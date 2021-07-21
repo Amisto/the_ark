@@ -46,9 +46,9 @@ unsigned int Population::borderAdultsToOldmen()
     return TheArk::get_instance()->getMedicalService()->borderAdultsToOldmen();
 }
 
-unsigned int Population::number_staff(Classification_of_humans serves)
+unsigned int Population::number_staff(Services service)
 {
-    switch(serves){
+    switch(service){
         case Technical_Service:
             return TheArk::get_instance()->getTechnicalService()->getRecommendedNStaff();
         case Biological_Service:
@@ -58,7 +58,7 @@ unsigned int Population::number_staff(Classification_of_humans serves)
         case Navigation_Service:
             return TheArk::get_instance()->getNavigationService()->getRecommendedNStaff();
         case Emergency_Service:
-            return TheArk::get_instance()->getEmergencyService()->getNStaff();
+            return TheArk::get_instance()->getEmergencyService()->getRecommendedNStaff();
         case Social_Service:
             return TheArk::get_instance()->getSocialService()->getRecommendedNStaff();
         default:
@@ -113,7 +113,7 @@ array<list<shared_ptr<Human>>, 7>& Population::getAllClassification()
      return this->classifications_of_humans;
 }
 
-list<shared_ptr<Human>>& Population::getServiceStaff(Classification_of_humans service)
+list<shared_ptr<Human>>& Population::getServiceStaff(Services service)
 {
      return this->classifications_of_humans[service];
 }

@@ -294,9 +294,9 @@ unsigned int SocialService::getStaffDemand(){
 unsigned int SocialService::getStaffPriority(){
     unsigned int labor_shortage_rate = 6 -
             (TheArk::get_instance()->getPopulation()->getAllClassification()
-            [Classification_of_humans::Clients_Of_Social_Service].size() /
+            [Services::Clients_Of_Social_Service].size() /
             (TheArk::get_instance()->getPopulation()->getAllClassification()
-            [Classification_of_humans::Social_Service].size() * this->efficiency_percentage));
+            [Services::Social_Service].size() * this->efficiency_percentage));
     if (labor_shortage_rate <= 0) labor_shortage_rate = 1;
     return labor_shortage_rate;
 }

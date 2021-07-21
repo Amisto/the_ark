@@ -23,7 +23,7 @@ enum Profession {
     STUDYING
 };
 
-enum Classification_of_humans{
+enum Services {
     Technical_Service,
     Biological_Service,
     Medical_Service,

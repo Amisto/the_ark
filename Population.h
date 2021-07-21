@@ -24,7 +24,7 @@ private:
     unsigned int borderChildrenToAdults();
     unsigned int borderAdultsToOldmen();
 
-    unsigned int number_staff(Classification_of_humans serves);
+    unsigned int number_staff(Services service);
     void stuff_distribution(list<shared_ptr<Human>>& stuff, unsigned int demand_stuff);
 
     double deathRateChildren();
@@ -45,7 +45,7 @@ public:
     unsigned int getOldmen() const;
     unsigned int getTotal() const;
     unsigned int getUnemployedPeople() const;
-    list<shared_ptr<Human>>& getServiceStaff(Classification_of_humans service);
+    list<shared_ptr<Human>>& getServiceStaff(Services service);
 
     list<shared_ptr<Human>>& getPeople();
     array<list<shared_ptr<Human>>, 7>& getAllClassification();
