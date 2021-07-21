@@ -58,7 +58,7 @@ else
     {return junk;}
 }
 
-void BioRes::RecycleRes(int worker,int people) //how mass change
+void BioRes::RecycleRes(int worker,int Energy,int people) //how mass change
 {
     if (0<mass+profit(worker)-people*k)
 {
@@ -77,11 +77,9 @@ int BioRes::GetPeople(int worker)
 {
 return int(KPD*hp*worker/worker_0/k);
 }
-void BioRes::TakeRes(double mass_change)
-    {mass=mass-mass_change;}
 int BioRes::GetResource()
     {return mass;}
-int BioRes::GetJunk()
+double BioRes::GetJunk()
     {return junk;}
 double BioRes::Gethp()
     {return hp;}
