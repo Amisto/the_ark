@@ -2,7 +2,6 @@
 #include <iomanip>
 #include <fstream>
 #include "TheArk.h"
-#include "menu.h"
 
 using std::cin;
 using std::cout;
@@ -13,27 +12,16 @@ void print_table_header(std::ostream & fout);
 
 int main() {
 
-    Menu the_ark;
-    RenderWindow window;
-    the_ark.welcome_page("../images/menu.jpg",
-                         "../images/exit.png",
-                         "../images/start.png" );
+    TheArk & ark = *TheArk::get_instance();
 
-    if (the_ark.get_flight())
-    {
-        TheArk & ark = *TheArk::get_instance();
+    std::ofstream fout("../TheArk.csv");
 
-        std::ofstream fout("../TheArk.csv");
-        ark.init(&cin, &fout);
+    ark.init(&cin, &fout);
+    print_table_header(fout);
 
-        print_table_header(fout);
+    ark.flight();
 
-        ark.flight();
-        ark.deleteArk();
-    }
-    else
-        cout << " Sorry, no flight....";
-
+    ark.deleteArk();
     return 0;
 }
 

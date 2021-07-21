@@ -8,7 +8,6 @@
 #include "Population.h"
 #include "Resources.h"
 #include <iostream>
-#include <SFML/Graphics.hpp>
 
 TheArk* TheArk::instance = nullptr;
 
