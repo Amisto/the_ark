@@ -10,21 +10,23 @@
 #include <cmath>
 
 MedicalService::MedicalService() : retirementAge(65), ChildrenDeath(0.0001), AdultDeath(0.001), OldDeath(0.01),
-                                   State(100), n_staff(70), resources(1000), Birth(0), NeedResources(1000), HealthYearAgo(100) {}
+                                   State(100), n_staff(0), resources(1000), Birth(0), NeedResources(1000), HealthYearAgo(100),
+                                   CriticalHealth(10) 
+ {}
 
 void MedicalService::process_accident(AccidentSeverity as) {
 }
 
 void MedicalService::process_year() {
     srand(time(nullptr));
-
+    
     retirementAge = static_cast<unsigned int>(round(51 * (2 - TheArk::get_instance()->getSocialService()->getState() *
                                                               State * State / 1000000)));
-    n_staff = static_cast<unsigned int>(round(0.035 * TheArk::get_instance()->getPopulation()->getTotal()));
+    n_staff = static_cast<unsigned int>(round(0.1 * TheArk::get_instance()->getPopulation()->getTotal()));
     NeedResources = static_cast<unsigned int>(20 * TheArk::get_instance()->getPopulation()->getTotal());
     double ResourcePercent = double(resources) / NeedResources;
-    double StaffPercent = double(TheArk::get_instance()->getPopulation()->getAllClassification()[2].size()) / n_staff;
-    Birth = (8 + rand() % 5) * TheArk::get_instance()->getPopulation()->getTotal() / 1000;
+    double StaffPercent = double(TheArk::get_instance()->getPopulation()->getServiceStaff(Medical_Service).size()) / n_staff;
+    Birth = (rand() % 3) * TheArk::get_instance()->getPopulation()->getAdults() / 100;
 
     unsigned int oll_health = 0;                                                                                        // общее здоровье всего корабля
     unsigned int HIlChild = 0, HIlAd = 0, HIlOld = 0;                                                                   // количество тяжелобольных
@@ -44,31 +46,18 @@ void MedicalService::process_year() {
                         (TheArk::get_instance()->getSocialService()->getState() *
                          State - 90000) / 10000)));
             }
-            it->setPhysicalHealth(static_cast<unsigned int>(round(
-                    it->getPhysicalHealth() + rand() % 5 - rand() % 5 +
-                    (TheArk::get_instance()->getSocialService()->getState() *
-                    State - 90000) / 10000)));
-            if (it->getPhysicalHealth() > 100) it->setPhysicalHealth(100);                                  // необходимый ограничитель
         }
         if ((it->getAge() >= TheArk::get_instance()->getSocialService()->borderChildrenToAdults()) &&
             (it->getAge() <= borderAdultsToOldmen())) {
             if ((it->getPhysicalHealth() < 60) && (it->getPhysicalHealth() > 30)) {
                 it->setPhysicalHealth(static_cast<unsigned int>(round(
-                        it->getPhysicalHealth() + rand() % 3 - rand() % 3 +
-                        (TheArk::get_instance()->getSocialService()->getState() *
-                         State - 90000) / 10000)));
+                        it->getPhysicalHealth() + rand() % 3 - rand() % 3)));
             }
             if (it->getPhysicalHealth() < 30) {
                 HIlAd++;
-                it->setPhysicalHealth(static_cast<unsigned int>(round(
-                        it->getPhysicalHealth() + rand() % 3 - rand() % 4 +
-                        (TheArk::get_instance()->getSocialService()->getState() *
-                         State - 90000) / 10000)));
+                it->setPhysicalHealth(static_cast<unsigned int>(round(it->getPhysicalHealth() + State / 10)));
+                        
             }
-            it->setPhysicalHealth(static_cast<unsigned int>(
-                    round(it->getPhysicalHealth() + rand() % 4 - rand() % 4 +
-                    (TheArk::get_instance()->getSocialService()->getState() *
-                    State - 90000) / 10000)));
             if (it->getPhysicalHealth() > 100) it->setPhysicalHealth(100);
         }
         if (it->getAge() > borderAdultsToOldmen()) {
@@ -97,7 +86,12 @@ void MedicalService::process_year() {
         State = 1.0 * oll_health /
                 TheArk::get_instance()->getPopulation()->getTotal();                                                    // вычислятся State исходя из среднего здоровья всего корабля
     } else State = 0;
-
+    
+    if (State < 75)
+        CriticalHealth = (100 - State) / 5;
+    else 
+        CriticalHealth = 5;
+    
     ChildrenDeath = (1 - (TheArk::get_instance()->getBiologicalService()->getState() / 100.0)) *
                     (1 - ResourcePercent) * (1 - StaffPercent) *
                     (1 - (TheArk::get_instance()->getSocialService()->getState() / 100.0)) *
@@ -115,7 +109,7 @@ void MedicalService::process_year() {
 }
 
 void MedicalService::setState(double s) {
-    n_staff = static_cast<unsigned int>(round(0.035 * TheArk::get_instance()->getPopulation()->getTotal()));
+    n_staff = static_cast<unsigned int>(round(0.1 * TheArk::get_instance()->getPopulation()->getTotal()));
     NeedResources = static_cast<unsigned int>(20 * TheArk::get_instance()->getPopulation()->getTotal());
     if (s != double(100)) {
         auto delta = static_cast<unsigned int>(round((100 - s)));
@@ -125,8 +119,13 @@ void MedicalService::setState(double s) {
     State = s;
 }
 
+unsigned int MedicalService::getCriticalHealth() const
+{
+    return this->CriticalHealth;
+}
+
 unsigned int MedicalService::getStaffDemand() {
-    return static_cast<unsigned int>(round(double(n_staff - TheArk::get_instance()->getPopulation()->getAllClassification()[2].size()) * (double(1.8) - (State / 100.0))));
+    return static_cast<unsigned int>(round(double(n_staff - TheArk::get_instance()->getPopulation()->getServiceStaff(Medical_Service).size())));
 }
 
 unsigned int MedicalService::getResourceDemand() {
@@ -134,7 +133,7 @@ unsigned int MedicalService::getResourceDemand() {
 }
 
 unsigned int MedicalService::getStaffPriority() {
-    return static_cast<unsigned int>(round(exp(1.8 * (1 - double(TheArk::get_instance()->getPopulation()->getAllClassification()[2].size())/n_staff))));
+    return static_cast<unsigned int>(round(exp(1.8 * (1 - double(TheArk::get_instance()->getPopulation()->getServiceStaff(Medical_Service).size())/n_staff))));
 }
 
 unsigned int MedicalService::getResourcePriority() {

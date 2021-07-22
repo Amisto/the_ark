@@ -22,12 +22,15 @@ private:
     double OldDeath;                                      // средняя вероятность, что один старик подгибнет в течение года
     double Birth;                                         // рождаемость в год
     unsigned int HealthYearAgo;                           // общее здоровье в прошлом году
+    unsigned int CriticalHealth;                          // критическое здоровье
+
 public:
     MedicalService();
 
     void process_accident(AccidentSeverity as) override;  // каждая служба должна уметь в своих терминах обработать переданную ей аварию
     void process_year() override;                         // если у службы есть какая-то личная жизнь, она может заниматься ей тут
     double getState() override;                           // каждая служба должна уметь вернуть свое состояние в процентах, посчитав его в своих терминах
+    unsigned int getCriticalHealth() const;               // возвращает поле CriticalHealth
     void setState(double s) override;                     // функция для инициализации, каждая служба должна уметь получить состояние в процентах и пересчитать  его в своих терминах
 
     unsigned int borderAdultsToOldmen() const;            // возраст старения

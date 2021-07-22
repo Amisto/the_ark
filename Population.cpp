@@ -120,7 +120,7 @@ list<shared_ptr<Human>>& Population::getServiceStaff(Services service)
 
 void Population::processYear() {
     //рождаемость
-    for(int i = 0; i < this->adults * 0.01; i++)
+    for(int i = 0; i < TheArk::get_instance()->getMedicalService()->BirthRate(); i++)
     {
         auto* micro_chelik = new Human();
         micro_chelik->setAge(0);
@@ -155,17 +155,18 @@ void Population::processYear() {
     adults = 0;
     oldmen = 0;
     unsigned int HisAge = 0;
+    unsigned int CriticalHealth = TheArk::get_instance()->getMedicalService()->getCriticalHealth();
+
 
     for (auto it = people.begin(); it != people.end();)
     {
 
         HisAge = (*it)->getAge();
-
         //подсчёт количества населения по группам и обработка случайной смертности
         if (HisAge < this->borderChildrenToAdults())
         {
             children++;
-            if (rand() <= this->deathRateChildren() * RAND_MAX)
+            if (rand() <= this->deathRateChildren() * RAND_MAX || (*it)->getPhysicalHealth() < CriticalHealth)
             {
                 (*it)->setIsAlive(false);
                 children--;
@@ -174,7 +175,7 @@ void Population::processYear() {
         if ((HisAge >= this->borderChildrenToAdults()) && (HisAge < borderAdultsToOldmen()))
         {
             adults++;
-            if (rand() <= this->deathRateAdults() * RAND_MAX)
+            if (rand() <= this->deathRateAdults() * RAND_MAX  || (*it)->getPhysicalHealth() < CriticalHealth)
             {
                 (*it)->setIsAlive(false);
                 adults--;
@@ -183,19 +184,13 @@ void Population::processYear() {
         if (HisAge >= this->borderAdultsToOldmen())
         {
             oldmen++;
-            if (rand() <= this->deathRateOldmen() * RAND_MAX || HisAge > 100)
+            if (rand() <= this->deathRateOldmen() * RAND_MAX || HisAge > 100  || (*it)->getPhysicalHealth() < CriticalHealth)
             {
                 (*it)->setIsAlive(false);
                 oldmen--;
             }
         }
-        /* if((*it)->getPhysicalHealth() <= 10 || (*it)->getMoralHealth() <= 5){
-            (*it)->setIsAlive(false);
-        }
-        if(HisAge > 100){
-            (*it)->setIsAlive(false);
-        }*/
-
+       
         //старение
         (*it)->setAge(HisAge + 1);
 
