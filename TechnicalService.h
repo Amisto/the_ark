@@ -40,9 +40,6 @@ public:
     virtual unsigned int getStaffDemand() override;              // сколько людей требуется
     virtual unsigned int getStaffPriority();            // с каким приоритетом слуюба будет требовать людей
 
-    bool changeStaff (int delta);               // сколько людей добавили или забрали (в т.ч. смертность)
-    virtual bool changeResources(int delta);            // сколько ресурсов добавили или забрали (в т.ч. износ)
-
 };
 
 #endif //THE_ARK_TECHNICALSERVICE_H
