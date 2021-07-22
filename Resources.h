@@ -7,42 +7,62 @@
 
 #include <vector>
 
-
-class Resources {
-private:
-	class Resource {
-	private:
-		unsigned int amount;
-
-	public:
-		Resource(unsigned int total);		                	// init user's amount of general resource
-		void GetResource(unsigned int isReturned);			// add recycled junk to available resources
-		void GiveResource(unsigned int isNeeded);			// remove an amount of currently used resources
-		unsigned int ReturnTotal() const;
-	};
-	
+class Resource {								// interface for different types of resources
+protected:
 	unsigned int consumables, components, junk, refuse, used;
-	std::vector<unsigned int> used_by_services;                		// vector contains an amount of current used resources for each service
-	
-	double efficiencyConsumablesToComponents() const;          		// processing consumables to components // TS
-	double efficiencyJunkToConsumables() const;                		// recycling junk to consumablse // TS
-	double efficiencyJunkToRefuse() const;                     		// recycling junk to refuse // TS
-
 public:
-   	Resources();
+	Resource(unsigned int total);
 
 	unsigned int getConsumables() const;
 	unsigned int getUsed() const;
 	unsigned int getJunk() const;
 	unsigned int getRefuse() const;
 	unsigned int getComponents() const;
+	
+	void YearProcess();
+};
 
-	void setComponentsToUsed(unsigned int current_usage, int id); 		// method to be called by services to get resources
+class OrgRes: public Resource {							// organic resources are used only by biological service
+public:
+	OrgRes(unsigned int total);
+	
+	void YearProcess();
+};
+
+class NotOrgRes: public Resource {						// not organic resources
+protected:
+	std::vector<unsigned int> used_by_services;      			// vector contains an amount of current used resources for each service
+public:
+	NotOrgRes(unsigned int total);
+	void YearProcess();
+
+	unsigned int TakeComp(unsigned int isNeeded, int id);			// add recycled junk to available resources
+	void  ReturnJunk(unsigned int isReturned, int id);			// remove an amount of currently used resources
+
+	double efficiencyConsumablesToComponents() const;          		// processing consumables to components // technical service
+	double efficiencyJunkToConsumables() const;                		// recycling junk to consumablse // technical service
+	double efficiencyJunkToRefuse() const;                     		// recycling junk to refuse // technical service
+};
+
+class Resources {
+protected:
+	OrgRes* org_res;
+	NotOrgRes* not_org_res;
+
+public:
+   	Resources();
+
+	unsigned int setComponentsToUsed(unsigned int current_usage, int id);   // method to be called by services to get resources
 	void setUsedToJunk(unsigned int current_broken, int id);		// method to be called by services to return junk
-	void setUsedToConsumables(unsigned int current_created, int id);	// method to be called by services to return consumables
 
 	void init(unsigned int total);
 	void processYear(); 							// the process of year's changing of all resources' categories
+
+	unsigned int getConsumables() const;
+	unsigned int getComponents() const;
+	unsigned int getUsed() const;
+	unsigned int getJunk() const;
+	unsigned int getRefuse() const;
 };
 
 

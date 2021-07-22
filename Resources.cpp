@@ -6,103 +6,183 @@
 #include "TheArk.h"
 #include "TechnicalService.h"
 #include <vector>
+#include <iostream>
 
-Resources::Resource::Resource(unsigned int total) : amount(total) 
+/*------------------------------------------CONSTRUCTORS----------------------------------------------*/
+
+NotOrgRes::NotOrgRes(unsigned int total) : Resource(total), used_by_services({0, 0, 0, 0, 0, 0}) 
 {
 
 }
 
-void Resources::Resource::GetResource(unsigned int isReturned) {
-	this->amount += isReturned;
-}
-
-void Resources::Resource::GiveResource(unsigned int isNeeded) {
-	this->amount -= isNeeded;
-}
-
-unsigned int Resources::Resource::ReturnTotal() const {
-	return this->amount;
-}
-
-unsigned int Resources::getComponents() const {
-	return components;
-}
-
-unsigned int Resources::getRefuse() const {
-	return refuse;
-}
-
-unsigned int Resources::getConsumables() const {
-	return consumables;
-}
-
-unsigned int Resources::getUsed() const {
-	return used;
-}
-
-unsigned int Resources::getJunk() const {
-	return junk;
-}
-
-Resources::Resources() : consumables(0), components(0), used_by_services({0, 0, 0, 0, 0, 0}), used(0), junk(0), refuse(0)
+OrgRes::OrgRes(unsigned int total) : Resource(total)
 {
 
 }
 
-void Resources::processYear() {
-	if (consumables > 0)
+Resource::Resource(unsigned int total) : components(0.5 * total), consumables(0.5 * total), used(0), junk(0), refuse(0)
+{
+
+}
+
+Resources::Resources()
+{
+	this->org_res = new OrgRes(0);
+	this->not_org_res = new NotOrgRes(0);
+}
+
+/*---------------------------------------------GETTERS------------------------------------------------*/
+
+unsigned int Resource::getComponents() const 
+{
+	return this->components;
+}
+
+unsigned int Resource::getRefuse() const 
+{
+	return this->refuse;
+}
+
+unsigned int Resource::getConsumables() const 
+{
+	return this->consumables;
+}
+
+unsigned int Resource::getUsed() const 
+{
+	return this->used;
+}
+
+unsigned int Resource::getJunk() const 
+{
+	return this->junk;
+}
+
+unsigned int Resources::getConsumables() const
+{
+	return this->org_res->getConsumables() + this->not_org_res->getConsumables();
+}
+
+unsigned int Resources::getComponents() const
+{
+	return this->org_res->getComponents() + this->not_org_res->getComponents();
+	std::cout<<this->org_res->getComponents()<<" "<<this->not_org_res->getComponents() << std::endl;
+}
+
+unsigned int Resources::getJunk() const
+{
+	return this->org_res->getJunk() + this->not_org_res->getJunk();
+}
+
+unsigned int Resources::getRefuse() const
+{
+	return this->org_res->getRefuse() + this->not_org_res->getRefuse();
+}
+
+unsigned int Resources::getUsed() const
+{
+	return this->org_res->getUsed() + this->not_org_res->getUsed();
+}
+
+/*-----------------------------------------YEAR_PROCESS----------------------------------------------*/
+
+void Resources::processYear() 
+{
+	this->org_res->YearProcess();
+	this->not_org_res->YearProcess();
+}
+
+void NotOrgRes::YearProcess()
+{
+	
+	
+	if (this->consumables > 0)
 	{
-		consumables -= consumables*efficiencyConsumablesToComponents();
+		this->consumables -= this->consumables*efficiencyConsumablesToComponents();
 	}
 
-	components  += consumables*efficiencyConsumablesToComponents();
-	consumables += junk*efficiencyJunkToConsumables();
+	this->components    += this->consumables * efficiencyConsumablesToComponents();
+	this->consumables   += this->junk * efficiencyJunkToConsumables();
 	
-	if (junk > 0)
+	if (this->junk > 0)
 	{
-		junk -= junk*efficiencyJunkToConsumables();
+		this->junk -= this->junk * efficiencyJunkToConsumables();
 	}
 	
-	if (junk > 0)
+	if (this->junk > 0)
 	{
-		junk -= junk*efficiencyJunkToRefuse();
+		this->junk -= this->junk * efficiencyJunkToRefuse();
 	}
 	
-	refuse      += junk*efficiencyJunkToRefuse();	
+	this->refuse       += this->junk * efficiencyJunkToRefuse();
 }
 
-void Resources::setComponentsToUsed(unsigned int current_usage, int id) {
-	used_by_services[id] += current_usage;
-	components           -= current_usage;
-	used                 += current_usage;
+void OrgRes::YearProcess()
+{
+	/*this->components    =   TheArk::get_instance()->getBiologicalService()->GetResource();
+	this->refuse       -=   TheArk::get_instance()->getBiologicalService()->GetJunk();*/
 }
 
-void Resources::setUsedToJunk(unsigned int current_broken, int id) {
-	junk                 += current_broken;
-	used_by_services[id] -= current_broken;
-	used                 -= current_broken;
+/*---------------------------------------------SETTERS-----------------------------------------------*/
+
+unsigned int Resources::setComponentsToUsed(unsigned int current_usage, int id) 
+{
+	return this->not_org_res->TakeComp(current_usage, id);
 }
 
-void Resources::setUsedToConsumables(unsigned int current_created, int id) {
-	consumables          += current_created;
-	used_by_services[id] -= current_created;
-	used                 -= current_created;
+void Resources::setUsedToJunk(unsigned int current_broken, int id) 
+{
+	this->not_org_res->ReturnJunk(current_broken, id);
 }
 
-double Resources::efficiencyConsumablesToComponents() const {
+void NotOrgRes::ReturnJunk(unsigned int isReturned, int id)
+{
+	junk                 += isReturned;
+	used_by_services[id] -= isReturned;
+	used                 -= isReturned;
+}
+
+unsigned int NotOrgRes::TakeComp(unsigned int isNeeded, int id)
+{
+	 if ( isNeeded <= this->components / 6 or used_by_services[id] == 0)
+	 {
+		 used                 += isNeeded;
+		 components           -= isNeeded;
+		 used_by_services[id] += isNeeded;
+
+		 return isNeeded;
+	 }
+
+	 else
+	 {
+		 return (isNeeded * used) / ( 6 * used_by_services[id]);
+	 }
+
+}
+
+/*-------------------------------------------SUPPORTING----------------------------------------------*/
+
+double NotOrgRes::efficiencyConsumablesToComponents() const 
+{
 	return TheArk::get_instance()->getTechnicalService()->efficiencyConsumablesToComponents();
 }
 
-double Resources::efficiencyJunkToConsumables() const {
+double NotOrgRes::efficiencyJunkToConsumables() const 
+{
 	return TheArk::get_instance()->getTechnicalService()->efficiencyJunkToConsumables();
 }
 
-double Resources::efficiencyJunkToRefuse() const {
+double NotOrgRes::efficiencyJunkToRefuse() const 
+{
 	return TheArk::get_instance()->getTechnicalService()->efficiencyJunkToRefuse();
 }
 
-void Resources::init(unsigned int total) {
-	consumables = 0.5 * total;
-	components  = 0.5 * total;
-	Resource GeneralResources(components);
+/*---------------------------------------------INIT--------------------------------------------------*/
+
+void Resources::init(unsigned int total) 
+{
+	not_org_res = new NotOrgRes(0.5 * total);
+	std::cout << not_org_res->getComponents() << std::endl;
+	org_res     = new OrgRes(0.5 * total);
+	std::cout << org_res->getComponents() << std:: endl;
 }
