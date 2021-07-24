@@ -31,6 +31,14 @@ Resources::Resources()
 	this->not_org_res = new NotOrgRes(0);
 }
 
+/*--------------------------------------------DESTRUCTORS---------------------------------------------*/
+
+Resources::~Resources()
+{
+	delete this->org_res;
+	delete this->not_org_res;
+}
+
 /*---------------------------------------------GETTERS------------------------------------------------*/
 
 unsigned int Resource::getComponents() const 
@@ -66,7 +74,6 @@ unsigned int Resources::getConsumables() const
 unsigned int Resources::getComponents() const
 {
 	return this->org_res->getComponents() + this->not_org_res->getComponents();
-	std::cout<<this->org_res->getComponents()<<" "<<this->not_org_res->getComponents() << std::endl;
 }
 
 unsigned int Resources::getJunk() const
@@ -125,24 +132,24 @@ void OrgRes::YearProcess()
 
 /*---------------------------------------------SETTERS-----------------------------------------------*/
 
-unsigned int Resources::setComponentsToUsed(unsigned int current_usage, int id) 
+unsigned int Resources::setComponentsToUsed(unsigned int current_usage, Services id) 
 {
 	return this->not_org_res->TakeComp(current_usage, id);
 }
 
-void Resources::setUsedToJunk(unsigned int current_broken, int id) 
+void Resources::setUsedToJunk(unsigned int current_broken, Services id) 
 {
 	this->not_org_res->ReturnJunk(current_broken, id);
 }
 
-void NotOrgRes::ReturnJunk(unsigned int isReturned, int id)
+void NotOrgRes::ReturnJunk(unsigned int isReturned, Services id)
 {
 	junk                 += isReturned;
 	used_by_services[id] -= isReturned;
 	used                 -= isReturned;
 }
 
-unsigned int NotOrgRes::TakeComp(unsigned int isNeeded, int id)
+unsigned int NotOrgRes::TakeComp(unsigned int isNeeded, Services id)
 {
 	 if ( isNeeded <= this->components / 6 or used_by_services[id] == 0)
 	 {
@@ -182,7 +189,5 @@ double NotOrgRes::efficiencyJunkToRefuse() const
 void Resources::init(unsigned int total) 
 {
 	not_org_res = new NotOrgRes(0.5 * total);
-	std::cout << not_org_res->getComponents() << std::endl;
 	org_res     = new OrgRes(0.5 * total);
-	std::cout << org_res->getComponents() << std:: endl;
 }

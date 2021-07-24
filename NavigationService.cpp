@@ -107,7 +107,7 @@ void NavigationService::setState(double s) {
 bool NavigationService:: changeResources(int delta)
 {if (delta < 0)
     {
-        TheArk::get_instance()->getResources()->setUsedToJunk( delta, 4);
+        TheArk::get_instance()->getResources()->setUsedToJunk( delta, Navigation_Service);
     }
 
     this->resources += delta;
