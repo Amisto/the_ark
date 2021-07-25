@@ -7,6 +7,7 @@
 
 #include <vector>
 #include "Enums.cpp"
+#include <memory>
 
 class Resource {								// interface for different types of resources
 protected:
@@ -47,12 +48,11 @@ public:
 
 class Resources {
 protected:
-	OrgRes* org_res;
-	NotOrgRes* not_org_res;
+	std::unique_ptr<OrgRes> org_res;
+	std::unique_ptr<NotOrgRes> not_org_res;
 
 public:
    	Resources();
-	~Resources();
 
 	unsigned int setComponentsToUsed(unsigned int current_usage, Services id);	// method to be called by services to get resources
 	void setUsedToJunk(unsigned int current_broken, Services id);			// method to be called by services to return junk

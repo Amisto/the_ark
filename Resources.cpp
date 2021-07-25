@@ -27,16 +27,8 @@ Resource::Resource(unsigned int total) : components(0.5 * total), consumables(0.
 
 Resources::Resources()
 {
-	this->org_res = new OrgRes(0);
-	this->not_org_res = new NotOrgRes(0);
-}
-
-/*--------------------------------------------DESTRUCTORS---------------------------------------------*/
-
-Resources::~Resources()
-{
-	delete this->org_res;
-	delete this->not_org_res;
+	this->org_res = std::make_unique<OrgRes>(0);
+	this->not_org_res = std::make_unique<NotOrgRes>(0);
 }
 
 /*---------------------------------------------GETTERS------------------------------------------------*/
@@ -188,6 +180,6 @@ double NotOrgRes::efficiencyJunkToRefuse() const
 
 void Resources::init(unsigned int total) 
 {
-	not_org_res = new NotOrgRes(0.5 * total);
-	org_res     = new OrgRes(0.5 * total);
+	this->not_org_res = std::make_unique<NotOrgRes>(0.5 * total);
+	this->org_res     = std::make_unique<OrgRes>(0.5 * total);
 }
