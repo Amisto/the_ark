@@ -26,6 +26,7 @@ public:
     Interface();
     void init();
     void snap(unsigned int current_year);
+    void finalSnap();
 
     virtual ~Interface();
     map<string, string>& getGeneral();

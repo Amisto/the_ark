@@ -142,6 +142,7 @@ void TheArk::flight() {
         processYear();
         interface->snap(current_year + 1);
     }
+    interface->finalSnap();
 }
 
 Population *TheArk::getPopulation() const {

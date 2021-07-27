@@ -186,3 +186,39 @@ map<string, string> &Interface::getGeneral() {
 array<map<string, string>, 6> &Interface::getServices() {
     return services;
 }
+
+void Interface::finalSnap() {
+    auto ta = TheArk::get_instance();
+    std::basic_ofstream<char> ocfg("../" + general["Output"] + "_out.cfg");
+    ocfg << "General" << endl << endl;
+    general["Output"] += "_out";
+    for (auto param : general)
+        ocfg << "    " << param.first << " " << param.second << endl;
+    ocfg << endl << endl;
+    ocfg << "Services" << endl << endl;
+    ocfg << "    Technical" << endl;
+    for (auto param : services[Services::Technical_Service])
+        ocfg << "        " << param.first << " " << param.second << endl;
+    ocfg << endl;
+    ocfg << "    Biological" << endl;
+    for (auto param : services[Services::Biological_Service])
+        ocfg << "        " << param.first << " " << param.second << endl;
+    ocfg << endl;
+    ocfg << "    Medical" << endl;
+    for (auto param : services[Services::Medical_Service])
+        ocfg << "        " << param.first << " " << param.second << endl;
+    ocfg << endl;
+    ocfg << "    Navigation" << endl;
+    for (auto param : services[Services::Navigation_Service])
+        ocfg << "        " << param.first << " " << param.second << endl;
+    ocfg << endl;
+    ocfg << "    Emergency" << endl;
+    for (auto param : services[Services::Emergency_Service])
+        ocfg << "        " << param.first << " " << param.second << endl;
+    ocfg << endl;
+    ocfg << "    Social" << endl;
+    for (auto param : services[Services::Social_Service])
+        ocfg << "        " << param.first << " " << param.second << endl;
+    ocfg << endl;
+    ocfg.close();
+}
