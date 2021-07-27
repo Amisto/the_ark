@@ -19,6 +19,7 @@ class EmergencyService;
 class SocialService;
 class Population;
 class Resources;
+class Interface;
 
 class Service;
 class TheArk {
@@ -29,8 +30,7 @@ private:
     Population* population;
     Resources* resources;
 
-    std::istream *is;
-    std::ostream *os;
+    Interface* interface;
 
     void processYear();
 
@@ -39,8 +39,8 @@ private:
 public:
     static TheArk* get_instance();
     
-    void init(std::istream *is, std::ostream *os);     // интерфейс - ввод
-    void snap();                     // интерфейс - вывод, использует os
+    void init();     // интерфейс - ввод
+    Interface* getInterface();
 
     unsigned int getYearsTotal() const;
     void setYearsTotal(unsigned int yearsTotal);

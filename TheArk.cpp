@@ -7,6 +7,7 @@
 #include "SocialService.h"
 #include "Population.h"
 #include "Resources.h"
+#include "Interface.h"
 #include <iostream>
 
 TheArk* TheArk::instance = nullptr;
@@ -43,11 +44,10 @@ TheArk::~TheArk()
     delete resources;
 }
 
-void TheArk::init(std::istream *_is, std::ostream *_os)
+void TheArk::init()
 {
-    is = _is;
-    os = _os;
-    auto &is_init = *_is;
+    interface = new Interface();
+    interface->init();
 
     std::array<std::string, 6> services_names = {"Technical", "Biological",
                                                  "Medical", "Navigation",
@@ -62,25 +62,15 @@ void TheArk::init(std::istream *_is, std::ostream *_os)
     services[4] = new EmergencyService();
     services[5] = new SocialService();
 
-    std::cout << "Years total: ";
-    is_init >> years_total;
+    years_total = std::stoi(interface->getGeneral()["Years"]);
 
     for (int i = 0; i < 6; ++i)
     {
-        unsigned int percent;
-        std::cout << services_names[i] << " service condition: ";
-        is_init >> percent;
-        services[i]->setState(percent);
+        services[i]->setState(std::stoi(interface->getServices()[i]["State"]));
     }
 
-    unsigned int total;
-    std::cout << "Population: ";
-    is_init >> total;
-    population->init(total);
-
-    std::cout << "Resources: ";
-    is_init >> total;
-    resources->init(total);
+    population->init(std::stoi(interface->getGeneral()["Population"]));
+    resources->init(std::stoi(interface->getGeneral()["Resources"]));
 }
 
 unsigned int TheArk::getYearsTotal() const {
@@ -129,6 +119,11 @@ SocialService* TheArk::getSocialService()
     return dynamic_cast<SocialService*>(services[5]);
 }
 
+Interface* TheArk::getInterface()
+{
+    return interface;
+}
+
 void TheArk::processYear() {
     population->processYear();
     resources->processYear();
@@ -141,34 +136,12 @@ void TheArk::processYear() {
 }
 
 void TheArk::flight() {
-    std::ostream& out = *os;
 
     for (current_year = 0; current_year < years_total; current_year++)
     {
-        out << std::setw(CELL_WIDTH) << current_year + 1 << ",";
         processYear();
-        snap();
+        interface->snap(current_year + 1);
     }
-}
-
-void TheArk::snap()
-{
-    auto &os_snap = *os;
-
-    os_snap << std::setw(CELL_WIDTH) << population->getTotal() << ","
-            << std::setw(CELL_WIDTH) << population->getChildren() << ","
-            << std::setw(CELL_WIDTH) << population->getAdults() << ","
-            << std::setw(CELL_WIDTH) << population->getOldmen() << ",";
-
-    os_snap << std::setw(CELL_WIDTH) << resources->getConsumables() << ","
-            << std::setw(CELL_WIDTH) << resources->getComponents() << ","
-            << std::setw(CELL_WIDTH) << resources->getUsed() << ","
-            << std::setw(CELL_WIDTH) << resources->getJunk() << ","
-            << std::setw(CELL_WIDTH) << resources->getRefuse() << ",";
-
-    for (auto s: services)
-        os_snap << std::setw(CELL_WIDTH) << s->getState() << ",";
-    os_snap << std::endl;
 }
 
 Population *TheArk::getPopulation() const {
