@@ -20,7 +20,9 @@ enum Profession {
     UNEMPLOYED,
     WORKER,
     UNDEFINED,
-    STUDYING
+    STUDYING,
+    CHILD,
+    RETIRED
 };
 
 enum Services {

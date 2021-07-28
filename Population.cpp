@@ -128,7 +128,7 @@ void Population::processYear() {
         this->people.push_back(ptr);
     }
     //распределение стафа, сделал бы в цикле, но нужно вызывать каждую ф-ю отдельно
-    int demand_staff[classifications_of_humans.size() - 1];
+    unsigned int demand_staff[classifications_of_humans.size() - 1];
     demand_staff[0] = TheArk::get_instance()->getTechnicalService()->getStaffDemand();
     demand_staff[1] = TheArk::get_instance()->getBiologicalService()->getStaffDemand();
     demand_staff[2] = TheArk::get_instance()->getMedicalService()->getStaffDemand();
@@ -141,12 +141,14 @@ void Population::processYear() {
     {
         all_demand_staff += demand_staff[i];
     }
-    for (int i = 0; i < this->classifications_of_humans.size() - 1; i++)
+    if (double(demand_staff[0]) / double(all_demand_staff) * double(this->unemployed_people > 1))
     {
-        stuff_distribution(this->classifications_of_humans[i], demand_staff[i] / all_demand_staff * this->unemployed_people);
+        for (int i = 0; i < this->classifications_of_humans.size() - 1; i++)
+        {
+            stuff_distribution(this->classifications_of_humans[i], (unsigned int)(double(demand_staff[i]) / double(all_demand_staff) * double(this->unemployed_people)));
+        }   
+        
     }
-
-
     //
 
 
@@ -154,6 +156,7 @@ void Population::processYear() {
     children = 0;
     adults = 0;
     oldmen = 0;
+    unemployed_people = 0;
     unsigned int HisAge = 0;
     unsigned int CriticalHealth = TheArk::get_instance()->getMedicalService()->getCriticalHealth();
 
@@ -180,6 +183,8 @@ void Population::processYear() {
                 (*it)->setIsAlive(false);
                 adults--;
             }
+            if ((*it)->getTypeAsAWorker() == UNEMPLOYED)
+                unemployed_people ++;
         }
         if (HisAge >= this->borderAdultsToOldmen())
         {
@@ -193,6 +198,7 @@ void Population::processYear() {
        
         //старение
         (*it)->setAge(HisAge + 1);
+        if (HisAge + 1 == this->borderChildrenToAdults()) this->unemployed_people ++;
 
         //попанье мертвых
         if (!(*it)->isAlive())
@@ -246,6 +252,7 @@ void Population::init(unsigned int total) {
     {          // заполняем детьми
         auto* person = new Human();
         person->setAge((rand()% this->borderChildrenToAdults()));
+        person->setTypeAsAWorker(CHILD);
         auto ptr = shared_ptr<Human>(person);
         this->people.push_back(ptr);
     }
@@ -253,6 +260,7 @@ void Population::init(unsigned int total) {
     {            // заполняем стариками
         auto *person = new Human;
         person->setAge((this->borderAdultsToOldmen() + rand() % (100 - this->borderAdultsToOldmen() + 1)));
+        person->setTypeAsAWorker(RETIRED);
         auto ptr = shared_ptr<Human>(person);
         this->people.push_back(ptr);
     }
@@ -260,6 +268,7 @@ void Population::init(unsigned int total) {
     {        // заполняем взрослыми всех остальных людей
         auto* person = new Human;
         person->setAge((this->borderChildrenToAdults()+ rand()% (this->borderAdultsToOldmen() - this->borderChildrenToAdults() + 1)));
+        person->setTypeAsAWorker(UNEMPLOYED);
         auto ptr = shared_ptr<Human>(person);
         this->people.push_back(ptr);
     }

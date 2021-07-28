@@ -13,7 +13,7 @@ TechnicalService::TechnicalService()
     this->engineState = 100;
     this->protectionState = 100;
     this->serviceState = 0;
-    this->maxStaff = 0.1 * TheArk::get_instance()->getPopulation()->getTotal();
+    this->maxStaff = 1;
     this->maxResources = 200;
     this->staff = 0;
     this->resources = 100;
@@ -68,7 +68,8 @@ void TechnicalService::process_year()
     // обновление полей
     this->staff = TheArk::get_instance()->getPopulation()->getServiceStaff(Technical_Service).size();
     this->totalState = 0.5 * (0.8 * this->protectionState + 1.2 * this->engineState);
-    this->maxStaff = 0.1 * TheArk::get_instance()->getPopulation()->getTotal();
+    if (0.1 * TheArk::get_instance()->getPopulation()->getTotal() > this->maxStaff)
+         this->maxStaff = 0.1 * TheArk::get_instance()->getPopulation()->getTotal();
 
     // обновление состояния службы
     if (this->totalState > 100)
@@ -91,9 +92,9 @@ void TechnicalService::process_year()
         this->resources -= int(repairing / 100) * this->maxResources;
     }
     // износ корабля
-    this->protectionState -= (101 - this->protectionState) * (rand() % 3) / 100;
+    this->protectionState -= (101 - this->protectionState) * (rand() % 3) / 150;
     srand(time(nullptr));
-    this->engineState -= (100 - this->protectionState) * (rand() % 3) / 100;
+    this->engineState -= (100 - this->protectionState) * (rand() % 3) / 150;
 }
 
 double TechnicalService::efficiencyConsumablesToComponents() {
@@ -122,7 +123,7 @@ unsigned int TechnicalService::getResourcePriority() {
 }
 
 unsigned int TechnicalService::getStaffDemand() {
-    if (this->maxStaff - this->staff > 0)
+    if (this->maxStaff > this->staff)
         return this->maxStaff - this->staff;
     else
         return 0;
