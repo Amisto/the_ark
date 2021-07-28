@@ -106,11 +106,11 @@ bool EmergencyService::changeResources(int delta)
 {
     if (delta < 0)//отняли ресурсы; из-за аварии 
     {
-        TheArk::get_instance()->getResources()->setUsedToJunk(- delta, 5); //вернули мусор
+        TheArk::get_instance()->getResources()->setUsedToJunk(- delta, Emergency_Service);  //вернули мусор
     }
     else //добавляем ресурсы в количестве недостающих - 10 - ежегодный износ
     {
-        TheArk::get_instance()->getResources()->setComponentsToUsed(delta, 5);
+        TheArk::get_instance()->getResources()->setComponentsToUsed(delta, Emergency_Service);
     }
     this->Resources += delta;
     return true;

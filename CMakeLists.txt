@@ -5,7 +5,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_executable(the_ark
         main.cpp
-        TheArk.h
         TheArk.cpp
         Service.cpp
         TechnicalService.cpp
@@ -17,4 +16,5 @@ add_executable(the_ark
         Population.cpp
         Resources.cpp
         Human.cpp
-        Enums.cpp)
+        Enums.cpp
+        Interface.cpp)

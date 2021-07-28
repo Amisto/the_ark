@@ -6,6 +6,8 @@
 #define THE_ARK_RESOURCES_H
 
 #include <vector>
+#include "Enums.cpp"
+#include <memory>
 
 class Resource {								// interface for different types of resources
 protected:
@@ -36,8 +38,8 @@ public:
 	NotOrgRes(unsigned int total);
 	void YearProcess();
 
-	unsigned int TakeComp(unsigned int isNeeded, int id);			// add recycled junk to available resources
-	void  ReturnJunk(unsigned int isReturned, int id);			// remove an amount of currently used resources
+	unsigned int TakeComp(unsigned int isNeeded, Services id);			// add recycled junk to available resources
+	void  ReturnJunk(unsigned int isReturned, Services id);			// remove an amount of currently used resources
 
 	double efficiencyConsumablesToComponents() const;          		// processing consumables to components // technical service
 	double efficiencyJunkToConsumables() const;                		// recycling junk to consumablse // technical service
@@ -46,17 +48,17 @@ public:
 
 class Resources {
 protected:
-	OrgRes* org_res;
-	NotOrgRes* not_org_res;
+	std::unique_ptr<OrgRes> org_res;
+	std::unique_ptr<NotOrgRes> not_org_res;
 
 public:
    	Resources();
 
-	unsigned int setComponentsToUsed(unsigned int current_usage, int id);   // method to be called by services to get resources
-	void setUsedToJunk(unsigned int current_broken, int id);		// method to be called by services to return junk
+	unsigned int setComponentsToUsed(unsigned int current_usage, Services id);	// method to be called by services to get resources
+	void setUsedToJunk(unsigned int current_broken, Services id);			// method to be called by services to return junk
 
 	void init(unsigned int total);
-	void processYear(); 							// the process of year's changing of all resources' categories
+	void processYear(); 								// the process of year's changing of all resources' categories
 
 	unsigned int getConsumables() const;
 	unsigned int getComponents() const;
