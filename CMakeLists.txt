@@ -18,4 +18,5 @@ add_executable(the_ark
         Resources.cpp
         Human.cpp
         Enums.cpp
-        Interface.cpp)
+        Interface.cpp
+        RandomNumberGenerator.cpp)

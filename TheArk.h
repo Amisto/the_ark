@@ -20,6 +20,7 @@ class SocialService;
 class Population;
 class Resources;
 class Interface;
+class RandomNumberGenerator;
 
 class Service;
 class TheArk {
@@ -29,7 +30,7 @@ private:
     std::array<Service*, 6> services;
     Population* population;
     Resources* resources;
-
+    RandomNumberGenerator* random_generator;
     Interface* interface;
 
     void processYear();
@@ -56,6 +57,7 @@ public:
     std::array<Service*, 6>& getServices();
     Population *getPopulation() const;
     Resources *getResources() const;
+    RandomNumberGenerator* getRandomGenerator() const;
 
     void flight();
 

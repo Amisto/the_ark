@@ -14,12 +14,9 @@
 #include "Resources.h"
 #include "Interface.h"
 #include "NavigationBlock.h"
+#include "RandomNumberGenerator.h"
 
 using std::unique_ptr;
-using std::default_random_engine;
-using std::uniform_real_distribution;
-using std::cout;
-using std::endl;
 
 enum FlightStage
 {
@@ -82,10 +79,6 @@ public:
 
     // Kills some of staff. Victims HAS to be less than staff!
     void killStaff(unsigned victims);
-
-    // Random numbers generators
-    float getRandomFloat(float min, float max);
-    int getRandomInt(int min, int max);
 
     [[nodiscard]] bool isChangedEfficiency() const;
     void setChangedEfficiency(bool changedEfficiency);

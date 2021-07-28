@@ -8,6 +8,7 @@
 #include "Population.h"
 #include "Resources.h"
 #include "Interface.h"
+#include "RandomNumberGenerator.h"
 #include <iostream>
 
 TheArk* TheArk::instance = nullptr;
@@ -42,6 +43,8 @@ TheArk::~TheArk()
     }
     delete population;
     delete resources;
+    delete random_generator;
+    delete interface;
 }
 
 void TheArk::init()
@@ -61,6 +64,8 @@ void TheArk::init()
     services[3] = new NavigationService();
     services[4] = new EmergencyService();
     services[5] = new SocialService();
+
+    random_generator = new RandomNumberGenerator;
 
     years_total = std::stoi(interface->getGeneral()["Years"]);
 
@@ -157,3 +162,8 @@ std::array<Service*, 6>& TheArk::getServices()
 {
     return services;
 }
+
+RandomNumberGenerator *TheArk::getRandomGenerator() const {
+    return random_generator;
+}
+
