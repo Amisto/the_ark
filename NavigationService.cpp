@@ -24,7 +24,7 @@ unsigned short NavigationBlock::getDefaultEfficiency(NavigationDevices type)
             return 5;
 
         case NavDevAMOUNT:
-            cout << "ERROR IN getDefaultEfficiency" << endl;
+            cout << "NAVSERVICE ERROR_1" << endl;
     }
     return -1;
 }
@@ -64,15 +64,16 @@ void NavigationBlock::changeState(float delta) {
 }
 
 float NavigationBlock::repairDevice(float available_points) {
-    if (available_points < 0) {
-        cout <<"REPAIR DEVICE problem < 0" << endl;
-    }
-    else if (state + available_points > 100) {
+    if (state + available_points > 100) {
         available_points -= (100 - state);
         state = 100;
         return available_points;
     }
     else {
+        if (available_points < 0) {
+            cout << "NAVSERVICE ERROR_2" << endl;
+            return 0;
+        }
         state += available_points;
         return 0;
     }
@@ -82,9 +83,10 @@ float NavigationBlock::repairDevice(float available_points) {
 
 // NavigationService implementations
 
-NavigationService::NavigationService(): staff(0), required_staff(10),
-                                        need_resources(0), years_delta(0)
+NavigationService::NavigationService(): staff(0), need_resources(0), years_delta(0)
 {
+    required_staff = required_staff = std::stoi(
+            TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / DEFAULT_STAFF_DENOMINATOR;
     stage = ACCELERATION;
     time_until_next_stage = ACCELERATION_TIME;
     next_stage = STABLE;
@@ -192,7 +194,6 @@ void NavigationService::process_accident(AccidentSeverity as)
                     TheArk::get_instance()->getYearsTotal() + time_until_next_stage);
     }
 
-    //cout << "MOGUS" << as << "  " << TheArk::get_instance()->getCurrentYear() << endl;
     killStaff(killed_staff);
     staff -= killed_staff;
 }
@@ -215,37 +216,51 @@ void NavigationService::process_year()
             next_stage = STABLE;
         }
     }
-    // years_delta section DISABLED UNTIL EMERGENCY IS FIXED
-//    double effective_sum = 0; // Sum for all devices' performance
-//    for (auto & it : devices)
-//        effective_sum += it->getState() * it->getEfficiency() / 10000.f;
-//    years_delta -= effective_sum - 1;
-//    if (years_delta > 3) {
-//        TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getYearsTotal() + 3);
-//        years_delta -= 3;
-//        cout << "+3 Years" << endl;
-//    } else if (years_delta < -3) {
-//        TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getYearsTotal() - 3);
-//        years_delta -= -3;
-//        cout << "-3 Years" << endl;
-//    }
-    //cout << years_delta << endl;
+
+    // years_delta section
+    double effective_sum = 0; // Sum for all devices' performance
+    for (auto & it : devices)
+        effective_sum += it->getState() * it->getEfficiency() / 10000.f;
+
+    years_delta -= effective_sum - 0.95;
+
+    if (years_delta > 3) {
+        TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getYearsTotal() + 3);
+        years_delta -= 3;
+
+        if (TheArk::get_instance()->getYearsTotal() >
+            LOST_THE_WAY_WARNING
+            * std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Years"])) {
+                cout << "We've been travelling " << LOST_THE_WAY_WARNING << " times longer than estimated" << endl
+                << "Probably we are lost forever" << endl
+                << "Would you like to continue? (y/n)" << endl;
+                char h = std::cin.get();
+                if (h == 'n')
+                    TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getCurrentYear() + 1);
+                else
+                    LOST_THE_WAY_WARNING += 2;
+        }
+    }
+    else if (years_delta < -3) {
+        TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getYearsTotal() - 3);
+        years_delta -= -3;
+    }
     //
 
 
     // Block for staff management
     if (TheArk::get_instance()->getPopulation()->getUnemployedPeople() >=
-        (required_staff / 10)) {
-        required_staff += TheArk::get_instance()->getPopulation()->getUnemployedPeople() / 15;
+        (required_staff / 10) and required_staff < std::stoi(
+            TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / (DEFAULT_STAFF_DENOMINATOR - 1)) {
+        required_staff += TheArk::get_instance()->getPopulation()->getUnemployedPeople() / 12;
     }
-    else if (staff < std::stoi(
-            TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / 8) {
+    if (staff < std::stoi(
+            TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / DEFAULT_STAFF_DENOMINATOR) {
         required_staff = std::stoi(
-                TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / 8;
+                TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / DEFAULT_STAFF_DENOMINATOR;
     }
 
     staff = TheArk::get_instance()->getPopulation()->getServiceStaff(Navigation_Service).size();
-    //cout <<staff << " - ";
     //
 
     // Block for resource management
@@ -255,27 +270,14 @@ void NavigationService::process_year()
      // Efficiency upgrades
       // Adding points to the device with max state
     if(staff > std::stoi
-        (TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / 8) {
+        (TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / DEFAULT_STAFF_DENOMINATOR) {
         setChangedEfficiency(true);
         float eff_points = (staff * 100.f) /
-                (std::stof(TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / 8.f)
+                (std::stof(TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / DEFAULT_STAFF_DENOMINATOR)
                 - 100;
 
-// 1       NavigationDevices upgraded_device;
-//        float max_state = 0;
-//        for (auto i = 0; i < NavDevAMOUNT; i++) {
-//            if (devices[i]->getState() > max_state) {
-//                max_state = devices[i]->getState();
-//                upgraded_device = static_cast<NavigationDevices>(i);
-//            }
-//        }
-        for (auto i = 0; i < NavDevAMOUNT; i++) {
-            cout << devices[i]->getState() << "   " << devices[i]->getEfficiency() << endl;
-        }
         auto upgrd_dev = std::max_element(devices.begin(), devices.end(), CompareDevicesState());// upgraded device
-        //std::cout << upgrd_dev->get()->getState() << " " << upgrd_dev->get()->getEfficiency() << endl;
-//1        devices[upgraded_device]->setEfficiency(devices[upgraded_device]->getEfficiency()
-//        + eff_points);
+
         upgrd_dev->get()->setEfficiency(upgrd_dev->get()->getEfficiency() + eff_points);
     }
     else if (isChangedEfficiency()) {
@@ -283,13 +285,18 @@ void NavigationService::process_year()
             devices[i]->setEfficiency(devices[i]->getDefaultEfficiency(
                     static_cast<NavigationDevices>(i)));
     }
+
+     // Annual degradation
+     for (auto & it : devices)
+         it->changeState(ANNUAL_DEGRADATION);
+
     //
 
-    // Repair
+    // Repairing the most efficient device, then the one with the least state
     float CURRENT_YEAR_REPAIR_PERCENT = getRandomFloat(0.7, 1.5)
             * REPAIR_PERCENT_PER_YEAR
             * (staff / (std::stof(
-            TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / 8));
+            TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / DEFAULT_STAFF_DENOMINATOR));
 
     auto rprd_dev = std::max_element(devices.begin(), devices.end(), CompareDevicesEfficiency()); // repaired device
     CURRENT_YEAR_REPAIR_PERCENT = rprd_dev->get()->repairDevice(CURRENT_YEAR_REPAIR_PERCENT);
@@ -305,8 +312,6 @@ void NavigationService::process_year()
         }
     }
     //
-//cout << required_staff << endl;
-//cout << getStaffDemand() << " AMOGUS - " << TheArk::get_instance()->getPopulation()->getUnemployedPeople() << endl;
 }
 
 double NavigationService::getState()
@@ -323,13 +328,16 @@ void NavigationService::setState(double s)
 {
     if (not TheArk::get_instance()->getCurrentYear())
         required_staff = std::stoi(
-                TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / 8;
+                TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / DEFAULT_STAFF_DENOMINATOR;
     for (auto& it : devices)
         it->setState(s);
 }
 
 unsigned int NavigationService::getStaffDemand() {
-    return required_staff - staff;
+    if (required_staff > staff)
+        return required_staff - staff;
+    else
+        return 0;
 }
 
 unsigned int NavigationService::getResourceDemand() {

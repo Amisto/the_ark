@@ -55,9 +55,9 @@ public:
     // Basic numbers for efficiency of each device
     unsigned short getDefaultEfficiency(NavigationDevices type);
 
-    float getState() const;
-    unsigned int getConsumption() const;
-    float getEfficiency() const;
+    [[nodiscard]] float getState() const;
+    [[nodiscard]] unsigned int getConsumption() const;
+    [[nodiscard]] float getEfficiency() const;
 
     void setState(float new_state);     // Has protection form invalid value
     void setConsumption(unsigned new_consumption);
@@ -98,15 +98,16 @@ private:
     unsigned int required_staff;
 
     // Shows how effective repairing is for a full team
-    const unsigned short REPAIR_PERCENT_PER_YEAR = 20;
+    const unsigned short REPAIR_PERCENT_PER_YEAR = 10;
 
     unsigned int need_resources;
 
-    // Stage of the flight
+    // Stages' of the flight management
     FlightStage stage;
     unsigned short time_until_next_stage;
     FlightStage next_stage;
 
+    // First and last years of flight are marked as ACCEL.
     const unsigned short ACCELERATION_TIME = 3;
 
     array<unique_ptr<NavigationBlock>, NavDevAMOUNT> devices;
@@ -117,16 +118,27 @@ private:
     // of devices, < 0 means faster flight
     float years_delta;
 
+    // Starting population / this coef. is default staff number
+    const char DEFAULT_STAFF_DENOMINATOR = 9;
+
+    // If years_total is higher this value times,
+    // there will be a warning to prevent from endless
+    // travelling
+    unsigned short int LOST_THE_WAY_WARNING = 3;
+
+    // Every year each device's state will decrease by this amount
+    const float ANNUAL_DEGRADATION = -0.5;
+
 public:
     NavigationService();
 
     void process_accident(AccidentSeverity as)  override; // каждая служба должна уметь в своих терминах обработать переданную ей аварию
     void process_year()  override;                        // если у службы есть какая-то личная жизнь, она может заниматься ей тут
-    double getState()  override;                          // каждая служба должна уметь вернуть свое состояние в процентах, посчитав его в своих терминах
+    [[nodiscard]] double getState()  override;                          // каждая служба должна уметь вернуть свое состояние в процентах, посчитав его в своих терминах
     void setState(double s)  override;                    // функция для инициализации, каждая служба должна уметь получить состояние в процентах и пересчитать  его в своих терминах
 
-    unsigned int getStaffDemand() override;
-    unsigned int getResourceDemand() override;
+    [[nodiscard]] unsigned int getStaffDemand() override;
+    [[nodiscard]] unsigned int getResourceDemand() override;
 
     // Kills some of staff. Victims HAS to be less than staff!
     void killStaff(unsigned victims);
@@ -135,7 +147,7 @@ public:
     float getRandomFloat(float min, float max);
     int getRandomInt(int min, int max);
 
-    bool isChangedEfficiency() const;
+    [[nodiscard]] bool isChangedEfficiency() const;
     void setChangedEfficiency(bool changedEfficiency);
 };
 
