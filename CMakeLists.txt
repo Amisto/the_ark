@@ -10,6 +10,7 @@ add_executable(the_ark
         TechnicalService.cpp
         BiologicalService.cpp
         MedicalService.cpp
+        NavigationBlock.cpp
         NavigationService.cpp
         EmergencyService.cpp
         SocialService.cpp
