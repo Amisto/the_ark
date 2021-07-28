@@ -60,7 +60,7 @@ void NavigationService::process_accident(AccidentSeverity as)
         case MEDIUM:
             killed_staff = staff / 10;
             devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 5)]->changeState(
-                    TheArk::get_instance()->getRandomGenerator()->getRandomFloat(-10.f, -5.f));
+                    TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-10.f, -5.f));
 
         case SEVERE:
             killed_staff = staff / 5;
@@ -70,13 +70,13 @@ void NavigationService::process_accident(AccidentSeverity as)
             TheArk::get_instance()->setYearsTotal(
                     TheArk::get_instance()->getYearsTotal() + time_until_next_stage);
             devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 5)]->changeState(
-                    TheArk::get_instance()->getRandomGenerator()->getRandomFloat(-18.f, -10.f));
+                    TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-18.f, -10.f));
 
         case DISASTROUS:
             killed_staff = staff / 2;
             for (auto i = 0; i < 4; i++) {
                 devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 5)]->changeState(
-                        TheArk::get_instance()->getRandomGenerator()->getRandomFloat(-60.f, -30.f));
+                        TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-60.f, -30.f));
             }
             if (TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 2) == 1) {
                 stage = MANEUVER;
@@ -90,7 +90,7 @@ void NavigationService::process_accident(AccidentSeverity as)
             killed_staff = staff * 0.9;
             for (auto i = 0; i < 6; i++) {
                 devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
-                        TheArk::get_instance()->getRandomGenerator()->getRandomFloat(-90.f, -60.f));
+                        TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-90.f, -60.f));
             }
             stage = MANEUVER;
             time_until_next_stage = 50;
@@ -177,7 +177,7 @@ void NavigationService::process_year()
     if(staff > std::stoi
         (TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / DEFAULT_STAFF_DENOMINATOR) {
         setChangedEfficiency(true);
-        float eff_points = (staff * 100.f) /
+        double eff_points = (staff * 100.f) /
                 (std::stof(TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / DEFAULT_STAFF_DENOMINATOR)
                 - 100;
 
@@ -198,7 +198,7 @@ void NavigationService::process_year()
     //
 
     // Repairing the most efficient device, then the one with the least state
-    float CURRENT_YEAR_REPAIR_PERCENT = TheArk::get_instance()->getRandomGenerator()->getRandomFloat(0.7, 1.5)
+    double CURRENT_YEAR_REPAIR_PERCENT = TheArk::get_instance()->getRandomGenerator()->getRandomDouble(0.7, 1.5)
             * REPAIR_PERCENT_PER_YEAR
             * (staff / (std::stof(
             TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / DEFAULT_STAFF_DENOMINATOR));
@@ -221,7 +221,7 @@ void NavigationService::process_year()
 
 double NavigationService::getState()
 {
-    float result = 0;
+    double result = 0;
 
     for (auto& it : devices)
         result += it->getState();

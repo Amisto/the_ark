@@ -53,7 +53,7 @@ private:
 
     // Shows gained or lost time due to the work
     // of devices, < 0 means faster flight
-    float years_delta;
+    double years_delta;
 
     // Starting population / this coef. is default staff number
     const char DEFAULT_STAFF_DENOMINATOR = 9;
@@ -64,7 +64,7 @@ private:
     unsigned short int LOST_THE_WAY_WARNING = 3;
 
     // Every year each device's state will decrease by this amount
-    const float ANNUAL_DEGRADATION = -0.5;
+    const double ANNUAL_DEGRADATION = -0.5;
 
 public:
     NavigationService();
