@@ -8,6 +8,7 @@
 #include <random>
 #include <chrono>
 #include <algorithm>
+#include <cmath>
 
 #include "Service.h"
 #include "TheArk.h"
@@ -29,15 +30,21 @@ class NavigationService : public Service {
 private:
     // Total amount of workers here
     unsigned int staff;
-
+    // Hiring more people than this value * default
+    // required_staff is useless for upgrades
+    const double MAX_STAFF_RATIO = 1.3;
     // Basically Population / 8, but can be higher
     // More people — faster repair, higher efficiency
     unsigned int required_staff;
+    // Starting population / this coef. is default staff number
+    const char DEFAULT_STAFF_DENOMINATOR = 9;
+    // Staff required for fully functioning systems
+    unsigned DEFAULT_STAFF;
 
     // Shows how effective repairing is for a full team
     const unsigned short REPAIR_PERCENT_PER_YEAR = 10;
 
-    unsigned int need_resources;
+    //unsigned int need_resources;
 
     // Stages' of the flight management
     FlightStage stage;
@@ -51,12 +58,17 @@ private:
     // Flag for process_year optimization
     bool changed_efficiency = false;
 
+    // Is used with the next field
+    double gained_efficiency_points = 0;
+    // E.g. this value = 10, total efficiency of all devices
+    // is always lower than 110%
+    const unsigned short MAX_UPGRADE_POINTS = 20;
+    //
+    const double MAX_UPGRADE_POINTS_PER_YEAR = 2;
+
     // Shows gained or lost time due to the work
     // of devices, < 0 means faster flight
     double years_delta;
-
-    // Starting population / this coef. is default staff number
-    const char DEFAULT_STAFF_DENOMINATOR = 9;
 
     // If years_total is higher this value times,
     // there will be a warning to prevent from endless

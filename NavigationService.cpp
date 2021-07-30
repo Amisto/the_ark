@@ -4,10 +4,11 @@
 
 #include "NavigationService.h"
 
-NavigationService::NavigationService(): staff(0), need_resources(0), years_delta(0)
+NavigationService::NavigationService(): staff(0), /*need_resources(0),*/ years_delta(0)
 {
-    required_staff = required_staff = std::stoi(
+    DEFAULT_STAFF = std::stoi(
             TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / DEFAULT_STAFF_DENOMINATOR;
+    required_staff = DEFAULT_STAFF;
     stage = ACCELERATION;
     time_until_next_stage = ACCELERATION_TIME;
     next_stage = STABLE;
@@ -127,7 +128,7 @@ void NavigationService::process_year()
     for (auto & it : devices)
         effective_sum += it->getState() * it->getEfficiency() / 10000.f;
 
-    years_delta -= effective_sum - 0.95;
+    years_delta -= effective_sum - 1;
 
     if (years_delta > 3) {
         TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getYearsTotal() + 3);
@@ -139,7 +140,7 @@ void NavigationService::process_year()
                 cout << "We've been travelling " << LOST_THE_WAY_WARNING << " times longer than estimated" << endl
                 << "Probably we are lost forever" << endl
                 << "Would you like to continue? (y/n)" << endl;
-                char h = std::cin.get();
+                auto h = std::cin.get();
                 if (h == 'n')
                     TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getCurrentYear() + 1);
                 else
@@ -154,15 +155,12 @@ void NavigationService::process_year()
 
 
     // Block for staff management
-    if (TheArk::get_instance()->getPopulation()->getUnemployedPeople() >=
-        (required_staff / 10) and required_staff < std::stoi(
-            TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / (DEFAULT_STAFF_DENOMINATOR - 1)) {
-        required_staff += TheArk::get_instance()->getPopulation()->getUnemployedPeople() / 12;
+    if (staff < DEFAULT_STAFF) {
+        required_staff = DEFAULT_STAFF;
     }
-    if (staff < std::stoi(
-            TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / DEFAULT_STAFF_DENOMINATOR) {
-        required_staff = std::stoi(
-                TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / DEFAULT_STAFF_DENOMINATOR;
+    else if (TheArk::get_instance()->getPopulation()->getUnemployedPeople() >=
+        (required_staff / 15) and required_staff < MAX_STAFF_RATIO * DEFAULT_STAFF) {
+        required_staff += TheArk::get_instance()->getPopulation()->getUnemployedPeople() / 8;
     }
 
     staff = TheArk::get_instance()->getPopulation()->getServiceStaff(Navigation_Service).size();
@@ -174,23 +172,40 @@ void NavigationService::process_year()
     // Block for devices
      // Efficiency upgrades
       // Adding points to the device with max state
-    if(staff > std::stoi
-        (TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / DEFAULT_STAFF_DENOMINATOR) {
-        setChangedEfficiency(true);
-        double eff_points = (staff * 100.f) /
-                (std::stof(TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / DEFAULT_STAFF_DENOMINATOR)
-                - 100;
+    if(staff > DEFAULT_STAFF) {
+        if (gained_efficiency_points != MAX_UPGRADE_POINTS)
+        {
+            setChangedEfficiency(true);
+            double x;
+            if (staff < MAX_STAFF_RATIO * DEFAULT_STAFF)
+                x = (staff * 1.f) / DEFAULT_STAFF;
+            else
+                x = MAX_STAFF_RATIO;
+            double current_max_points = MAX_UPGRADE_POINTS * pow((x - 1) / (MAX_STAFF_RATIO - 1), 0.1);
 
-        auto upgrd_dev = std::max_element(devices.begin(), devices.end(), CompareDevicesState());// upgraded device
+            double eff_points = MAX_UPGRADE_POINTS_PER_YEAR * pow((x - 1) / (MAX_STAFF_RATIO - 1), 0.3);
+            if (staff >= MAX_STAFF_RATIO * DEFAULT_STAFF)
+                eff_points = MAX_UPGRADE_POINTS_PER_YEAR;
+            if (eff_points + gained_efficiency_points < current_max_points) {
+                gained_efficiency_points += eff_points;
+            }
+            else {
+                eff_points = current_max_points - gained_efficiency_points;
+                gained_efficiency_points = current_max_points;
+            }
 
-        upgrd_dev->get()->setEfficiency(upgrd_dev->get()->getEfficiency() + eff_points);
+            auto upgrd_dev = std::max_element(devices.begin(), devices.end(), CompareDevicesState());// upgraded device
+            upgrd_dev->get()->setEfficiency(upgrd_dev->get()->getEfficiency() + eff_points);
+        }
     }
     else if (isChangedEfficiency()) {
         for (auto i = 0; i < NavDevAMOUNT; i++)
             devices[i]->setEfficiency(devices[i]->getDefaultEfficiency(
                     static_cast<NavigationDevices>(i)));
+        gained_efficiency_points = 0;
     }
 
+    //cout << gained_efficiency_points << endl;
      // Annual degradation
      for (auto & it : devices)
          it->changeState(ANNUAL_DEGRADATION);
@@ -199,9 +214,7 @@ void NavigationService::process_year()
 
     // Repairing the most efficient device, then the one with the least state
     double CURRENT_YEAR_REPAIR_PERCENT = TheArk::get_instance()->getRandomGenerator()->getRandomDouble(0.7, 1.5)
-            * REPAIR_PERCENT_PER_YEAR
-            * (staff / (std::stof(
-            TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / DEFAULT_STAFF_DENOMINATOR));
+            * REPAIR_PERCENT_PER_YEAR * staff / DEFAULT_STAFF;
 
     auto rprd_dev = std::max_element(devices.begin(), devices.end(), CompareDevicesEfficiency()); // repaired device
     CURRENT_YEAR_REPAIR_PERCENT = rprd_dev->get()->repairDevice(CURRENT_YEAR_REPAIR_PERCENT);
@@ -229,11 +242,7 @@ double NavigationService::getState()
     return result / NavDevAMOUNT;
 }
 
-void NavigationService::setState(double s)
-{
-    if (not TheArk::get_instance()->getCurrentYear())
-        required_staff = std::stoi(
-                TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / DEFAULT_STAFF_DENOMINATOR;
+void NavigationService::setState(double s) {
     for (auto& it : devices)
         it->setState(s);
 }
