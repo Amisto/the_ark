@@ -25,12 +25,12 @@ enum NavigationDevices
 class NavigationBlock
 {
 private:
-    float state;
+    double state;
     unsigned int consumption;  // Resources per year
 
     // Some devices are much more useful than other,
     // Can change during the flight
-    float efficiency;
+    double efficiency;
 
 public:
     explicit NavigationBlock(NavigationDevices type);
@@ -38,18 +38,18 @@ public:
     // Basic numbers for efficiency of each device
     static unsigned short getDefaultEfficiency(NavigationDevices type);
 
-    [[nodiscard]] float getState() const;
+    [[nodiscard]] double getState() const;
     [[nodiscard]] unsigned int getConsumption() const;
-    [[nodiscard]] float getEfficiency() const;
+    [[nodiscard]] double getEfficiency() const;
 
-    void setState(float new_state);     // Has protection form invalid value
+    void setState(double new_state);     // Has protection form invalid value
     void setConsumption(unsigned new_consumption);
-    void setEfficiency(float new_efficiency);
+    void setEfficiency(double new_efficiency);
 
-    void changeState(float delta); // Delta can be < 0, has protection form invalid value
+    void changeState(double delta); // Delta can be < 0, has protection form invalid value
 
     // Points + current state can be > 100, method returns unused points back
-    float repairDevice(float available_points);
+    double repairDevice(double available_points);
 
 };
 

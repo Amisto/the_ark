@@ -34,7 +34,7 @@ public:
     EmergencyService();
 
     unsigned int getNStaff();
-    double accident_propability();
+    double accident_probability();
     double damage_factor();
     void determine_severity(Service* s);
     void create_accident(Service* s);
@@ -43,8 +43,9 @@ public:
     double getState() override;                             // каждая служба должна уметь вернуть свое состояние в процентах, посчитав его в своих терминах
     void setState(double s) override;                       // функция для инициализации, каждая служба должна уметь получить состояние в процентах и пересчитать  его в своих терминах
     
-    unsigned int getStaffDemand();
-    unsigned int getResourceDemand();
+    unsigned int getStaffDemand() override;
+    unsigned int getResourceDemand() override;
+
     bool changeResources(int delta);
     bool changeStaff(int delta);
 

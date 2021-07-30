@@ -18,7 +18,7 @@ float RandomNumberGenerator::getRandomFloat(float min, float max) {
     return d(e);
 }
 
-double RandomNumberGenerator::getRandomDouble(float min, float max) {
+double RandomNumberGenerator::getRandomDouble(double min, double max) {
     unsigned seed = std::chrono::steady_clock::now().time_since_epoch().count();
     static std::default_random_engine e(seed);
     uniform_real_distribution<double> d(min, max);

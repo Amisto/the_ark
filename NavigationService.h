@@ -81,7 +81,7 @@ public:
     void killStaff(unsigned victims);
 
     [[nodiscard]] bool isChangedEfficiency() const;
-    void setChangedEfficiency(bool changedEfficiency);
+    void setChangedEfficiency(bool new_changed_efficiency);
 };
 
 #endif //THE_ARK_NAVIGATIONSERVICE_H

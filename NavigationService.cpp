@@ -253,6 +253,6 @@ bool NavigationService::isChangedEfficiency() const {
     return changed_efficiency;
 }
 
-void NavigationService::setChangedEfficiency(bool changedEfficiency) {
-    changed_efficiency = changedEfficiency;
+void NavigationService::setChangedEfficiency(bool new_changed_efficiency) {
+    changed_efficiency = new_changed_efficiency;
 }

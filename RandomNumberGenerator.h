@@ -16,7 +16,7 @@ class RandomNumberGenerator
 public:
     int getRandomInt(int min, int max);
     float getRandomFloat(float min, float max);
-    double getRandomDouble(float min, float max);
+    double getRandomDouble(double min, double max);
 };
 
 #endif //THE_ARK_RANDOMNUMBERGENERATOR_H

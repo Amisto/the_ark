@@ -16,7 +16,7 @@ EmergencyService::EmergencyService()
 
 
 //от 0 до 1, чем хуже состояние службы - тем выше вероятность аварии
-double EmergencyService::accident_propability()
+double EmergencyService::accident_probability()
 {
     double s = TheArk::get_instance()->getMedicalService()->getState() / 100;
     return 1 / pow(3, 3 * s);
@@ -35,7 +35,7 @@ void EmergencyService::create_accident(Service* s)
 {
     srand(time(0));
     int temp = (20 + rand() % 100);
-    double k = temp * (1 - this->accident_propability());
+    double k = temp * (1 - this->accident_probability());
     if (k > 20 && k < 100)
         this->determine_severity(s);
     else return;

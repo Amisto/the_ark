@@ -37,26 +37,26 @@ NavigationBlock::NavigationBlock(NavigationDevices type)
 
 unsigned int NavigationBlock::getConsumption() const { return consumption; }
 
-float NavigationBlock::getEfficiency() const { return efficiency; }
+double NavigationBlock::getEfficiency() const { return efficiency; }
 
-float NavigationBlock::getState() const { return state; }
+double NavigationBlock::getState() const { return state; }
 
 void NavigationBlock::setConsumption(unsigned int new_consumption) {
     consumption = new_consumption;
 }
 
-void NavigationBlock::setEfficiency(float new_efficiency) {
+void NavigationBlock::setEfficiency(double new_efficiency) {
     efficiency = new_efficiency;
 }
 
-void NavigationBlock::setState(float new_state) {
+void NavigationBlock::setState(double new_state) {
     if(new_state <= 100 and new_state >= 0)
         state = new_state;
     else
         cout << "NAVBLOCK ERROR_3" << endl;
 }
 
-void NavigationBlock::changeState(float delta) {
+void NavigationBlock::changeState(double delta) {
     state += delta;
     if (state < 0)
         state = 0;
@@ -64,7 +64,7 @@ void NavigationBlock::changeState(float delta) {
         state = 100;
 }
 
-float NavigationBlock::repairDevice(float available_points) {
+double NavigationBlock::repairDevice(double available_points) {
     if (state + available_points > 100) {
         available_points -= (100 - state);
         state = 100;
