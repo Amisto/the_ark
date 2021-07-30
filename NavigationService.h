@@ -76,6 +76,7 @@ public:
 
     [[nodiscard]] unsigned int getStaffDemand() override;
     [[nodiscard]] unsigned int getResourceDemand() override;
+    unsigned int returnJunk() override;
 
     // Kills some of staff. Victims HAS to be less than staff!
     void killStaff(unsigned victims);

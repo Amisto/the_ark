@@ -285,6 +285,10 @@ unsigned int SocialService::getResourceDemand() {
     return 0; // наша служба не нуждается в ресурсах на начальном этапе придумывания
 }
 
+unsigned int SocialService::returnJunk() {
+    return 0;
+}
+
 unsigned int SocialService::getResourcePriority() {return 6;} // последний приоритет
 
 unsigned int SocialService::getStaffDemand(){

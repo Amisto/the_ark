@@ -36,6 +36,7 @@ public:
     double efficiencyJunkToRefuse();                // как быстро хлам перерабатываются в отходы
 
     virtual unsigned int getResourceDemand() override;           // сколько ресурсов требуется
+    virtual unsigned int returnJunk() override;		// сколько мусора возвоащается
     virtual unsigned int getResourcePriority();         // с каким приоритетом служба будет требовать ресурсы
     virtual unsigned int getStaffDemand() override;              // сколько людей требуется
     virtual unsigned int getStaffPriority();            // с каким приоритетом слуюба будет требовать людей

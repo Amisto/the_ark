@@ -10,7 +10,7 @@
 #include <cmath>
 
 MedicalService::MedicalService() : retirementAge(65), ChildrenDeath(0.0001), AdultDeath(0.001), OldDeath(0.01),
-                                   State(100), n_staff(0), resources(1000), Birth(0), NeedResources(1000), HealthYearAgo(100),
+                                   State(100), n_staff(0), resources(1000),Junk(0), Birth(0), NeedResources(1000), HealthYearAgo(100),
                                    CriticalHealth(10) 
  {}
 
@@ -170,5 +170,11 @@ bool MedicalService::changeStaff(int delta) {
 
 bool MedicalService::changeResources(int delta) {
     resources += delta;
+    Junk = delta;
     return true;
+}
+
+unsigned int MedicalService::returnJunk()
+{
+	return Junk;
 }

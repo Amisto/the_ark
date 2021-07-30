@@ -23,6 +23,7 @@ public:
     virtual double getState() = 0;                          // каждая служба должна уметь вернуть свое состояние в процентах, посчитав его в своих терминах
     virtual void setState(double s) = 0;                    // функция для инициализации, каждая служба должна уметь получить состояние в процентах и пересчитать  его в своих терминах
     virtual unsigned int getResourceDemand() = 0;           // сколько ресурсов требуется
+    virtual unsigned int returnJunk() = 0;		    // сколько возвращает мусора
     virtual unsigned int getStaffDemand() = 0;              // сколько людей требуется
 
     virtual ~Service();

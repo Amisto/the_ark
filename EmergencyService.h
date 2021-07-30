@@ -28,6 +28,7 @@ private:
     unsigned int Staff; //персонала в данный момент
     unsigned int max_Staff;//максимальное количество персонала в службе
     unsigned int Resources;
+    unsigned int Junk;
     unsigned int max_Resources;
 
 public:
@@ -45,6 +46,7 @@ public:
     
     unsigned int getStaffDemand() override;
     unsigned int getResourceDemand() override;
+    unsigned int returnJunk() override;
 
     bool changeResources(int delta);
     bool changeStaff(int delta);

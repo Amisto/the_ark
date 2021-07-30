@@ -57,14 +57,14 @@ public:
 	unsigned int setComponentsToUsed(unsigned int current_usage, Services id);	// method to be called by services to get resources
 	void setUsedToJunk(unsigned int current_broken, Services id);			// method to be called by services to return junk
 
-	void init(unsigned int total);
-	void processYear(); 								// the process of year's changing of all resources' categories
-
 	unsigned int getConsumables() const;
 	unsigned int getComponents() const;
 	unsigned int getUsed() const;
 	unsigned int getJunk() const;
 	unsigned int getRefuse() const;
+	
+	void init(unsigned int total);
+	void processYear(); 								// the process of year's changing of all resources' categories
 };
 
 

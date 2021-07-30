@@ -118,6 +118,10 @@ unsigned int TechnicalService::getResourceDemand() {
     return this->maxResources - this->resources;
 }
 
+unsigned int TechnicalService::returnJunk() {
+    return this->maxResources - this->resources;
+}
+
 unsigned int TechnicalService::getResourcePriority() {
     return 1;
 }

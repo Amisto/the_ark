@@ -46,6 +46,7 @@ public:
     void setState(double s) override;                       // функция для инициализации, каждая служба должна уметь получить состояние в процентах и пересчитать  его в своих терминах
 
     unsigned int getResourceDemand() override;           // сколько ресурсов требуется
+    unsigned int returnJunk() override;		// сколько мусора вернули
     unsigned int getResourcePriority();         // с каким приоритетом служба будет требовать ресурсы
     unsigned int getStaffDemand() override;              // сколько людей требуется
     unsigned int getStaffPriority();            // с каким приоритетом слуюба будет требовать людей

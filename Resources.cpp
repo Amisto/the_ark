@@ -5,6 +5,11 @@
 #include "Resources.h"
 #include "TheArk.h"
 #include "TechnicalService.h"
+#include "BiologicalService.h"
+#include "EmergencyService.h"
+#include "MedicalService.h"
+#include "NavigationService.h"
+#include "SocialService.h"
 #include <vector>
 #include <iostream>
 
@@ -83,44 +88,6 @@ unsigned int Resources::getUsed() const
 	return this->org_res->getUsed() + this->not_org_res->getUsed();
 }
 
-/*-----------------------------------------YEAR_PROCESS----------------------------------------------*/
-
-void Resources::processYear() 
-{
-	this->org_res->YearProcess();
-	this->not_org_res->YearProcess();
-}
-
-void NotOrgRes::YearProcess()
-{
-	
-	
-	if (this->consumables > 0)
-	{
-		this->consumables -= this->consumables*efficiencyConsumablesToComponents();
-	}
-
-	this->components    += this->consumables * efficiencyConsumablesToComponents();
-	this->consumables   += this->junk * efficiencyJunkToConsumables();
-	
-	if (this->junk > 0)
-	{
-		this->junk -= this->junk * efficiencyJunkToConsumables();
-	}
-	
-	if (this->junk > 0)
-	{
-		this->junk -= this->junk * efficiencyJunkToRefuse();
-	}
-	
-	this->refuse       += this->junk * efficiencyJunkToRefuse();
-}
-
-void OrgRes::YearProcess()
-{
-	/*this->components    =   TheArk::get_instance()->getBiologicalService()->GetResource();
-	this->refuse       -=   TheArk::get_instance()->getBiologicalService()->GetJunk();*/
-}
 
 /*---------------------------------------------SETTERS-----------------------------------------------*/
 
@@ -182,4 +149,56 @@ void Resources::init(unsigned int total)
 {
 	this->not_org_res = std::make_unique<NotOrgRes>(0.5 * total);
 	this->org_res     = std::make_unique<OrgRes>(0.5 * total);
+	
+
 }
+
+/*-----------------------------------------YEAR_PROCESS----------------------------------------------*/
+
+void Resources::processYear() 
+{	
+	setComponentsToUsed(TheArk::get_instance()->getTechnicalService()->getResourceDemand(), Technical_Service);
+	setComponentsToUsed(TheArk::get_instance()->getMedicalService()->getResourceDemand(), Medical_Service);
+	setComponentsToUsed(TheArk::get_instance()->getNavigationService()->getResourceDemand(), Navigation_Service);
+	setComponentsToUsed(TheArk::get_instance()->getEmergencyService()->getResourceDemand(), Emergency_Service);
+	setComponentsToUsed(TheArk::get_instance()->getSocialService()->getResourceDemand(), Social_Service);
+	
+	this->org_res->YearProcess();
+	this->not_org_res->YearProcess();
+	
+	setUsedToJunk(TheArk::get_instance()->getTechnicalService()->returnJunk(), Technical_Service);
+	setUsedToJunk(TheArk::get_instance()->getMedicalService()->returnJunk(), Medical_Service);
+	setUsedToJunk(TheArk::get_instance()->getNavigationService()->returnJunk(), Navigation_Service);
+	setUsedToJunk(TheArk::get_instance()->getEmergencyService()->returnJunk(), Emergency_Service);
+	setUsedToJunk(TheArk::get_instance()->getSocialService()->returnJunk(), Social_Service);
+}
+
+void NotOrgRes::YearProcess()
+{	
+	if (this->consumables > 0)
+	{
+		this->consumables -= this->consumables*efficiencyConsumablesToComponents();
+	}
+
+	this->components    += this->consumables * efficiencyConsumablesToComponents();
+	this->consumables   += this->junk * efficiencyJunkToConsumables();
+	
+	if (this->junk > 0)
+	{
+		this->junk -= this->junk * efficiencyJunkToConsumables();
+	}
+	
+	if (this->junk > 0)
+	{
+		this->junk -= this->junk * efficiencyJunkToRefuse();
+	}
+	
+	this->refuse       += this->junk * efficiencyJunkToRefuse();
+}
+
+void OrgRes::YearProcess()
+{
+	/*this->components    =   TheArk::get_instance()->getBiologicalService()->GetResource();
+	this->refuse       -=   TheArk::get_instance()->getBiologicalService()->GetJunk();*/
+}
+

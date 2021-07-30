@@ -11,6 +11,7 @@ EmergencyService::EmergencyService()
     this->Staff = 100; //персонала в данный момент
     this->max_Staff = 100;//максимальное количество персонала в службе
     this->Resources = 100;
+    this->Junk = 0;
     this->max_Resources = 100;
 }
 
@@ -106,11 +107,12 @@ bool EmergencyService::changeResources(int delta)
 {
     if (delta < 0)//отняли ресурсы; из-за аварии 
     {
-        TheArk::get_instance()->getResources()->setUsedToJunk(- delta, Emergency_Service);  //вернули мусор
+	this->Junk = delta;
+        //TheArk::get_instance()->getResources()->setUsedToJunk(- delta, Emergency_Service);  //вернули мусор
     }
     else //добавляем ресурсы в количестве недостающих - 10 - ежегодный износ
     {
-        TheArk::get_instance()->getResources()->setComponentsToUsed(delta, Emergency_Service);
+        //TheArk::get_instance()->getResources()->setComponentsToUsed(delta, Emergency_Service);
     }
     this->Resources += delta;
     return true;
@@ -120,6 +122,11 @@ unsigned int EmergencyService::getResourceDemand()
 {
     return this->max_Resources - this->Resources;
     
+}
+
+unsigned int EmergencyService::returnJunk()
+{
+	return this->Junk;
 }
 
 //-------------------------------------

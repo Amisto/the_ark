@@ -21,6 +21,7 @@ public:
     void setState(double s) override;                       // функция для инициализации, каждая служба должна уметь получить состояние в процентах и пересчитать  его в своих терминах
     unsigned int getResourceDemand() override {return 0;};
     unsigned int getStaffDemand() override {return 0;};
+    unsigned int returnJunk() override {return 0;};
 };
 
 class BioRes {

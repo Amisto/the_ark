@@ -249,6 +249,10 @@ unsigned int NavigationService::getResourceDemand() {
     return 0;
 }
 
+unsigned int NavigationService::returnJunk() {
+    return 0;
+}
+
 bool NavigationService::isChangedEfficiency() const {
     return changed_efficiency;
 }

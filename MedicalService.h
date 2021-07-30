@@ -14,6 +14,7 @@ class MedicalService : public Service {
 private:
     unsigned int n_staff;                                 // количество рабочих всего
     unsigned int resources;                               // количество имеющихся ресурсов
+    unsigned int Junk;					  // количество мусора
     unsigned int NeedResources;                           // количество необходимых ресурсов
     double State;                                         // состояние системы по 100-бальной шкале
     unsigned int retirementAge;                           // возраст старения
@@ -45,6 +46,7 @@ public:
     unsigned int getStaffPriority();             // с каким приоритетом слуюба будет требовать людей
     bool changeStaff(int delta);                 // сколько людей добавили или забрали (в т.ч. смертность)
     bool changeResources(int delta);             // сколько ресурсов добавили или забрали (в т.ч. износ)
+    unsigned int returnJunk() override;		 // сколько мусора вернули
 
 };
 
