@@ -23,7 +23,7 @@ unsigned short NavigationBlock::getDefaultEfficiency(NavigationDevices type)
             return 5;
 
         case NavDevAMOUNT:
-            cout << "NAVBLOCK ERROR_1" << endl;
+            std::cerr << "NAVBLOCK ERROR_1" << endl;
     }
     return -1;
 }
@@ -53,7 +53,7 @@ void NavigationBlock::setState(double new_state) {
     if(new_state <= 100 and new_state >= 0)
         state = new_state;
     else
-        cout << "NAVBLOCK ERROR_3" << endl;
+        std::cerr << "NAVBLOCK ERROR_3" << endl;
 }
 
 void NavigationBlock::changeState(double delta) {
@@ -72,7 +72,7 @@ double NavigationBlock::repairDevice(double available_points) {
     }
     else {
         if (available_points < 0) {
-            cout << "NAVBLOCK ERROR_2" << endl;
+            std::cerr << "NAVBLOCK ERROR_2" << endl;
             return 0;
         }
         state += available_points;

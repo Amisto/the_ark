@@ -3,64 +3,53 @@
 
 #include "EmergencyService.h"
 
-#include <iostream>
-
-EmergencyService::EmergencyService()
-{
-    this->State = 100;
-    this->Staff = 100; //персонала в данный момент
-    this->max_Staff = 100;//максимальное количество персонала в службе
-    this->Resources = 100;
-    this->Junk = 0;
-    this->max_Resources = 100;
+EmergencyService::EmergencyService(): state(0), staff(0), resources(0), max_resources(0), Junk(0) {
+    max_staff = std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / 10;
 }
 
-
-//от 0 до 1, чем хуже состояние службы - тем выше вероятность аварии
-double EmergencyService::accident_probability()
+// From 1 to 100, low Emergency Service's state increases the value and
+// the damage from accidents
+double EmergencyService::damage_factor(Service* s)
 {
-    double s = TheArk::get_instance()->getMedicalService()->getState() / 100;
-    return 1 / pow(3, 3 * s);
+    /*if (getState() + s->getState() != 0)
+        return 100.f / (0.1 * getState() + 0.9 * s->getState());
+    else
+        return 100.f;*/
+    return 4000.f / ((0.5 * getState() + 0.5 * s->getState()) + 30) - 30;
 }
 
-//от 1 до 100 чем хуже состояние чс, тем больше коэффициент - больше ущерб от аварии
-double EmergencyService::damage_factor()
-{
-    if (this->getState() != 0)
-        return 100 / (this->getState());
-    else return 100;
-}
-
-//генерация аварий
+// Generation of accidents
+// Low service's state increases the probability of accident
 void EmergencyService::create_accident(Service* s)
 {
-    srand(time(0));
-    int temp = (20 + rand() % 100);
-    double k = temp * (1 - this->accident_probability());
+    double k = TheArk::get_instance()->getRandomGenerator()->getRandomInt(20, 119)
+                    * (1 - pow(3, -0.03 * s->getState()));
     if (k > 20 && k < 100)
         this->determine_severity(s);
-    else return;
+    else
+        return;
 }
 
 
 void EmergencyService::determine_severity(Service* s)
 {
-    if (this->damage_factor() > 0 && this->damage_factor() < 11)
+    //std::cout << TheArk::get_instance()->getCurrentYear() << " THROWN " << typeid(*s).name() << " DF " << damage_factor(s) << std::endl;
+    if (damage_factor(s) > 0 && damage_factor(s) < 11)
         s->process_accident(NEGLIGIBLE);
 
-    else if (this->damage_factor() > 10 && this->damage_factor() < 31)
+    else if (this->damage_factor(s) > 10 && this->damage_factor(s) < 31)
         s->process_accident(LIGHT);
 
-    else if (this->damage_factor() > 30 && this->damage_factor() < 51)
+    else if (this->damage_factor(s) > 30 && this->damage_factor(s) < 51)
         s->process_accident(MEDIUM);
 
-    else if (this->damage_factor() > 50 && this->damage_factor() < 71)
+    else if (this->damage_factor(s) > 50 && this->damage_factor(s) < 71)
         s->process_accident(SEVERE);
 
-    else if (this->damage_factor() > 70 && this->damage_factor() < 91)
+    else if (this->damage_factor(s) > 70 && this->damage_factor(s) < 91)
         s->process_accident(DISASTROUS);
 
-    else if (this->damage_factor() > 90 && this->damage_factor() < 101)
+    else if (this->damage_factor(s) > 90 && this->damage_factor(s) < 101)
         s->process_accident(CATASTROPHIC);
 }
 
@@ -68,13 +57,16 @@ void EmergencyService::determine_severity(Service* s)
 
 void EmergencyService:: process_year()
 {
- // обновление состояния корабля в зависимости от кол-ва людей, ресурсов и аварий
+    // Updating State depending on Resources, current state and accidents
+    staff = TheArk::get_instance()->getPopulation()->getServiceStaff(Emergency_Service).size();
+    //this->changeResources(this->getResourceDemand() - 10);
+    //this->killStaff(3);
+    //this->setState(100 * (double)((this->staff + this->resources) / 205.f));
 
-    this->changeResources(this->getResourceDemand() - 10);
-    this->changeStaff(3);
-    this->setState(100 * (double)((this->Staff + this->Resources) / 205));
-
-//генерация чс
+    setState(staff * 100.f / max_staff);
+    if(getState() > 100)
+        setState(100);
+    // Creating accidents
 
     for (auto s : TheArk::get_instance()->getServices())
     {
@@ -83,27 +75,25 @@ void EmergencyService:: process_year()
 
 }
 
-//для обработки переданных аварий; меняет состояние корабля в зависимости от тяжести аварии
+// Damaging this service depending on the severity
 void EmergencyService::process_accident(AccidentSeverity as)
 {
     this->changeResources(-(12 * as + 10));
-    this->changeStaff(4 * as + 10);
+    this->killStaff(4 * as + 10);
     this->setState(100 - (as * 5.1 + 10));
 }
 
-double EmergencyService::getState()
-{
-    return this->State;
+double EmergencyService::getState() {
+    return state;
 }
 
-void EmergencyService::setState(double s)
-{
-    this->State = s;
+void EmergencyService::setState(double s) {
+    state = s;
 }
 
-// управление ресурсами
-//----------------------------
-bool EmergencyService::changeResources(int delta)
+// Resources management
+//-----------------------------
+void EmergencyService::changeResources(int delta)
 {
     if (delta < 0)//отняли ресурсы; из-за аварии 
     {
@@ -114,13 +104,12 @@ bool EmergencyService::changeResources(int delta)
     {
         //TheArk::get_instance()->getResources()->setComponentsToUsed(delta, Emergency_Service);
     }
-    this->Resources += delta;
-    return true;
+    this->resources += delta;
 }
 
 unsigned int EmergencyService::getResourceDemand()
 {
-    return this->max_Resources - this->Resources;
+    return this->max_resources - this->resources;
     
 }
 
@@ -131,48 +120,31 @@ unsigned int EmergencyService::returnJunk()
 
 //-------------------------------------
 
-//управление перосналом
+// Staff management
 
 //-------------------------------------
 
-
-unsigned int EmergencyService:: getNStaff() 
-{
-    return TheArk::get_instance()->getPopulation()->getAllClassification()[Emergency_Service].size();
-}
-
-//добавление недостающего персонала реализовано в getRecommendedNStaff; здесь только убиваем в случае аварий + ежегодая убыль
-bool EmergencyService::changeStaff(int delta)
+void EmergencyService::killStaff(int delta)
 {
     list<shared_ptr<Human>>& people = TheArk::get_instance()->getPopulation()->getAllClassification()[Emergency_Service];
-
-    if (this->Staff > delta)
+    staff = people.size();
+    if (this->staff > delta)
     {
-        int counter = 0;
-
-        for (auto it = people.begin(); it != people.end(); it++)
+        auto it = people.begin();
+        for (auto i = 0; i < delta; i++)
         {
-            while (counter < delta)
-            {
-                (*it)->setIsAlive(false);
-                counter++;
-            }
-
+            (*it)->setIsAlive(false);
         }
-
-        this->Staff -= delta;
+        this->staff -= delta;
     }
-
-    else
-        this->Staff = 0;
-
-    return true;
+    else {
+        staff = 0;
+    }
 }
 
 unsigned int EmergencyService::getStaffDemand()
 {
-    return this->max_Staff - this->Staff;
-
+    return this->max_staff - this->staff;
 }
 
 //----------------------------------------
