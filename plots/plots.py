@@ -15,8 +15,16 @@ NAVIGATION_SERVICE = []
 EMERGENCY_SERVICE = []
 SOCIAL_SERVICE = []
 
+CONSUMABLES = []
+COMPONENTS = []
+USED = []
+JUNK = []
+REFUSE = []
+TOTAL = []
+
 # чтение файла и заполнение данных
-with open("../TheArk.csv", encoding="utf-8") as r_file: # тут указывается название файла
+fname = input()
+with open(fname, encoding="utf-8") as r_file: # тут указывается название файла
     file_reader = csv.reader(r_file, delimiter=",")
     count = 0
     for row in file_reader:
@@ -28,6 +36,12 @@ with open("../TheArk.csv", encoding="utf-8") as r_file: # тут указыва�
             CHILDREN.append(int(row[2]))
             ADULTS.append(int(row[3]))
             OLD.append(int(row[4]))
+            CONSUMABLES.append(int(row[5]))
+            COMPONENTS.append(int(row[6]))
+            USED.append(int(row[7]))
+            JUNK.append(int(row[8]))
+            REFUSE.append(int(row[9]))
+            TOTAL.append(int(row[5]) + int(row[6]) + int(row[7]) + int(row[8]) + int(row[9]))
             TECHNICAL_SERVICE.append(float(row[10]))
             BIOLOGICAL_SERVICE.append(float(row[11]))
             MEDICAL_SERVICE.append(float(row[12]))
@@ -61,3 +75,17 @@ plt.xlabel("Year")
 plt.legend()
 plt.grid()
 plt.savefig("Services.png")
+
+# Services
+fig.clf()
+plt.plot(YEARS, CONSUMABLES, label="Consumables")
+plt.plot(YEARS, COMPONENTS, label="Components")
+plt.plot(YEARS, USED, label="Used")
+plt.plot(YEARS, JUNK, label="Junk")
+plt.plot(YEARS, REFUSE, label="Refuse")
+plt.plot(YEARS, TOTAL, label="Total")
+plt.ylabel("Megatons")
+plt.xlabel("Year")
+plt.legend()
+plt.grid()
+plt.savefig("Resources.png")
