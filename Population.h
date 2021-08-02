@@ -20,21 +20,22 @@ private:
     unsigned int adults;
     unsigned int oldmen;
     unsigned int unemployed_people;
+    double distribution_coef[6];
 
     unsigned int borderChildrenToAdults();
     unsigned int borderAdultsToOldmen();
 
     unsigned int number_staff(Services service);
-    void stuff_distribution(list<shared_ptr<Human>>& stuff, unsigned int demand_stuff);
+    void staff_distribution(list<shared_ptr<Human>>& stuff, unsigned int demand_stuff);
 
     double deathRateChildren();
     double deathRateAdults();
     double deathRateOldmen();
 
 
-    void check_dead_people_is_classifications(); // пробежались по всем всем листам и попнули умерших
+    void check_dead_people_in_services(); // пробежались по всем всем листам и попнули умерших
 
-    array<list<shared_ptr<Human>>, 7> classifications_of_humans;
+    array<list<shared_ptr<Human>>, 7> service_workers;
     list<shared_ptr<Human>> people;
 
 

@@ -14,7 +14,10 @@
 #include <cstdlib>
 #include <iostream>
 
-Population::Population() : children(0), adults(0), oldmen(0), unemployed_people(0){}
+Population::Population() : children(0), adults(0), oldmen(0), unemployed_people(0), distribution_coef{0.2, 0.2, 0.3, 0.05, 0.05, 0.2}
+{
+    
+}
 
 unsigned int Population::getChildren() const {
     return this->children;
@@ -67,17 +70,17 @@ unsigned int Population::number_staff(Services service)
 
 }
 
-void Population::stuff_distribution(list<shared_ptr<Human>>& stuff, unsigned int demand_stuff)
+void Population::staff_distribution(list<shared_ptr<Human>>& staff, unsigned int demand_staff)
 {
     auto it = this->people.begin();
     unsigned int counter = 0;
-    while(it != this->people.end() && counter < demand_stuff)
+    while(it != this->people.end() && counter < demand_staff)
     {
-        if((*it)->getAge() > this->borderChildrenToAdults() && (*it)->getAge() < this->borderAdultsToOldmen())
+        if((*it)->getAge() >= this->borderChildrenToAdults() && (*it)->getAge() < this->borderAdultsToOldmen())
         {
             if((*it)->getTypeAsAWorker() == UNDEFINED || (*it)->getTypeAsAWorker() == UNEMPLOYED)
             {
-                stuff.push_back(*it);
+                staff.push_back(*it);
                 (*it)->setTypeAsAWorker(WORKER);
                 counter++;
                 this->unemployed_people--;
@@ -110,12 +113,12 @@ list<shared_ptr<Human>>& Population::getPeople()
 
 array<list<shared_ptr<Human>>, 7>& Population::getAllClassification()
 {
-     return this->classifications_of_humans;
+     return this->service_workers;
 }
 
 list<shared_ptr<Human>>& Population::getServiceStaff(Services service)
 {
-     return this->classifications_of_humans[service];
+     return this->service_workers[service];
 }
 
 void Population::processYear() {
@@ -124,31 +127,38 @@ void Population::processYear() {
     {
         auto* micro_chelik = new Human();
         micro_chelik->setAge(0);
+        micro_chelik->setTypeAsAWorker(CHILD);
         auto ptr = shared_ptr<Human>(micro_chelik);
         this->people.push_back(ptr);
     }
     //распределение стафа, сделал бы в цикле, но нужно вызывать каждую ф-ю отдельно
-    unsigned int demand_staff[classifications_of_humans.size() - 1];
+    unsigned int demand_staff[service_workers.size() - 1];
     demand_staff[0] = TheArk::get_instance()->getTechnicalService()->getStaffDemand();
     demand_staff[1] = TheArk::get_instance()->getBiologicalService()->getStaffDemand();
     demand_staff[2] = TheArk::get_instance()->getMedicalService()->getStaffDemand();
     demand_staff[3] = TheArk::get_instance()->getNavigationService()->getStaffDemand();
     demand_staff[4] = TheArk::get_instance()->getEmergencyService()->getStaffDemand();
     demand_staff[5] = TheArk::get_instance()->getSocialService()->getStaffDemand();
-
+    
     int all_demand_staff = 0;
-    for (int i = 0; i < this->classifications_of_humans.size() - 1; i++)
+    for (int i = 0; i < this->service_workers.size() - 1; i++)
     {
         all_demand_staff += demand_staff[i];
     }
-    if (double(demand_staff[0]) / double(all_demand_staff) * double(this->unemployed_people > 1))
+
+    for (int i = 0; i < this->service_workers.size() - 1; i++)
     {
-        for (int i = 0; i < this->classifications_of_humans.size() - 1; i++)
-        {
-            stuff_distribution(this->classifications_of_humans[i], (unsigned int)(double(demand_staff[i]) / double(all_demand_staff) * double(this->unemployed_people)));
-        }   
+        unsigned int new_staff = (unsigned int)(double(demand_staff[i]) / double(all_demand_staff) * double(this->unemployed_people));
+        unsigned int current_staff_of_service = this->service_workers[i].size();
+        unsigned int max_staff_of_service = (unsigned int)(this->distribution_coef[i] * this->adults);
+        if (current_staff_of_service < max_staff_of_service && new_staff > 1)
+        {   
+            if (current_staff_of_service + new_staff > max_staff_of_service) 
+                new_staff = max_staff_of_service - current_staff_of_service;
+            staff_distribution(this->service_workers[i], new_staff);
+        }
+    }  
         
-    }
     //
 
 
@@ -157,15 +167,21 @@ void Population::processYear() {
     adults = 0;
     oldmen = 0;
     unemployed_people = 0;
-    unsigned int HisAge = 0;
+    unsigned int HisAge;
     unsigned int CriticalHealth = TheArk::get_instance()->getMedicalService()->getCriticalHealth();
 
 
     for (auto it = people.begin(); it != people.end();)
     {
-
+        // старение
         HisAge = (*it)->getAge();
-        //подсчёт количества населения по группам и обработка случайной смертности
+        (*it)->setAge(HisAge + 1);
+        HisAge++;
+
+        if (HisAge == this->borderChildrenToAdults()) (*it)->setTypeAsAWorker(UNEMPLOYED);
+
+
+        // подсчёт количества населения по группам и обработка случайной смертности
         if (HisAge < this->borderChildrenToAdults())
         {
             children++;
@@ -183,7 +199,7 @@ void Population::processYear() {
                 (*it)->setIsAlive(false);
                 adults--;
             }
-            if ((*it)->getTypeAsAWorker() == UNEMPLOYED)
+            if ((*it)->getTypeAsAWorker() != WORKER)
                 unemployed_people ++;
         }
         if (HisAge >= this->borderAdultsToOldmen())
@@ -196,10 +212,6 @@ void Population::processYear() {
             }
         }
        
-        //старение
-        (*it)->setAge(HisAge + 1);
-        if (HisAge + 1 == this->borderChildrenToAdults()) this->unemployed_people ++;
-
         //попанье мертвых
         if (!(*it)->isAlive())
         {
@@ -214,7 +226,7 @@ void Population::processYear() {
     }
     // конец обработки по возрасту
 
-    this->check_dead_people_is_classifications(); // см коммент в ф-ции
+    this->check_dead_people_in_services(); // см коммент в ф-ции
 
     // тут ещё безусловно нужно написать рождаемость, иначе все подохнут
     // дальше идет просмотр обучающихся и обработка тех, кто отучился. Их пихаем в службы по запросам
@@ -223,14 +235,16 @@ void Population::processYear() {
     //конец обработки
 }
 
-void Population::check_dead_people_is_classifications()
+void Population::check_dead_people_in_services()
 {
     // удаление людей с is_alive == false из всех классификаций
-    for (list<shared_ptr<Human>>& classification: this->classifications_of_humans)
+    for (list<shared_ptr<Human>>& classification: this->service_workers)
     {
         for (auto it = classification.begin(); it != classification.end();)
         {
-            if (!(*it)->isAlive()){
+            if (!(*it)->isAlive() || (*it)->getAge() >= this->borderAdultsToOldmen())
+            {
+                (*it)->setTypeAsAWorker(RETIRED);
                 auto nit = it;
                 ++it;
                 classification.erase(nit);
@@ -273,24 +287,28 @@ void Population::init(unsigned int total) {
         this->people.push_back(ptr);
     }
     // распределение рабочих по службам
-    unsigned int number_of_people_to_service = this->adults / (this->classifications_of_humans.size() - 1);
+    unsigned int number_of_people_to_service[6];
+    for (int i = 0; i < 6; i ++)
+    {
+        number_of_people_to_service[i] = (unsigned int)(this->distribution_coef[i] * this->adults);
+    }
     int number_of_service = 0;
     int counter = 0;
     for (auto human_it = this->people.begin(); human_it != this->people.end(); human_it++)
     {
-        if ((*human_it)->getAge() >= this->borderChildrenToAdults() && (*human_it)->getAge() <= this->borderAdultsToOldmen())
+        if ((*human_it)->getAge() >= this->borderChildrenToAdults() && (*human_it)->getAge() < this->borderAdultsToOldmen())
         {
-            this->classifications_of_humans[number_of_service].push_back(*human_it);
+            this->service_workers[number_of_service].push_back(*human_it);
             (*human_it)->setTypeAsAWorker(WORKER);
             counter ++;
             this->unemployed_people--;
         }
-        if (counter >= number_of_people_to_service)
+        if (counter >= number_of_people_to_service[number_of_service])
         {
             number_of_service++;
             counter = 0;
         }
-        if (number_of_service > this->classifications_of_humans.size() - 2)
+        if (number_of_service > this->service_workers.size() - 2)
             break;
     }
 }
