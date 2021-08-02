@@ -14,9 +14,12 @@
 #include <cstdlib>
 #include <iostream>
 
-Population::Population() : children(0), adults(0), oldmen(0), unemployed_people(0), distribution_coef{0.2, 0.2, 0.3, 0.05, 0.05, 0.2}
+Population::Population() : children(0), adults(0), oldmen(0), unemployed_people(0)
 {
-    
+    for (int i = 0; i < this->service_workers.size() - 1; i++)
+    {
+        distribution_coef[i] = std::stod(TheArk::get_instance()->getInterface()->getServices()[i]["Propotion_of_people"]);
+    }
 }
 
 unsigned int Population::getChildren() const {
