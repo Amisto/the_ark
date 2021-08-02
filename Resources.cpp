@@ -12,6 +12,7 @@
 #include "SocialService.h"
 #include <vector>
 #include <iostream>
+#include <algorithm>
 
 /*------------------------------------------CONSTRUCTORS----------------------------------------------*/
 
@@ -103,6 +104,11 @@ void Resources::setUsedToJunk(unsigned int current_broken, Services id)
 
 void NotOrgRes::ReturnJunk(unsigned int isReturned, Services id)
 {
+    if (isReturned > used_by_services[id])
+        isReturned = used_by_services[id];
+    if (isReturned > used)
+        isReturned = used;
+
 	junk                 += isReturned;
 	used_by_services[id] -= isReturned;
 	used                 -= isReturned;
@@ -112,6 +118,9 @@ unsigned int NotOrgRes::TakeComp(unsigned int isNeeded, Services id)
 {
 	 if ( isNeeded <= this->components / 6 or used_by_services[id] == 0)
 	 {
+	     if (isNeeded > components)
+	         isNeeded = components;
+
 		 used                 += isNeeded;
 		 components           -= isNeeded;
 		 used_by_services[id] += isNeeded;
@@ -174,26 +183,21 @@ void Resources::processYear()
 }
 
 void NotOrgRes::YearProcess()
-{	
-	if (this->consumables > 0)
-	{
-		this->consumables -= this->consumables*efficiencyConsumablesToComponents();
-	}
+{
+    auto d_consumables_components = std::min(this->consumables, (unsigned int)(this->consumables*efficiencyConsumablesToComponents()));
+    this->consumables -= d_consumables_components;
+	this->components  += d_consumables_components;
 
-	this->components    += this->consumables * efficiencyConsumablesToComponents();
-	this->consumables   += this->junk * efficiencyJunkToConsumables();
-	
-	if (this->junk > 0)
-	{
-		this->junk -= this->junk * efficiencyJunkToConsumables();
-	}
-	
-	if (this->junk > 0)
-	{
-		this->junk -= this->junk * efficiencyJunkToRefuse();
-	}
-	
-	this->refuse       += this->junk * efficiencyJunkToRefuse();
+	// TODO: if we have an excess JunkToConsumables efficiency and not enough junk we end up with no refuse.
+	// We should implement some kind of balance -  so that a part of junk goes both ways in any case.
+
+	auto d_junk_consumables = std::min(this->junk, (unsigned int)(this->junk * efficiencyJunkToConsumables()));
+    this->junk -= d_junk_consumables;
+    this->consumables += d_junk_consumables;
+
+    auto d_junk_refuse = std::min(this->junk, (unsigned int)(this->junk * efficiencyJunkToRefuse()));
+    this->junk -= d_junk_refuse;
+    this->refuse += d_junk_refuse;
 }
 
 void OrgRes::YearProcess()
