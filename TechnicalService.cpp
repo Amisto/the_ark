@@ -12,7 +12,7 @@ TechnicalService::TechnicalService()
     this->totalState = 100;
     this->engineState = 100;
     this->protectionState = 100;
-    this->serviceState = 0;
+    this->serviceState = 100;
     this->maxStaff = 1;
     this->maxResources = 200;
     this->staff = 0;
@@ -111,7 +111,8 @@ double TechnicalService::efficiencyJunkToRefuse() {
 
 void TechnicalService::setState(double s)
 {
-    this->serviceState = s;
+    this->engineState = s;
+    this->protectionState = s;
 }
 
 unsigned int TechnicalService::getResourceDemand() {
