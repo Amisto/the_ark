@@ -7,7 +7,9 @@
 #include "Population.h"
 #include "BiologicalService.h"
 #include "SocialService.h"
+#include "RandomNumberGenerator.h"
 #include <cmath>
+#include <iostream>
 
 MedicalService::MedicalService() : retirementAge(65), ChildrenDeath(0.0001), AdultDeath(0.001), OldDeath(0.01),
                                    State(100), n_staff(0), resources(1000),Junk(0), Birth(0), NeedResources(1000), HealthYearAgo(100),
@@ -18,15 +20,15 @@ void MedicalService::process_accident(AccidentSeverity as) {
 }
 
 void MedicalService::process_year() {
-    srand(time(nullptr));
-    
+
+    RandomNumberGenerator RNG;
     retirementAge = static_cast<unsigned int>(round(51 * (2 - TheArk::get_instance()->getSocialService()->getState() *
                                                               State * State / 1000000)));
     n_staff = static_cast<unsigned int>(round(0.1 * TheArk::get_instance()->getPopulation()->getTotal()));
     NeedResources = static_cast<unsigned int>(20 * TheArk::get_instance()->getPopulation()->getTotal());
     double ResourcePercent = double(resources) / NeedResources;
     double StaffPercent = double(TheArk::get_instance()->getPopulation()->getServiceStaff(Medical_Service).size()) / n_staff;
-    Birth = (rand() % 3 + 1) * TheArk::get_instance()->getPopulation()->getAdults() / 100;
+    Birth = RNG.getRandomInt(1, 3) * TheArk::get_instance()->getPopulation()->getAdults() / 100;
 
     unsigned int oll_health = 0;                                                                                        // общее здоровье всего корабля
     unsigned int HIlChild = 0, HIlAd = 0, HIlOld = 0;                                                                   // количество тяжелобольных
@@ -35,14 +37,14 @@ void MedicalService::process_year() {
         if (it->getAge() < TheArk::get_instance()->getSocialService()->borderChildrenToAdults()) {
             if ((it->getPhysicalHealth() < 60) && (it->getPhysicalHealth() > 30)) {                                     // обработка детей со здоровьем от 30 до 60
                 it->setPhysicalHealth(static_cast<unsigned int>(round(
-                        it->getPhysicalHealth() + rand() % 4 - rand() % 3 +
+                        it->getPhysicalHealth() + RNG.getRandomInt(0, 3) - RNG.getRandomInt(0, 4) +
                         (TheArk::get_instance()->getSocialService()->getState() *
                          State - 90000) / 10000)));
             }
             if (it->getPhysicalHealth() < 30) {                                                                         // обработка тяжелобольных детей со здоровьем <30
                 HIlChild++;                                                                                             // считаем количество тяжелобольных детей
                 it->setPhysicalHealth(static_cast<unsigned int>(round(
-                        it->getPhysicalHealth() + rand() % 4 - rand() % 4 +
+                        it->getPhysicalHealth() + RNG.getRandomInt(0, 3) - RNG.getRandomInt(0, 3) +
                         (TheArk::get_instance()->getSocialService()->getState() *
                          State - 90000) / 10000)));
             }
@@ -51,7 +53,7 @@ void MedicalService::process_year() {
             (it->getAge() <= borderAdultsToOldmen())) {
             if ((it->getPhysicalHealth() < 60) && (it->getPhysicalHealth() > 30)) {
                 it->setPhysicalHealth(static_cast<unsigned int>(round(
-                        it->getPhysicalHealth() + rand() % 3 - rand() % 3)));
+                        it->getPhysicalHealth() + RNG.getRandomInt(0, 2) - RNG.getRandomInt(0, 2))));
             }
             if (it->getPhysicalHealth() < 30) {
                 HIlAd++;
@@ -63,21 +65,17 @@ void MedicalService::process_year() {
         if (it->getAge() > borderAdultsToOldmen()) {
             if ((it->getPhysicalHealth() < 60) && (it->getPhysicalHealth() > 30)) {
                 it->setPhysicalHealth(static_cast<unsigned int>(round(
-                        it->getPhysicalHealth() + rand() % 2 - rand() % 4 +
+                        it->getPhysicalHealth() + RNG.getRandomInt(0, 2) - RNG.getRandomInt(0, 3) +
                         (TheArk::get_instance()->getSocialService()->getState() *
                          State - 90000) / 10000)));
             }
             if (it->getPhysicalHealth() < 30) {
                 HIlOld++;
                 it->setPhysicalHealth(static_cast<unsigned int>(round(
-                        it->getPhysicalHealth() + rand() % 2 - rand() % 5 +
+                        it->getPhysicalHealth() + RNG.getRandomInt(0, 2) - RNG.getRandomInt(0, 4) +
                         (TheArk::get_instance()->getSocialService()->getState() *
                          State - 90000) / 10000)));
             }
-            it->setPhysicalHealth(static_cast<unsigned int>(
-                    round(it->getPhysicalHealth() + rand() % 3 - rand() % 4 +
-                    (TheArk::get_instance()->getSocialService()->getState() *
-                    State - 90000) / 10000)));
             if (it->getPhysicalHealth() > 100) it->setPhysicalHealth(100);
         }
     }
@@ -109,14 +107,8 @@ void MedicalService::process_year() {
 }
 
 void MedicalService::setState(double s) {
-    n_staff = static_cast<unsigned int>(round(0.1 * TheArk::get_instance()->getPopulation()->getTotal()));
-    NeedResources = static_cast<unsigned int>(20 * TheArk::get_instance()->getPopulation()->getTotal());
-    if (s != double(100)) {
-        auto delta = static_cast<unsigned int>(round((100 - s)));
-        for (auto &it : TheArk::get_instance()->getPopulation()->getPeople())
-            it->setPhysicalHealth((it->getPhysicalHealth() - delta) * (95 + rand() % 10) / 100);
-    }
-    State = s;
+    for (auto &person: TheArk::get_instance()->getPopulation()->getPeople())
+        person->setPhysicalHealth((unsigned int)s);
 }
 
 unsigned int MedicalService::getCriticalHealth() const
