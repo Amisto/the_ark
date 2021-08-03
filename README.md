@@ -39,6 +39,14 @@ TheArk::get_instance()->getInterface()->getServices()[Services::Social_Service][
 
 Если вы хотите добавить параметры в Population/Resources, пишите issue, добавим.
 
+## Использование случайных чисел
+Как вызвать случайное число в своём коде:
+- Если нужно случайное целое:
+  TheArk::get_instance()->getRandomGenerator()->getRandomInt(int min, int max)
+- Если нужен случайный float:
+  TheArk::get_instance()->getRandomGenerator()->getRandomFloat(float min, float max)
+- Если нужен случайный double:
+  TheArk::get_instance()->getRandomGenerator()->getRandomDouble(double min, double max)  
 
 ## Кодстайл
 - Между знаками сложения, умножения, деления и т.д. ставим пробелы
