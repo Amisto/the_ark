@@ -69,13 +69,13 @@ void TheArk::init()
 
     years_total = std::stoi(interface->getGeneral()["Years"]);
 
+    population->init(std::stoi(interface->getGeneral()["Population"]));
+    resources->init(std::stoi(interface->getGeneral()["Resources"]));
+
     for (int i = 0; i < 6; ++i)
     {
         services[i]->setState(std::stoi(interface->getServices()[i]["State"]));
     }
-
-    population->init(std::stoi(interface->getGeneral()["Population"]));
-    resources->init(std::stoi(interface->getGeneral()["Resources"]));
 }
 
 unsigned int TheArk::getYearsTotal() const {
