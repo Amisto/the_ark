@@ -5,41 +5,74 @@
 #ifndef THE_ARK_TECHNICALSERVICE_H
 #define THE_ARK_TECHNICALSERVICE_H
 
+#include <vector>
 #include "Service.h"
 #include "Human.h"
-#include <vector>
 #include "TheArk.h"
+#include "RandomNumberGenerator.h"
 
 class TechnicalService : public Service {
+
 private:
-    double totalState;                // общее состояние корабля
-    double engineState;               // состояние двигателя
-    double protectionState;           // состояние защиты корабля
-    double serviceState;           // состояние службы
-    unsigned int resources;        // количество нужных ресурсов в процентах
-    unsigned int staff;
-    unsigned int maxStaff;        // желательное количество людей
-    unsigned int maxResources;     // желательное количество ресурсов
+
+    // FIELDS //
+    
+    const int CRITICAL_STATE = 15;
+    const double PROPOTION_OF_PEOPLE = 0.2;
+
+    double totalState;                // total state of the ark
+    double engineState;               // state of engine
+    double protectionState;           // state of protection of the ark
+    double serviceState;              // 
+    unsigned int resources;           // current number of resources
+    unsigned int staff;               // current number of staff
+    unsigned int maxStaff;            // current demand staff
+    unsigned int maxResources;        // current demand resources
+    RandomNumberGenerator random;     // 
+
+
+    // METHODS //
+
+    void kill(unsigned int victims);           // kills -victims- people if it is needed
+
 
 public:
+
     TechnicalService();
+    
+    // GETTERS //
+    
+    virtual unsigned int getResourceDemand() override;           // returns number of demand resources at current year
 
-    void process_accident(AccidentSeverity as) override;    // каждая служба должна уметь в своих терминах обработать переданную ей аварию
-    void process_year() override;                        // если у службы есть какая-то личная жизнь, она может заниматься ей тут
-    double getState() override;                             // каждая служба должна уметь вернуть свое состояние в процентах, посчитав его в своих терминах
-    void setState(double s) override;                       // функция для инициализации, каждая служба должна уметь получить состояние в процентах и пересчитать  его в своих терминах
-    void emergencyRepair ();
-    void kill(int victims);                         // убивает людей
+    virtual unsigned int getResourcePriority();                  // returns priority of resources
 
-    double efficiencyConsumablesToComponents();     // как быстро расходники перерабатываются в компоненты
-    double efficiencyJunkToConsumables();           // как быстро хлам перерабатываются в расходники
-    double efficiencyJunkToRefuse();                // как быстро хлам перерабатываются в отходы
+    virtual unsigned int getStaffDemand() override;              // returns number of demand people
 
-    virtual unsigned int getResourceDemand() override;           // сколько ресурсов требуется
-    virtual unsigned int returnJunk() override;		// сколько мусора возвоащается
-    virtual unsigned int getResourcePriority();         // с каким приоритетом служба будет требовать ресурсы
-    virtual unsigned int getStaffDemand() override;              // сколько людей требуется
-    virtual unsigned int getStaffPriority();            // с каким приоритетом слуюба будет требовать людей
+    virtual unsigned int getStaffPriority();                     // returns priority of people
+    
+    double getState() override;                                  // returns State of theh service  
+
+
+    // SETTERS //
+
+    void setState(double s) override; 
+
+    
+    // OTHER //
+
+    void process_accident(AccidentSeverity as) override;    // processing accidents
+
+    void process_year() override;                           // processing events during the year
+
+    void emergencyRepair();                                 // emergency repair of the ark if state is low
+
+    double efficiencyConsumablesToComponents();     // speed of recycling Consumables-->Components
+
+    double efficiencyJunkToConsumables();           // speed of recycling Junk-->Consumables
+
+    double efficiencyJunkToRefuse();                // speed of recycling Junk-->Refuse
+
+    virtual unsigned int returnJunk() override;		// returns Junk at current year
 
 };
 
