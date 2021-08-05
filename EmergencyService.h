@@ -12,15 +12,13 @@
 #include "Enums.cpp"
 #include "TheArk.h"
 #include "Interface.h"
-//#include "MedicalService.h"
-//#include "NavigationService.h"
-//#include "BiologicalService.h"
-//#include "SocialService.h"
-//#include "TechnicalService.h"
-//#include "Human.h"
-//#include "Population.h"
 #include "Resources.h"
 #include "RandomNumberGenerator.h"
+
+using std::array;
+using std::setw;
+using std::cout;
+using std::endl;
 
 
 class EmergencyService : public Service
@@ -29,14 +27,29 @@ private:
     double state;
 
     unsigned int staff; // Current staff amount
-    unsigned int max_staff; // Staff has to be <= this value
-    unsigned int Junk;
+    unsigned int max_staff;
 
     unsigned int resources;
     unsigned int max_resources;
+    unsigned int Junk;
+
+    // Coefficients for probabilities of accidents depending on
+    // service's state
+    array< array<double, 3>, 6> distribution_coefficients;
+
+    // Accidents' output
+    std::ofstream emergency_log;
+    const unsigned short CELL_WIDTH = 11;
+    const unsigned short CELL_WIDTH_S = 20;
+
+    // From 0 to 1, controls the impact of this Service on accident's severity
+    const double EFFECTIVE_STATE_RATIO = 0.4; // Higher ratio — lower dependence on Emergency service's state
+
+    void create_accident(Service* s);
 
 public:
     EmergencyService();
+    ~EmergencyService() override;
 
     void process_accident(AccidentSeverity as) override;    // каждая служба должна уметь в своих терминах обработать переданную ей аварию
     void process_year() override;                   // если у службы есть какая-то личная жизнь, она может заниматься ей тут
@@ -45,10 +58,6 @@ public:
     unsigned int getStaffDemand() override;
     unsigned int getResourceDemand() override;
     unsigned int returnJunk() override;
-
-    double damage_factor(Service* s);
-    void determine_severity(Service* s);
-    void create_accident(Service* s);
 
     void changeResources(int delta);
     void killStaff(int delta); // Has protection from delta > current Staff value

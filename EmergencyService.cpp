@@ -4,55 +4,56 @@
 #include "EmergencyService.h"
 
 EmergencyService::EmergencyService(): state(0), staff(0), resources(0), max_resources(0), Junk(0) {
-    max_staff = std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / 10;
-}
-
-// From 1 to 100, low Emergency Service's state increases the value and
-// the damage from accidents
-double EmergencyService::damage_factor(Service* s)
-{
-    /*if (getState() + s->getState() != 0)
-        return 100.f / (0.1 * getState() + 0.9 * s->getState());
-    else
-        return 100.f;*/
-    return 4000.f / ((0.5 * getState() + 0.5 * s->getState()) + 30) - 30;
+    max_staff = std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Population"])
+            * std::stod(TheArk::get_instance()->getInterface()->getServices()
+            [Emergency_Service]["Propotion_of_people"]);
+    std::ifstream inp;
+    inp.open("../EmergencyService_setup/output.txt");
+    for(auto i = 0; i < 6; i++) {
+        for(auto k = 0; k < 3; k++) {
+            inp >> distribution_coefficients[i][k];
+        }
+    }
+    inp.close();
+    emergency_log.open("../Emergency_Log.txt");
+    emergency_log << setw(CELL_WIDTH + 1) << "Year,"
+    << setw(CELL_WIDTH_S + 1) << "Service,"
+    << setw(CELL_WIDTH + 1) << "Severity," << endl;
 }
 
 // Generation of accidents
 // Low service's state increases the probability of accident
 void EmergencyService::create_accident(Service* s)
 {
-    double k = TheArk::get_instance()->getRandomGenerator()->getRandomInt(20, 119)
-                    * (1 - pow(3, -0.03 * s->getState()));
-    if (k > 20 && k < 100)
-        this->determine_severity(s);
-    else
-        return;
+    double effective_state = EFFECTIVE_STATE_RATIO * this->state + (1.f - EFFECTIVE_STATE_RATIO) * s->getState(); // Emergency
+    // usually helps to fix the accident, so effective state is combined
+
+    std::array <double, 7> probabilities {0}; // For each severity and one for their sum
+    for (auto i = 0; i < 6; i++) {
+        probabilities[i] = distribution_coefficients[i][0] *
+                std::exp( (-1.f) * distribution_coefficients[i][1] * pow(effective_state, 2)) +
+                distribution_coefficients[i][2]; // y = a * exp(-b * x^2) + c
+        probabilities[6] += probabilities[i];
+    }
+
+    auto rand_number = TheArk::get_instance()->getRandomGenerator()->getRandomDouble(0, 1);
+
+    if (rand_number < probabilities[6]) {
+        unsigned short resulting_damage = 0;
+
+        while (rand_number > std::accumulate(probabilities.begin(), probabilities.begin() + resulting_damage, 0.l))
+            resulting_damage++;
+        resulting_damage--;
+
+        s->process_accident(static_cast<AccidentSeverity>(resulting_damage));
+        string service_name = typeid(*s).name();
+        service_name.erase(0, 2);
+
+        emergency_log << setw(CELL_WIDTH) << TheArk::get_instance()->getCurrentYear() << ","
+        << setw(CELL_WIDTH_S) << service_name << "," << setw(CELL_WIDTH)
+        << static_cast<AccidentSeverity>(resulting_damage) << "," << endl;
+    }
 }
-
-
-void EmergencyService::determine_severity(Service* s)
-{
-    //std::cout << TheArk::get_instance()->getCurrentYear() << " THROWN " << typeid(*s).name() << " DF " << damage_factor(s) << std::endl;
-    if (damage_factor(s) > 0 && damage_factor(s) < 11)
-        s->process_accident(NEGLIGIBLE);
-
-    else if (this->damage_factor(s) > 10 && this->damage_factor(s) < 31)
-        s->process_accident(LIGHT);
-
-    else if (this->damage_factor(s) > 30 && this->damage_factor(s) < 51)
-        s->process_accident(MEDIUM);
-
-    else if (this->damage_factor(s) > 50 && this->damage_factor(s) < 71)
-        s->process_accident(SEVERE);
-
-    else if (this->damage_factor(s) > 70 && this->damage_factor(s) < 91)
-        s->process_accident(DISASTROUS);
-
-    else if (this->damage_factor(s) > 90 && this->damage_factor(s) < 101)
-        s->process_accident(CATASTROPHIC);
-}
-
 
 
 void EmergencyService:: process_year()
@@ -66,8 +67,8 @@ void EmergencyService:: process_year()
     setState(staff * 100.f / max_staff);
     if(getState() > 100)
         setState(100);
-    // Creating accidents
 
+    // Creating accidents
     for (auto s : TheArk::get_instance()->getServices())
     {
         this->create_accident(s);
@@ -78,9 +79,9 @@ void EmergencyService:: process_year()
 // Damaging this service depending on the severity
 void EmergencyService::process_accident(AccidentSeverity as)
 {
-    this->changeResources(-(12 * as + 10));
-    this->killStaff(4 * as + 10);
-    this->setState(100 - (as * 5.1 + 10));
+    //changeResources(-(12 * as + 10));
+    killStaff((0.0243 * pow((as + 1), 2) + 0.0257) * max_staff);
+    //setState(100 - (as * 5.1 + 10));
 }
 
 double EmergencyService::getState() {
@@ -145,6 +146,10 @@ void EmergencyService::killStaff(int delta)
 unsigned int EmergencyService::getStaffDemand()
 {
     return this->max_staff - this->staff;
+}
+
+EmergencyService::~EmergencyService() {
+    emergency_log.close();
 }
 
 //----------------------------------------

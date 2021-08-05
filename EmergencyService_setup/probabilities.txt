@@ -1,0 +1,23 @@
+Service with 100% state, 1 time per x years:
+NEGLIGIBLE == 8;
+LIGHT == 12;
+MEDIUM == 30;
+SEVERE == 50
+DISASTROUS == 75;
+CATASTROPHIC == 100;
+
+Service with 50% state, 1 time per x years:
+NEGLIGIBLE == 5;
+LIGHT == 9;
+MEDIUM == 20;
+SEVERE == 28;
+DISASTROUS == 38;
+CATASTROPHIC == 50;
+
+Service with 10% state, 1 time per x years:
+NEGLIGIBLE == 3;
+LIGHT == 5;
+MEDIUM == 7.8;
+SEVERE == 10.5;
+DISASTROUS == 13;
+CATASTROPHIC == 16.
