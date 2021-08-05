@@ -28,7 +28,7 @@ void MedicalService::process_year() {
     NeedResources = static_cast<unsigned int>(20 * TheArk::get_instance()->getPopulation()->getTotal());
     double ResourcePercent = double(resources) / NeedResources;
     double StaffPercent = double(TheArk::get_instance()->getPopulation()->getServiceStaff(Medical_Service).size()) / n_staff;
-    Birth = RNG.getRandomInt(1, 3) * TheArk::get_instance()->getPopulation()->getAdults() / 100;
+    Birth = RNG.getRandomInt(0, 4) * TheArk::get_instance()->getPopulation()->getAdults() / 100;
 
     unsigned int oll_health = 0;                                                                                        // общее здоровье всего корабля
     unsigned int HIlChild = 0, HIlAd = 0, HIlOld = 0;                                                                   // количество тяжелобольных
