@@ -39,7 +39,6 @@ void NavigationService::killStaff(unsigned int victims)
 // CATASTROPHIC — lost almost everything
 void NavigationService::process_accident(AccidentSeverity as)
 {
-    return; // DISABLED UNTIL EMERGENCY IS FIXED
     unsigned killed_staff = 0;
     switch (as)
     {
@@ -47,20 +46,18 @@ void NavigationService::process_accident(AccidentSeverity as)
             stage = MANEUVER;
             time_until_next_stage = 5;
             next_stage = STABLE;
-            TheArk::get_instance()->setYearsTotal(
-                    TheArk::get_instance()->getYearsTotal() + time_until_next_stage);
+            years_delta += time_until_next_stage;
 
         case LIGHT:
             killed_staff = staff / 15;
             stage = MANEUVER;
             time_until_next_stage = 10;
             next_stage = STABLE;
-            TheArk::get_instance()->setYearsTotal(
-                    TheArk::get_instance()->getYearsTotal() + time_until_next_stage);
+            years_delta += time_until_next_stage;
 
         case MEDIUM:
             killed_staff = staff / 10;
-            devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 5)]->changeState(
+            devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
                     TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-10.f, -5.f));
 
         case SEVERE:
@@ -68,23 +65,21 @@ void NavigationService::process_accident(AccidentSeverity as)
             stage = MANEUVER;
             time_until_next_stage = 20;
             next_stage = STABLE;
-            TheArk::get_instance()->setYearsTotal(
-                    TheArk::get_instance()->getYearsTotal() + time_until_next_stage);
-            devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 5)]->changeState(
+            years_delta += time_until_next_stage;
+            devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
                     TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-18.f, -10.f));
 
         case DISASTROUS:
             killed_staff = staff / 2;
             for (auto i = 0; i < 4; i++) {
-                devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 5)]->changeState(
+                devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
                         TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-60.f, -30.f));
             }
             if (TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 2) == 1) {
                 stage = MANEUVER;
                 time_until_next_stage = 20;
                 next_stage = STABLE;
-                TheArk::get_instance()->setYearsTotal(
-                        TheArk::get_instance()->getYearsTotal() + time_until_next_stage);
+                years_delta += time_until_next_stage;
             }
 
         case CATASTROPHIC:
@@ -96,8 +91,7 @@ void NavigationService::process_accident(AccidentSeverity as)
             stage = MANEUVER;
             time_until_next_stage = 50;
             next_stage = STABLE;
-            TheArk::get_instance()->setYearsTotal(
-                    TheArk::get_instance()->getYearsTotal() + time_until_next_stage);
+            years_delta += time_until_next_stage;
     }
 
     killStaff(killed_staff);
@@ -133,23 +127,25 @@ void NavigationService::process_year()
     if (years_delta > 3) {
         TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getYearsTotal() + 3);
         years_delta -= 3;
-
-        if (TheArk::get_instance()->getYearsTotal() >
-            LOST_THE_WAY_WARNING
-            * std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Years"])) {
-                cout << "We've been travelling " << LOST_THE_WAY_WARNING << " times longer than estimated" << endl
-                << "Probably we are lost forever" << endl
-                << "Would you like to continue? (y/n)" << endl;
-                auto h = std::cin.get();
-                if (h == 'n')
-                    TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getCurrentYear() + 1);
-                else
-                    LOST_THE_WAY_WARNING += 2;
-        }
     }
     else if (years_delta < -3) {
         TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getYearsTotal() - 3);
         years_delta -= -3;
+    }
+
+    if (TheArk::get_instance()->getCurrentYear() >
+    LOST_THE_WAY_WARNING
+    * std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Years"])) {
+        cout << "We've been travelling " << LOST_THE_WAY_WARNING << " times longer than estimated" << endl
+        << "Probably we are lost forever" << endl
+        << "Would you like to continue? (y/n)" << endl;
+        cout << TheArk::get_instance()->getCurrentYear() << endl;
+        string h;
+        std::cin >> h;
+        if (h == "n")
+            TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getCurrentYear() - 1);
+        else
+            LOST_THE_WAY_WARNING += 2;
     }
     //
 

@@ -42,7 +42,7 @@ private:
     unsigned DEFAULT_STAFF;
 
     // Shows how effective repairing is for a full team
-    const unsigned short REPAIR_PERCENT_PER_YEAR = 10;
+    const unsigned short REPAIR_PERCENT_PER_YEAR = 20;
 
     //unsigned int need_resources;
 
