@@ -5,6 +5,7 @@
 #include "TechnicalService.h"
 #include "TheArk.h"
 #include <cstdlib>
+#include <iostream>
 #include <ctime>
 
 TechnicalService::TechnicalService() 
@@ -14,10 +15,10 @@ TechnicalService::TechnicalService()
     this->protectionState = 100;
     this->serviceState    = 100;
     this->maxStaff        = 1;
-    this->maxResources    = 200;
+    this->maxResources    = 50000;
     this->staff           = 0;
-    this->resources       = 100;
-
+    this->resources       = 50000;
+    this->junk            = 0;
 }
 
 // идет "корректировка" состояния корабля в зависимости от степени аварии
@@ -57,12 +58,11 @@ void TechnicalService::emergencyRepair()
     // calculating quantity
     double repair = double(this->staff) / this->maxStaff * double(this->resources) / this->maxResources * 50;
 
-    this->protectionState += repair;
-
-    if (this->resources - int(repair / 100) * maxResources > 0)
+    if (this->resources > int(repair * RESOURCES_PER_PERCENT))
     {
         this->protectionState += repair;
-        this->resources -= int(repair / 100) * maxResources;
+        this->resources -= int(repair * RESOURCES_PER_PERCENT);
+        this->junk += AMOUNT_OF_JUNK_AFTER_COMPONENTS * int(repair * RESOURCES_PER_PERCENT);
     }
 
     // убить много людей, так как экстренная и масштабная починка
@@ -74,7 +74,7 @@ void TechnicalService::process_year()
     // обновление полей
     this->staff = TheArk::get_instance()->getPopulation()->getServiceStaff(Technical_Service).size();
     this->totalState = 0.5 * (0.8 * this->protectionState + 1.2 * this->engineState);
-    this->maxStaff = PROPOTION_OF_PEOPLE * TheArk::get_instance()->getPopulation()->getAdults();
+    this->maxStaff = PROPOTION_OF_PEOPLE * TheArk::get_instance()->getPopulation()->getAdults();    
 
     // обновление состояния службы
     if (this->totalState > 100)
@@ -85,29 +85,31 @@ void TechnicalService::process_year()
 
     // ежегодная починка корабля
     double repair = double(this->staff) / this->maxStaff * double(this->resources) / this->maxResources * 10;
-    if (this->protectionState < 90 && this->resources - int(repair / 100) * this->maxResources > 0)
+    if (this->protectionState < 90 && this->resources > int(repair * RESOURCES_PER_PERCENT))
     {
         this->protectionState += repair;
-        this->resources -= int(repair / 100) * this->maxResources;
+        this->resources -= int(repair * RESOURCES_PER_PERCENT);
+        this->junk += AMOUNT_OF_JUNK_AFTER_COMPONENTS * int(repair * RESOURCES_PER_PERCENT);
         // можно убить пару людей в зависимости от масштаба ремонта
     }
-    if (this->protectionState > 60 && this->engineState < 90 && this->resources - int(repair / 100) * this->maxResources > 0)
+    if (this->protectionState > 60 && this->engineState < 90 && this->resources > int(repair * RESOURCES_PER_PERCENT))
     {
         this->engineState += repair;
-        this->resources -= int(repair / 100) * this->maxResources;
+        this->resources -= int(repair * RESOURCES_PER_PERCENT);
+        this->junk += AMOUNT_OF_JUNK_AFTER_COMPONENTS * int(repair * RESOURCES_PER_PERCENT);
     }
 
     // износ корабля
-    this->protectionState -= random.getRandomDouble(0.1, 1);
+    this->protectionState -= random.getRandomDouble(1.0, 1.5);
     this->engineState     -= (100 - this->protectionState) * random.getRandomDouble(0.01, 0.1);
 }
 
 double TechnicalService::efficiencyConsumablesToComponents() {
-    return double(this->staff) / this->maxStaff * 0.9;
+    return double(this->staff) / this->maxStaff * 0.5;
 }
 
 double TechnicalService::efficiencyJunkToConsumables() {
-    return double(this->staff) / this->maxStaff * 0.7;
+    return double(this->staff) / this->maxStaff * 0.3;
 }
 
 double TechnicalService::efficiencyJunkToRefuse() {
@@ -125,7 +127,9 @@ unsigned int TechnicalService::getResourceDemand() {
 }
 
 unsigned int TechnicalService::returnJunk() {
-    return this->maxResources - this->resources;
+    unsigned int tmp = this->junk;
+    this->junk = 0;
+    return tmp;
 }
 
 unsigned int TechnicalService::getResourcePriority() {

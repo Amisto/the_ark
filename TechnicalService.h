@@ -19,6 +19,8 @@ private:
     
     const int CRITICAL_STATE = 15;
     const double PROPOTION_OF_PEOPLE = 0.2;
+    const double AMOUNT_OF_JUNK_AFTER_COMPONENTS = 1;
+    const int RESOURCES_PER_PERCENT = 100;
 
     double totalState;                // total state of the ark
     double engineState;               // state of engine
@@ -28,6 +30,7 @@ private:
     unsigned int staff;               // current number of staff
     unsigned int maxStaff;            // current demand staff
     unsigned int maxResources;        // current demand resources
+    unsigned int junk;                // junk resources to be returned after the year
     RandomNumberGenerator random;     // 
 
 
@@ -66,13 +69,13 @@ public:
 
     void emergencyRepair();                                 // emergency repair of the ark if state is low
 
-    double efficiencyConsumablesToComponents();     // speed of recycling Consumables-->Components
+    double efficiencyConsumablesToComponents();             // speed of recycling Consumables-->Components
 
-    double efficiencyJunkToConsumables();           // speed of recycling Junk-->Consumables
+    double efficiencyJunkToConsumables();                   // speed of recycling Junk-->Consumables
 
-    double efficiencyJunkToRefuse();                // speed of recycling Junk-->Refuse
+    double efficiencyJunkToRefuse();                        // speed of recycling Junk-->Refuse
 
-    virtual unsigned int returnJunk() override;		// returns Junk at current year
+    virtual unsigned int returnJunk() override;		        // returns Junk at current year
 
 };
 
