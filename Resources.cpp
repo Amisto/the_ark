@@ -26,9 +26,13 @@ OrgRes::OrgRes(unsigned int total) : Resource(total)
 
 }
 
-Resource::Resource(unsigned int total) : components(0.5 * total), consumables(0.5 * total), used(0), junk(0), refuse(0)
-{
-
+Resource::Resource(unsigned int total)
+{	
+	this->components = std::stod(TheArk::get_instance()->getInterface()->getGeneral()["Proportion_of_components"]) * total;
+	this->consumables = (1 -std::stod(TheArk::get_instance()->getInterface()->getGeneral()["Proportion_of_components"])) * total;
+	this->used = 0; 
+	this->junk = 0; 
+	this->refuse = 0;
 }
 
 Resources::Resources()
@@ -84,7 +88,7 @@ unsigned int Resources::getRefuse() const
 	return this->org_res->getRefuse() + this->not_org_res->getRefuse();
 }
 
-unsigned int Resources::getUsed() const
+unsigned int  Resources::getUsed() const
 {
 	return this->org_res->getUsed() + this->not_org_res->getUsed();
 }
@@ -156,10 +160,16 @@ double NotOrgRes::efficiencyJunkToRefuse() const
 
 void Resources::init(unsigned int total) 
 {
-	this->not_org_res = std::make_unique<NotOrgRes>(0.5 * total);
-	this->org_res     = std::make_unique<OrgRes>(0.5 * total);
-	
-
+	double not_org_prop = std::stod(TheArk::get_instance()->getInterface()->getGeneral()["Proportion_of_not_organic_resources"]); // !!!!!!!!
+	if (not_org_prop < 1)
+	{
+		this->not_org_res = std::make_unique<NotOrgRes>(not_org_prop * total);
+		this->org_res     = std::make_unique<OrgRes>( (1 - not_org_prop) * total);
+	}
+	else
+	{
+		std::cout<<"proportion of not org resources cannot be more than 1"<<std::endl;
+	}
 }
 
 /*-----------------------------------------YEAR_PROCESS----------------------------------------------*/
