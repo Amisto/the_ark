@@ -93,6 +93,15 @@ unsigned int  Resources::getUsed() const
 	return this->org_res->getUsed() + this->not_org_res->getUsed();
 }
 
+unsigned int NotOrgRes::getUsedByService(Services id) const
+{
+	return this->used_by_services[id];
+}
+
+unsigned int Resources::getUsedByService(Services id) const
+{
+	return this->not_org_res->getUsedByService(id);
+}
 
 /*---------------------------------------------SETTERS-----------------------------------------------*/
 

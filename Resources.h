@@ -44,6 +44,8 @@ public:
 	double efficiencyConsumablesToComponents() const;          		// processing consumables to components // technical service
 	double efficiencyJunkToConsumables() const;                		// recycling junk to consumablse // technical service
 	double efficiencyJunkToRefuse() const;                     		// recycling junk to refuse // technical service
+
+	unsigned int getUsedByService(Services id) const;
 };
 
 class Resources {
@@ -62,6 +64,8 @@ public:
 	unsigned int getUsed() const;
 	unsigned int getJunk() const;
 	unsigned int getRefuse() const;
+
+	unsigned int getUsedByService(Services id) const;
 	
 	void init(unsigned int total);
 	void processYear(); 								// the process of year's changing of all resources' categories
