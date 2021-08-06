@@ -10,6 +10,7 @@
 #include "Human.h"
 #include "TheArk.h"
 #include "RandomNumberGenerator.h"
+#include "Interface.h"
 
 class TechnicalService : public Service {
 
@@ -17,10 +18,10 @@ private:
 
     // FIELDS //
     
-    const int CRITICAL_STATE = 15;
-    const double PROPOTION_OF_PEOPLE = 0.2;
-    const double AMOUNT_OF_JUNK_AFTER_COMPONENTS = 1;
-    const int RESOURCES_PER_PERCENT = 100;
+    const int CRITICAL_STATE = std::stod(TheArk::get_instance()->getInterface()->getServices()[Technical_Service]["Critical_state"]);
+    const double PROPOTION_OF_PEOPLE = std::stod(TheArk::get_instance()->getInterface()->getServices()[Technical_Service]["Propotion_of_people"]);
+    const double AMOUNT_OF_JUNK_AFTER_COMPONENTS = std::stod(TheArk::get_instance()->getInterface()->getServices()[Technical_Service]["Amount_of_junk_after_components"]);
+    const int RESOURCES_PER_PERCENT = std::stod(TheArk::get_instance()->getInterface()->getServices()[Technical_Service]["Resources_per_percent"]);
 
     double totalState;                // total state of the ark
     double engineState;               // state of engine
