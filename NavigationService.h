@@ -90,7 +90,7 @@ public:
     [[nodiscard]] unsigned int getResourceDemand() override;
     unsigned int returnJunk() override;
 
-    // Kills some of staff. Victims HAS to be less than staff!
+    // Kills some staff members. Var victims HAS to be less than staff!
     void killStaff(unsigned victims);
 
     [[nodiscard]] bool isChangedEfficiency() const;

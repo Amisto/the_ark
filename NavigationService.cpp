@@ -32,8 +32,8 @@ void NavigationService::killStaff(unsigned int victims)
 }
 
 // NEGLIGIBLE — lost the way for some time
-// LIGHT — lost some staff and some time
-// MEDIUM — lost some staff and some device's health
+// LIGHT — lost some staff members and some time
+// MEDIUM — lost some staff members and some device's health
 // SEVERE — lost staff, devices' health and time
 // DISASTROUS — lost a lot of staff, devices and probably time
 // CATASTROPHIC — lost almost everything
@@ -47,6 +47,7 @@ void NavigationService::process_accident(AccidentSeverity as)
             time_until_next_stage = 5;
             next_stage = STABLE;
             years_delta += time_until_next_stage;
+            break;
 
         case LIGHT:
             killed_staff = staff / 15;
@@ -54,11 +55,13 @@ void NavigationService::process_accident(AccidentSeverity as)
             time_until_next_stage = 10;
             next_stage = STABLE;
             years_delta += time_until_next_stage;
+            break;
 
         case MEDIUM:
             killed_staff = staff / 10;
             devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
                     TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-10.f, -5.f));
+            break;
 
         case SEVERE:
             killed_staff = staff / 5;
@@ -68,6 +71,7 @@ void NavigationService::process_accident(AccidentSeverity as)
             years_delta += time_until_next_stage;
             devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
                     TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-18.f, -10.f));
+            break;
 
         case DISASTROUS:
             killed_staff = staff / 2;
@@ -81,9 +85,10 @@ void NavigationService::process_accident(AccidentSeverity as)
                 next_stage = STABLE;
                 years_delta += time_until_next_stage;
             }
+            break;
 
         case CATASTROPHIC:
-            killed_staff = staff * 0.9;
+            killed_staff = staff * 9 / 10;
             for (auto i = 0; i < 6; i++) {
                 devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
                         TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-90.f, -60.f));
@@ -92,6 +97,7 @@ void NavigationService::process_accident(AccidentSeverity as)
             time_until_next_stage = 50;
             next_stage = STABLE;
             years_delta += time_until_next_stage;
+            break;
     }
 
     killStaff(killed_staff);
@@ -139,7 +145,6 @@ void NavigationService::process_year()
         cout << "We've been travelling " << LOST_THE_WAY_WARNING << " times longer than estimated" << endl
         << "Probably we are lost forever" << endl
         << "Would you like to continue? (y/n)" << endl;
-        cout << TheArk::get_instance()->getCurrentYear() << endl;
         string h;
         std::cin >> h;
         if (h == "n")
@@ -174,7 +179,7 @@ void NavigationService::process_year()
             setChangedEfficiency(true);
             double x;
             if (staff < MAX_STAFF_RATIO * DEFAULT_STAFF)
-                x = (staff * 1.f) / DEFAULT_STAFF;
+                x = (staff * 1.0) / DEFAULT_STAFF;
             else
                 x = MAX_STAFF_RATIO;
             double current_max_points = MAX_UPGRADE_POINTS * pow((x - 1) / (MAX_STAFF_RATIO - 1), 0.1);

@@ -23,9 +23,10 @@ unsigned short NavigationBlock::getDefaultEfficiency(NavigationDevices type)
             return 5;
 
         case NavDevAMOUNT:
+        default:
             std::cerr << "NAVBLOCK ERROR_1" << endl;
+            return -1;
     }
-    return -1;
 }
 
 NavigationBlock::NavigationBlock(NavigationDevices type)
