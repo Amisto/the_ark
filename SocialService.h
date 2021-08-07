@@ -11,7 +11,6 @@
 #include "Service.h"
 #include "Population.h"
 #include <queue>
-#include <stdlib.h>
 
 using std::priority_queue;
 
