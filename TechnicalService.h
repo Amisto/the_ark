@@ -18,10 +18,10 @@ private:
 
     // FIELDS //
     
-    const int CRITICAL_STATE = std::stod(TheArk::get_instance()->getInterface()->getServices()[Technical_Service]["Critical_state"]);
+    const int CRITICAL_STATE = std::stoi(TheArk::get_instance()->getInterface()->getServices()[Technical_Service]["Critical_state"]);
     const double PROPOTION_OF_PEOPLE = std::stod(TheArk::get_instance()->getInterface()->getServices()[Technical_Service]["Propotion_of_people"]);
     const double AMOUNT_OF_JUNK_AFTER_COMPONENTS = std::stod(TheArk::get_instance()->getInterface()->getServices()[Technical_Service]["Amount_of_junk_after_components"]);
-    const int RESOURCES_PER_PERCENT = std::stod(TheArk::get_instance()->getInterface()->getServices()[Technical_Service]["Resources_per_percent"]);
+    const int RESOURCES_PER_PERCENT = std::stoi(TheArk::get_instance()->getInterface()->getServices()[Technical_Service]["Resources_per_percent"]);
 
     double totalState;                // total state of the ark
     double engineState;               // state of engine
@@ -32,6 +32,7 @@ private:
     unsigned int maxStaff;            // current demand staff
     unsigned int maxResources;        // current demand resources
     unsigned int junk;                // junk resources to be returned after the year
+    unsigned int demand_resources;    //
     RandomNumberGenerator random;     // 
 
 
