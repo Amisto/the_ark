@@ -107,8 +107,7 @@ void TechnicalService::process_year()
 
     // износ корабля
     this->protectionState -= random.getRandomDouble(1.0, 1.5);
-    this->engineState     -= (100 - this->protectionState) * random.getRandomDouble(0.01, 0.1);
-    std::cout << demand_resources << " || " << resources << " || " << junk << "\n";  
+    this->engineState     -= (100 - this->protectionState) * random.getRandomDouble(0.01, 0.1); 
 }
 
 double TechnicalService::efficiencyConsumablesToComponents() {
