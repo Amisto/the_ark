@@ -22,6 +22,7 @@ Population::Population() : children(0), adults(0), oldmen(0), unemployed_people(
     }
 }
 
+// GETTERS //
 unsigned int Population::getChildren() const {
     return this->children;
 }
@@ -42,6 +43,23 @@ unsigned int Population::getUnemployedPeople() const {
     return this->unemployed_people;
 }
 
+list<shared_ptr<Human>>& Population::getPeople()
+{
+    return this->people;
+}
+
+array<list<shared_ptr<Human>>, 7>& Population::getAllClassification()
+{
+     return this->service_workers;
+}
+
+list<shared_ptr<Human>>& Population::getServiceStaff(Services service)
+{
+     return this->service_workers[service];
+}
+
+
+// BORDERS //
 unsigned int Population::borderChildrenToAdults()
 {
     return TheArk::get_instance()->getSocialService()->borderChildrenToAdults();
@@ -52,32 +70,13 @@ unsigned int Population::borderAdultsToOldmen()
     return TheArk::get_instance()->getMedicalService()->borderAdultsToOldmen();
 }
 
-unsigned int Population::number_staff(Services service)
-{
-    switch(service){
-        case Technical_Service:
-            return TheArk::get_instance()->getTechnicalService()->getRecommendedNStaff();
-        case Biological_Service:
-            return TheArk::get_instance()->getBiologicalService()->getRecommendedNStaff();
-        case Medical_Service:
-            return TheArk::get_instance()->getMedicalService()->getRecommendedNStaff();
-        case Navigation_Service:
-            return TheArk::get_instance()->getNavigationService()->getRecommendedNStaff();
-        case Emergency_Service:
-            return TheArk::get_instance()->getEmergencyService()->getRecommendedNStaff();
-        case Social_Service:
-            return TheArk::get_instance()->getSocialService()->getRecommendedNStaff();
-        default:
-            return 0;
-    }
 
-}
-
+// OPERATIONS WITH STAFF //
 void Population::staff_distribution(list<shared_ptr<Human>>& staff, unsigned int demand_staff)
 {
     auto it = this->people.begin();
     unsigned int counter = 0;
-    while(it != this->people.end() && counter < demand_staff)
+    while (it != this->people.end() && counter < demand_staff)
     {
         if((*it)->getAge() >= this->borderChildrenToAdults() && (*it)->getAge() < this->borderAdultsToOldmen())
         {
@@ -94,6 +93,8 @@ void Population::staff_distribution(list<shared_ptr<Human>>& staff, unsigned int
     }
 }
 
+
+// RATES //
 double Population::deathRateChildren()
 {
     return TheArk::get_instance()->getMedicalService()->deathRateChildren();
@@ -109,23 +110,11 @@ double Population::deathRateOldmen()
     return TheArk::get_instance()->getMedicalService()->deathRateOldmen();
 }
 
-list<shared_ptr<Human>>& Population::getPeople()
-{
-    return this->people;
-}
 
-array<list<shared_ptr<Human>>, 7>& Population::getAllClassification()
-{
-     return this->service_workers;
-}
-
-list<shared_ptr<Human>>& Population::getServiceStaff(Services service)
-{
-     return this->service_workers[service];
-}
-
+// PROCESS YEAR //
 void Population::processYear() {
-    //рождаемость
+    
+    // BIRTH
     for(int i = 0; i < TheArk::get_instance()->getMedicalService()->BirthRate(); i++)
     {
         auto* micro_chelik = new Human();
@@ -134,7 +123,8 @@ void Population::processYear() {
         auto ptr = shared_ptr<Human>(micro_chelik);
         this->people.push_back(ptr);
     }
-    //распределение стафа, сделал бы в цикле, но нужно вызывать каждую ф-ю отдельно
+
+    // ANNUAL DISTRIBUTION OF PEOPLE
     unsigned int demand_staff[service_workers.size() - 1];
     demand_staff[0] = TheArk::get_instance()->getTechnicalService()->getStaffDemand();
     demand_staff[1] = TheArk::get_instance()->getBiologicalService()->getStaffDemand();
@@ -153,7 +143,7 @@ void Population::processYear() {
     {
         unsigned int new_staff = (unsigned int)(double(demand_staff[i]) / double(all_demand_staff) * double(this->unemployed_people));
         unsigned int current_staff_of_service = this->service_workers[i].size();
-        unsigned int max_staff_of_service = (unsigned int)(this->distribution_coef[i] * this->adults);
+        unsigned int max_staff_of_service     = (unsigned int)(this->distribution_coef[i] * this->adults);
         if (current_staff_of_service < max_staff_of_service && new_staff > 1)
         {   
             if (current_staff_of_service + new_staff > max_staff_of_service) 
@@ -161,31 +151,26 @@ void Population::processYear() {
             staff_distribution(this->service_workers[i], new_staff);
         }
     }  
-        
-    //
 
-
-    // обработка по возрасту и смертность сразу же, чтобы два раза не ходить
-    children = 0;
-    adults = 0;
-    oldmen = 0;
-    unemployed_people = 0;
+    // UPDATE EVERY PERSON
+    this->children = 0;
+    this->adults = 0;
+    this->oldmen = 0;
+    this->unemployed_people = 0;
     unsigned int HisAge;
     unsigned int CriticalHealth = TheArk::get_instance()->getMedicalService()->getCriticalHealth();
 
-
     for (auto it = people.begin(); it != people.end();)
     {
-        // старение
+        // AGE INCREMENT
         HisAge = (*it)->getAge();
         (*it)->setAge(HisAge + 1);
         HisAge++;
 
         if (HisAge == this->borderChildrenToAdults()) (*it)->setTypeAsAWorker(UNEMPLOYED);
 
-
-        // подсчёт количества населения по группам и обработка случайной смертности
-        if (HisAge < this->borderChildrenToAdults())
+        // RANDOM DEATHS AND UPDATE OF FIELDS
+        if (HisAge < this->borderChildrenToAdults())  // CHILDREN
         {
             children++;
             if (rand() <= this->deathRateChildren() * RAND_MAX || (*it)->getPhysicalHealth() < CriticalHealth)
@@ -194,7 +179,7 @@ void Population::processYear() {
                 children--;
             }
         }
-        if ((HisAge >= this->borderChildrenToAdults()) && (HisAge < borderAdultsToOldmen()))
+        if ((HisAge >= this->borderChildrenToAdults()) && (HisAge < borderAdultsToOldmen()))  // ADULTS
         {
             adults++;
             if (rand() <= this->deathRateAdults() * RAND_MAX  || (*it)->getPhysicalHealth() < CriticalHealth)
@@ -205,7 +190,7 @@ void Population::processYear() {
             if ((*it)->getTypeAsAWorker() != WORKER)
                 unemployed_people ++;
         }
-        if (HisAge >= this->borderAdultsToOldmen())
+        if (HisAge >= this->borderAdultsToOldmen())  // OLD
         {
             oldmen++;
             if (rand() <= this->deathRateOldmen() * RAND_MAX || HisAge > 100  || (*it)->getPhysicalHealth() < CriticalHealth)
@@ -215,32 +200,26 @@ void Population::processYear() {
             }
         }
        
-        //попанье мертвых
+        // POP DEAD PERSON
         if (!(*it)->isAlive())
         {
             auto tmpit = it;
             ++it;
             this->people.erase(tmpit);
         }
-        else{
+        else
+        {
             ++it;
         }
 
     }
-    // конец обработки по возрасту
 
-    this->check_dead_people_in_services(); // см коммент в ф-ции
-
-    // тут ещё безусловно нужно написать рождаемость, иначе все подохнут
-    // дальше идет просмотр обучающихся и обработка тех, кто отучился. Их пихаем в службы по запросам
-    // распределение остальных людей по соответвующим категориям
-
-    //конец обработки
+    // POP DEAD PEOPLE IN SERVICE LISTS
+    this->check_dead_people_in_services();
 }
 
 void Population::check_dead_people_in_services()
 {
-    // удаление людей с is_alive == false из всех классификаций
     for (list<shared_ptr<Human>>& classification: this->service_workers)
     {
         for (auto it = classification.begin(); it != classification.end();)
@@ -259,37 +238,43 @@ void Population::check_dead_people_in_services()
     }
 }
 
-void Population::init(unsigned int total) {
-    this->children = (unsigned int)(0.15 * total);
-    this->oldmen = (unsigned int)(0.15 * total);
-    this->adults = total - children - oldmen;
+// INITIALIZATION //
+void Population::init(unsigned int total) 
+{
+    this->children = (unsigned int)(std::stod(TheArk::get_instance()->getInterface()->getGeneral()["Children"]) * total);
+    this->oldmen   = (unsigned int)(std::stod(TheArk::get_instance()->getInterface()->getGeneral()["Old"]) * total);
+    this->adults   = total - children - oldmen;
     this->unemployed_people = this->adults;
 
-    for(int i = 0; i < this->children; i++)
-    {          // заполняем детьми
+    // CREATING PEOPLE
+    for(int i = 0; i < this->children; i++) // CHILDREN
+    {   
         auto* person = new Human();
         person->setAge((rand()% this->borderChildrenToAdults()));
         person->setTypeAsAWorker(CHILD);
         auto ptr = shared_ptr<Human>(person);
         this->people.push_back(ptr);
     }
-    for(int i = 0; i < this->oldmen; i++)
-    {            // заполняем стариками
+
+    for(int i = 0; i < this->oldmen; i++) // OLD
+    {
         auto *person = new Human;
         person->setAge((this->borderAdultsToOldmen() + rand() % (100 - this->borderAdultsToOldmen() + 1)));
         person->setTypeAsAWorker(RETIRED);
         auto ptr = shared_ptr<Human>(person);
         this->people.push_back(ptr);
     }
-    for(int i = 0; i < this->adults; i++)
-    {        // заполняем взрослыми всех остальных людей
+
+    for(int i = 0; i < this->adults; i++) // ADULTS
+    {
         auto* person = new Human;
         person->setAge((this->borderChildrenToAdults()+ rand()% (this->borderAdultsToOldmen() - this->borderChildrenToAdults() + 1)));
         person->setTypeAsAWorker(UNEMPLOYED);
         auto ptr = shared_ptr<Human>(person);
         this->people.push_back(ptr);
     }
-    // распределение рабочих по службам
+
+    // WORKERS DISTRIBUTION TO SERVICES
     unsigned int number_of_people_to_service[6];
     for (int i = 0; i < 6; i ++)
     {
