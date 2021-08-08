@@ -29,7 +29,7 @@ private:
     int k, mass, junk, worker_0;
     double hp, KPD;
 public:
-    BioRes(unsigned int start_mass, double KPD, int worker_optimum, int max_profit, double health_of_system,
+    BioRes(unsigned int start_mass, double KPD_e, int worker_optimum, int max_profit, double health_of_system,
            int consume_for1);
 
     void RecycleRes(int worker, int people);
