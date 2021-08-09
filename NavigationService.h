@@ -28,12 +28,12 @@ private:
     unsigned int staff;
     // Hiring more people than this value * default
     // required_staff is useless for upgrades
-    const double MAX_STAFF_RATIO = 1.3;
+    const double MAX_STAFF_RATIO = 1.2;
     // Basically Population / 8, but can be higher
     // More people — faster repair, higher efficiency
     unsigned int required_staff;
     // Starting population / this coef. is default staff number
-    const char DEFAULT_STAFF_DENOMINATOR = 9;
+    const char DEFAULT_STAFF_DENOMINATOR = 20;
     // Staff required for fully functioning systems
     unsigned DEFAULT_STAFF;
 
@@ -79,7 +79,7 @@ private:
     unsigned short int LOST_THE_WAY_WARNING = 3;
 
     // Every year each device's state will decrease by this amount
-    const double ANNUAL_DEGRADATION = -3;
+    const double ANNUAL_DEGRADATION = -2;
 
 public:
     NavigationService();

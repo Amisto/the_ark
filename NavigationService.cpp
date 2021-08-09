@@ -58,7 +58,7 @@ void NavigationService::process_accident(AccidentSeverity as)
         case LIGHT:
             killed_staff = staff / 20;
             stage = MANEUVER;
-            time_until_next_stage = 1;
+            time_until_next_stage = 2;
             next_stage = STABLE;
             years_delta += time_until_next_stage;
             devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
@@ -74,7 +74,7 @@ void NavigationService::process_accident(AccidentSeverity as)
         case SEVERE:
             killed_staff = staff / 5;
             stage = MANEUVER;
-            time_until_next_stage = 5;
+            time_until_next_stage = 7;
             next_stage = STABLE;
             years_delta += time_until_next_stage;
             devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
@@ -91,7 +91,7 @@ void NavigationService::process_accident(AccidentSeverity as)
             }
             if (TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 2) == 1) {
                 stage = MANEUVER;
-                time_until_next_stage = 10;
+                time_until_next_stage = 12;
                 next_stage = STABLE;
                 years_delta += time_until_next_stage;
             }
@@ -104,7 +104,7 @@ void NavigationService::process_accident(AccidentSeverity as)
                         TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-90.f, -60.f));
             }
             stage = MANEUVER;
-            time_until_next_stage = 13;
+            time_until_next_stage = 17;
             next_stage = STABLE;
             years_delta += time_until_next_stage;
             break;
@@ -162,6 +162,9 @@ void NavigationService::process_year()
         else
             LOST_THE_WAY_WARNING += 2;
     }
+    if (std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Years"]) * 0.9 >
+        TheArk::get_instance()->getYearsTotal())
+        TheArk::get_instance()->setYearsTotal(std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Years"]) * 9 / 10);
     //
 
 
