@@ -2,6 +2,10 @@
 // Created by Amisto on 4/2/2021.
 
 #include "EmergencyService.h"
+#include "Interface.h"
+#include "TheArk.h"
+#include "Resources.h"
+#include "RandomNumberGenerator.h"
 
 EmergencyService::EmergencyService(): state(0), staff(0), resources(0), max_resources(0), Junk(0) {
     max_staff = std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Population"])

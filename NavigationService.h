@@ -11,11 +11,7 @@
 #include <cmath>
 
 #include "Service.h"
-#include "TheArk.h"
-#include "Resources.h"
-#include "Interface.h"
 #include "NavigationBlock.h"
-#include "RandomNumberGenerator.h"
 
 using std::unique_ptr;
 
@@ -70,13 +66,20 @@ private:
     // of devices, < 0 means faster flight
     double years_delta;
 
+    // If total efficiency * state > this value
+    // then total distance of flight decreases
+    const double MINIMAL_PRODUCTIVITY = 0.35;
+
+    // Total years amount is changing by this value
+    const unsigned short BASIC_DELTA = 2;
+
     // If years_total is higher this value times,
     // there will be a warning to prevent from endless
     // travelling
     unsigned short int LOST_THE_WAY_WARNING = 3;
 
     // Every year each device's state will decrease by this amount
-    const double ANNUAL_DEGRADATION = -0.5;
+    const double ANNUAL_DEGRADATION = -3;
 
 public:
     NavigationService();

@@ -3,6 +3,10 @@
 //
 
 #include "NavigationService.h"
+#include "TheArk.h"
+#include "Resources.h"
+#include "Interface.h"
+#include "RandomNumberGenerator.h"
 
 NavigationService::NavigationService(): staff(0), /*need_resources(0),*/ years_delta(0)
 {
@@ -44,33 +48,39 @@ void NavigationService::process_accident(AccidentSeverity as)
     {
         case NEGLIGIBLE:
             stage = MANEUVER;
-            time_until_next_stage = 5;
+            time_until_next_stage = 1;
             next_stage = STABLE;
             years_delta += time_until_next_stage;
+            devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
+                    TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-5.f, -1.f));
             break;
 
         case LIGHT:
-            killed_staff = staff / 15;
+            killed_staff = staff / 20;
             stage = MANEUVER;
-            time_until_next_stage = 10;
+            time_until_next_stage = 1;
             next_stage = STABLE;
             years_delta += time_until_next_stage;
+            devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
+                    TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-15.f, -5.f));
             break;
 
         case MEDIUM:
             killed_staff = staff / 10;
             devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
-                    TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-10.f, -5.f));
+                    TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-35.f, -15.f));
             break;
 
         case SEVERE:
             killed_staff = staff / 5;
             stage = MANEUVER;
-            time_until_next_stage = 20;
+            time_until_next_stage = 5;
             next_stage = STABLE;
             years_delta += time_until_next_stage;
             devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
-                    TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-18.f, -10.f));
+                    TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-35.f, -20.f));
+            devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
+                    TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-40.f, -20.f));
             break;
 
         case DISASTROUS:
@@ -81,7 +91,7 @@ void NavigationService::process_accident(AccidentSeverity as)
             }
             if (TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 2) == 1) {
                 stage = MANEUVER;
-                time_until_next_stage = 20;
+                time_until_next_stage = 10;
                 next_stage = STABLE;
                 years_delta += time_until_next_stage;
             }
@@ -94,7 +104,7 @@ void NavigationService::process_accident(AccidentSeverity as)
                         TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-90.f, -60.f));
             }
             stage = MANEUVER;
-            time_until_next_stage = 50;
+            time_until_next_stage = 13;
             next_stage = STABLE;
             years_delta += time_until_next_stage;
             break;
@@ -128,15 +138,15 @@ void NavigationService::process_year()
     for (auto & it : devices)
         effective_sum += it->getState() * it->getEfficiency() / 10000.f;
 
-    years_delta -= effective_sum - 1;
+    years_delta -= 6 * pow((effective_sum - MINIMAL_PRODUCTIVITY), 5);
 
-    if (years_delta > 3) {
-        TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getYearsTotal() + 3);
-        years_delta -= 3;
+    if (years_delta > BASIC_DELTA) {
+        TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getYearsTotal() + BASIC_DELTA);
+        years_delta -= BASIC_DELTA;
     }
-    else if (years_delta < -3) {
-        TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getYearsTotal() - 3);
-        years_delta -= -3;
+    else if (years_delta < -BASIC_DELTA) {
+        TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getYearsTotal() - BASIC_DELTA);
+        years_delta -= -BASIC_DELTA;
     }
 
     if (TheArk::get_instance()->getCurrentYear() >

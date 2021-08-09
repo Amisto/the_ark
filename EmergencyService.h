@@ -8,12 +8,10 @@
 #include <ctime>
 #include <cmath>
 #include <iostream>
+#include <iomanip>
+#include <fstream>
+
 #include "Service.h"
-#include "Enums.cpp"
-#include "TheArk.h"
-#include "Interface.h"
-#include "Resources.h"
-#include "RandomNumberGenerator.h"
 
 using std::array;
 using std::setw;
