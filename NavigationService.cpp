@@ -117,6 +117,7 @@ void NavigationService::process_accident(AccidentSeverity as)
 
 void NavigationService::process_year()
 {
+    std::clog << "NS_Years_Delta: " << years_delta << endl;
     // Block for flight stage management
     time_until_next_stage--;
     if (not time_until_next_stage) {

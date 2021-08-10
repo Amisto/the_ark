@@ -33,6 +33,10 @@ private:
     RandomNumberGenerator* random_generator;
     Interface* interface;
 
+    std::ofstream* err_stream;
+    std::ofstream* log_stream;
+    std::array <std::basic_streambuf<char, std::char_traits<char>>*, 2> old_rdbufs;
+
     void processYear();
 
     TheArk();

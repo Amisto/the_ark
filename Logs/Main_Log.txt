@@ -1,0 +1,906 @@
+
+Year: 0
+NS_Years_Delta: 0
+
+Year: 1
+NS_Years_Delta: -0.696174
+
+Year: 2
+NS_Years_Delta: -1.39235
+
+Year: 3
+NS_Years_Delta: 16.9115
+
+Year: 4
+NS_Years_Delta: 15.9114
+
+Year: 5
+NS_Years_Delta: 14.9114
+
+Year: 6
+NS_Years_Delta: 12.9114
+
+Year: 7
+NS_Years_Delta: 17.9113
+
+Year: 8
+NS_Years_Delta: 16.9113
+
+Year: 9
+NS_Years_Delta: 16.9113
+
+Year: 10
+NS_Years_Delta: 14.9113
+
+Year: 11
+NS_Years_Delta: 13.9113
+
+Year: 12
+NS_Years_Delta: 18.9112
+
+Year: 13
+NS_Years_Delta: 17.9112
+
+Year: 14
+NS_Years_Delta: 15.9112
+
+Year: 15
+NS_Years_Delta: 13.9112
+
+Year: 16
+NS_Years_Delta: 11.9112
+
+Year: 17
+NS_Years_Delta: 10.9112
+
+Year: 18
+NS_Years_Delta: 9.91122
+
+Year: 19
+NS_Years_Delta: 9.91122
+
+Year: 20
+NS_Years_Delta: 8.91122
+
+Year: 21
+NS_Years_Delta: 7.91122
+
+Year: 22
+NS_Years_Delta: 6.91122
+
+Year: 23
+NS_Years_Delta: 4.91121
+
+Year: 24
+NS_Years_Delta: 3.91121
+
+Year: 25
+NS_Years_Delta: 1.91119
+
+Year: 26
+NS_Years_Delta: 1.91118
+
+Year: 27
+NS_Years_Delta: 1.91113
+
+Year: 28
+NS_Years_Delta: 1.91106
+
+Year: 29
+NS_Years_Delta: 2.91092
+
+Year: 30
+NS_Years_Delta: 0.910833
+
+Year: 31
+NS_Years_Delta: 0.910694
+
+Year: 32
+NS_Years_Delta: 0.91036
+
+Year: 33
+NS_Years_Delta: 0.909926
+
+Year: 34
+NS_Years_Delta: 2.90923
+
+Year: 35
+NS_Years_Delta: 2.90897
+
+Year: 36
+NS_Years_Delta: 2.90853
+
+Year: 37
+NS_Years_Delta: 1.90829
+
+Year: 38
+NS_Years_Delta: 1.90805
+
+Year: 39
+NS_Years_Delta: 2.90771
+
+Year: 40
+NS_Years_Delta: 2.90737
+
+Year: 41
+NS_Years_Delta: 0.906988
+
+Year: 42
+NS_Years_Delta: 0.906693
+
+Year: 43
+NS_Years_Delta: 2.9058
+
+Year: 44
+NS_Years_Delta: 2.9054
+
+Year: 45
+NS_Years_Delta: 1.90499
+
+Year: 46
+NS_Years_Delta: 2.9047
+
+Year: 47
+NS_Years_Delta: 0.904335
+
+Year: 48
+NS_Years_Delta: 0.903321
+
+Year: 49
+NS_Years_Delta: 7.90247
+
+Year: 50
+NS_Years_Delta: 6.90236
+
+Year: 51
+NS_Years_Delta: 4.90225
+
+Year: 52
+NS_Years_Delta: 2.90213
+
+Year: 53
+NS_Years_Delta: 1.90199
+
+Year: 54
+NS_Years_Delta: 2.90191
+
+Year: 55
+NS_Years_Delta: 0.901853
+
+Year: 56
+NS_Years_Delta: 0.901712
+
+Year: 57
+NS_Years_Delta: 7.9017
+
+Year: 58
+NS_Years_Delta: 5.9017
+
+Year: 59
+NS_Years_Delta: 15.9017
+
+Year: 60
+NS_Years_Delta: 13.9017
+
+Year: 61
+NS_Years_Delta: 11.9017
+
+Year: 62
+NS_Years_Delta: 10.9017
+
+Year: 63
+NS_Years_Delta: 8.9017
+
+Year: 64
+NS_Years_Delta: 6.9017
+
+Year: 65
+NS_Years_Delta: 4.90169
+
+Year: 66
+NS_Years_Delta: 2.90169
+
+Year: 67
+NS_Years_Delta: 1.90168
+
+Year: 68
+NS_Years_Delta: 1.90164
+
+Year: 69
+NS_Years_Delta: 1.90162
+
+Year: 70
+NS_Years_Delta: 2.90158
+
+Year: 71
+NS_Years_Delta: 0.901546
+
+Year: 72
+NS_Years_Delta: 1.90152
+
+Year: 73
+NS_Years_Delta: 2.90149
+
+Year: 74
+NS_Years_Delta: 2.90146
+
+Year: 75
+NS_Years_Delta: 0.901434
+
+Year: 76
+NS_Years_Delta: 17.9014
+
+Year: 77
+NS_Years_Delta: 15.9243
+
+Year: 78
+NS_Years_Delta: 13.9464
+
+Year: 79
+NS_Years_Delta: 11.9612
+
+Year: 80
+NS_Years_Delta: 9.97104
+
+Year: 81
+NS_Years_Delta: 9.97647
+
+Year: 82
+NS_Years_Delta: 7.97922
+
+Year: 83
+NS_Years_Delta: 6.98047
+
+Year: 84
+NS_Years_Delta: 4.98098
+
+Year: 85
+NS_Years_Delta: 2.98112
+
+Year: 86
+NS_Years_Delta: 17.9812
+
+Year: 87
+NS_Years_Delta: 17.9812
+
+Year: 88
+NS_Years_Delta: 15.9812
+
+Year: 89
+NS_Years_Delta: 13.9812
+
+Year: 90
+NS_Years_Delta: 12.9812
+
+Year: 91
+NS_Years_Delta: 10.9812
+
+Year: 92
+NS_Years_Delta: 8.98119
+
+Year: 93
+NS_Years_Delta: 8.98119
+
+Year: 94
+NS_Years_Delta: 7.98119
+
+Year: 95
+NS_Years_Delta: 5.98118
+
+Year: 96
+NS_Years_Delta: 3.98118
+
+Year: 97
+NS_Years_Delta: 1.98117
+
+Year: 98
+NS_Years_Delta: 1.98116
+
+Year: 99
+NS_Years_Delta: 3.98116
+
+Year: 100
+NS_Years_Delta: 2.98116
+
+Year: 101
+NS_Years_Delta: 0.981137
+
+Year: 102
+NS_Years_Delta: 0.981136
+
+Year: 103
+NS_Years_Delta: 0.981133
+
+Year: 104
+NS_Years_Delta: 1.98112
+
+Year: 105
+NS_Years_Delta: 1.98111
+
+Year: 106
+NS_Years_Delta: 2.9811
+
+Year: 107
+NS_Years_Delta: 1.98109
+
+Year: 108
+NS_Years_Delta: 1.98108
+
+Year: 109
+NS_Years_Delta: 1.98107
+
+Year: 110
+NS_Years_Delta: 8.98105
+
+Year: 111
+NS_Years_Delta: 6.98105
+
+Year: 112
+NS_Years_Delta: 4.98105
+
+Year: 113
+NS_Years_Delta: 9.98105
+
+Year: 114
+NS_Years_Delta: 14.981
+
+Year: 115
+NS_Years_Delta: 13.981
+
+Year: 116
+NS_Years_Delta: 12.981
+
+Year: 117
+NS_Years_Delta: 11.981
+
+Year: 118
+NS_Years_Delta: 9.981
+
+Year: 119
+NS_Years_Delta: 9.98099
+
+Year: 120
+NS_Years_Delta: 8.98099
+
+Year: 121
+NS_Years_Delta: 18.981
+
+Year: 122
+NS_Years_Delta: 18.9815
+
+Year: 123
+NS_Years_Delta: 16.9818
+
+Year: 124
+NS_Years_Delta: 16.9999
+
+Year: 125
+NS_Years_Delta: 16.0125
+
+Year: 126
+NS_Years_Delta: 16.0182
+
+Year: 127
+NS_Years_Delta: 15.02
+
+Year: 128
+NS_Years_Delta: 13.0202
+
+Year: 129
+NS_Years_Delta: 13.0203
+
+Year: 130
+NS_Years_Delta: 11.0203
+
+Year: 131
+NS_Years_Delta: 9.02026
+
+Year: 132
+NS_Years_Delta: 7.02026
+
+Year: 133
+NS_Years_Delta: 5.02026
+
+Year: 134
+NS_Years_Delta: 4.02025
+
+Year: 135
+NS_Years_Delta: 9.02025
+
+Year: 136
+NS_Years_Delta: 8.02202
+
+Year: 137
+NS_Years_Delta: 6.02273
+
+Year: 138
+NS_Years_Delta: 4.02298
+
+Year: 139
+NS_Years_Delta: 4.023
+
+Year: 140
+NS_Years_Delta: 2.023
+
+Year: 141
+NS_Years_Delta: 1.023
+
+Year: 142
+NS_Years_Delta: 1.023
+
+Year: 143
+NS_Years_Delta: 2.023
+
+Year: 144
+NS_Years_Delta: 2.023
+
+Year: 145
+NS_Years_Delta: 0.0230011
+
+Year: 146
+NS_Years_Delta: 0.0229929
+
+Year: 147
+NS_Years_Delta: 2.02299
+
+Year: 148
+NS_Years_Delta: 1.02298
+
+Year: 149
+NS_Years_Delta: 8.02295
+
+Year: 150
+NS_Years_Delta: 23.0229
+
+Year: 151
+NS_Years_Delta: 21.0229
+
+Year: 152
+NS_Years_Delta: 19.0229
+
+Year: 153
+NS_Years_Delta: 17.0229
+
+Year: 154
+NS_Years_Delta: 15.0229
+
+Year: 155
+NS_Years_Delta: 15.0229
+
+Year: 156
+NS_Years_Delta: 14.0229
+
+Year: 157
+NS_Years_Delta: 12.0229
+
+Year: 158
+NS_Years_Delta: 10.0229
+
+Year: 159
+NS_Years_Delta: 9.0229
+
+Year: 160
+NS_Years_Delta: 9.02289
+
+Year: 161
+NS_Years_Delta: 7.02288
+
+Year: 162
+NS_Years_Delta: 5.02287
+
+Year: 163
+NS_Years_Delta: 3.02283
+
+Year: 164
+NS_Years_Delta: 1.02273
+
+Year: 165
+NS_Years_Delta: 1.02257
+
+Year: 166
+NS_Years_Delta: 1.02254
+
+Year: 167
+NS_Years_Delta: 1.02245
+
+Year: 168
+NS_Years_Delta: 2.02227
+
+Year: 169
+NS_Years_Delta: 0.0220223
+
+Year: 170
+NS_Years_Delta: 12.0217
+
+Year: 171
+NS_Years_Delta: 17.0217
+
+Year: 172
+NS_Years_Delta: 15.0217
+
+Year: 173
+NS_Years_Delta: 13.0217
+
+Year: 174
+NS_Years_Delta: 11.0217
+
+Year: 175
+NS_Years_Delta: 9.02171
+
+Year: 176
+NS_Years_Delta: 8.02171
+
+Year: 177
+NS_Years_Delta: 8.02171
+
+Year: 178
+NS_Years_Delta: 6.02171
+
+Year: 179
+NS_Years_Delta: 6.02171
+
+Year: 180
+NS_Years_Delta: 4.0217
+
+Year: 181
+NS_Years_Delta: 2.0217
+
+Year: 182
+NS_Years_Delta: 0.0217002
+
+Year: 183
+NS_Years_Delta: 17.0217
+
+Year: 184
+NS_Years_Delta: 15.0333
+
+Year: 185
+NS_Years_Delta: 13.0449
+
+Year: 186
+NS_Years_Delta: 11.048
+
+Year: 187
+NS_Years_Delta: 10.0495
+
+Year: 188
+NS_Years_Delta: 8.05006
+
+Year: 189
+NS_Years_Delta: 8.05012
+
+Year: 190
+NS_Years_Delta: 13.0501
+
+Year: 191
+NS_Years_Delta: 23.0504
+
+Year: 192
+NS_Years_Delta: 23.0549
+
+Year: 193
+NS_Years_Delta: 21.058
+
+Year: 194
+NS_Years_Delta: 21.0895
+
+Year: 195
+NS_Years_Delta: 19.1138
+
+Year: 196
+NS_Years_Delta: 17.1303
+
+Year: 197
+NS_Years_Delta: 16.1414
+
+Year: 198
+NS_Years_Delta: 15.1493
+
+Year: 199
+NS_Years_Delta: 13.1523
+
+Year: 200
+NS_Years_Delta: 12.153
+
+Year: 201
+NS_Years_Delta: 12.1533
+
+Year: 202
+NS_Years_Delta: 10.1533
+
+Year: 203
+NS_Years_Delta: 9.15335
+
+Year: 204
+NS_Years_Delta: 8.15335
+
+Year: 205
+NS_Years_Delta: 6.15335
+
+Year: 206
+NS_Years_Delta: 4.15335
+
+Year: 207
+NS_Years_Delta: 4.15335
+
+Year: 208
+NS_Years_Delta: 2.15335
+
+Year: 209
+NS_Years_Delta: 0.153351
+
+Year: 210
+NS_Years_Delta: 7.15335
+
+Year: 211
+NS_Years_Delta: 7.15335
+
+Year: 212
+NS_Years_Delta: 7.15335
+
+Year: 213
+NS_Years_Delta: 12.1534
+
+Year: 214
+NS_Years_Delta: 10.1534
+
+Year: 215
+NS_Years_Delta: 8.15335
+
+Year: 216
+NS_Years_Delta: 6.15335
+
+Year: 217
+NS_Years_Delta: 21.1534
+
+Year: 218
+NS_Years_Delta: 19.1624
+
+Year: 219
+NS_Years_Delta: 17.1718
+
+Year: 220
+NS_Years_Delta: 17.1759
+
+Year: 221
+NS_Years_Delta: 17.1791
+
+Year: 222
+NS_Years_Delta: 15.182
+
+Year: 223
+NS_Years_Delta: 14.1831
+
+Year: 224
+NS_Years_Delta: 12.1835
+
+Year: 225
+NS_Years_Delta: 10.1836
+
+Year: 226
+NS_Years_Delta: 9.18357
+
+Year: 227
+NS_Years_Delta: 9.18357
+
+Year: 228
+NS_Years_Delta: 7.18357
+
+Year: 229
+NS_Years_Delta: 5.18357
+
+Year: 230
+NS_Years_Delta: 3.18357
+
+Year: 231
+NS_Years_Delta: 1.18357
+
+Year: 232
+NS_Years_Delta: 1.18357
+
+Year: 233
+NS_Years_Delta: 2.18357
+
+Year: 234
+NS_Years_Delta: 0.183564
+
+Year: 235
+NS_Years_Delta: 1.18356
+
+Year: 236
+NS_Years_Delta: 3.18356
+
+Year: 237
+NS_Years_Delta: 2.18356
+
+Year: 238
+NS_Years_Delta: 0.183549
+
+Year: 239
+NS_Years_Delta: 0.183545
+
+Year: 240
+NS_Years_Delta: 1.18353
+
+Year: 241
+NS_Years_Delta: 1.1835
+
+Year: 242
+NS_Years_Delta: 1.18347
+
+Year: 243
+NS_Years_Delta: 1.18346
+
+Year: 244
+NS_Years_Delta: 1.18345
+
+Year: 245
+NS_Years_Delta: 1.18344
+
+Year: 246
+NS_Years_Delta: 2.18344
+
+Year: 247
+NS_Years_Delta: 2.18343
+
+Year: 248
+NS_Years_Delta: 0.183428
+
+Year: 249
+NS_Years_Delta: 1.18342
+
+Year: 250
+NS_Years_Delta: 1.18342
+
+Year: 251
+NS_Years_Delta: 2.18342
+
+Year: 252
+NS_Years_Delta: 1.18342
+
+Year: 253
+NS_Years_Delta: 18.1834
+
+Year: 254
+NS_Years_Delta: 17.2149
+
+Year: 255
+NS_Years_Delta: 32.2441
+
+Year: 256
+NS_Years_Delta: 31.2756
+
+Year: 257
+NS_Years_Delta: 29.3029
+
+Year: 258
+NS_Years_Delta: 39.3344
+
+Year: 259
+NS_Years_Delta: 38.3659
+
+Year: 260
+NS_Years_Delta: 36.3858
+
+Year: 261
+NS_Years_Delta: 36.4173
+
+Year: 262
+NS_Years_Delta: 35.4377
+
+Year: 263
+NS_Years_Delta: 33.4468
+
+Year: 264
+NS_Years_Delta: 31.451
+
+Year: 265
+NS_Years_Delta: 36.4523
+
+Year: 266
+NS_Years_Delta: 34.4584
+
+Year: 267
+NS_Years_Delta: 34.462
+
+Year: 268
+NS_Years_Delta: 39.4656
+
+Year: 269
+NS_Years_Delta: 37.4675
+
+Year: 270
+NS_Years_Delta: 35.4683
+
+Year: 271
+NS_Years_Delta: 40.4686
+
+Year: 272
+NS_Years_Delta: 40.4687
+
+Year: 273
+NS_Years_Delta: 38.4687
+
+Year: 274
+NS_Years_Delta: 36.4687
+
+Year: 275
+NS_Years_Delta: 36.4687
+
+Year: 276
+NS_Years_Delta: 36.4687
+
+Year: 277
+NS_Years_Delta: 46.4687
+
+Year: 278
+NS_Years_Delta: 61.4839
+
+Year: 279
+NS_Years_Delta: 66.5154
+
+Year: 280
+NS_Years_Delta: 64.5381
+
+Year: 281
+NS_Years_Delta: 62.5491
+
+Year: 282
+NS_Years_Delta: 61.5564
+
+Year: 283
+NS_Years_Delta: 66.5605
+
+Year: 284
+NS_Years_Delta: 71.572
+
+Year: 285
+NS_Years_Delta: 76.6035
+
+Year: 286
+NS_Years_Delta: 74.622
+
+Year: 287
+NS_Years_Delta: 72.6333
+
+Year: 288
+NS_Years_Delta: 71.6392
+
+Year: 289
+NS_Years_Delta: 86.6414
+
+Year: 290
+NS_Years_Delta: 85.6729
+
+Year: 291
+NS_Years_Delta: 83.7004
+
+Year: 292
+NS_Years_Delta: 82.718
+
+Year: 293
+NS_Years_Delta: 80.7262
+
+Year: 294
+NS_Years_Delta: 80.731
+
+Year: 295
+NS_Years_Delta: 85.7333
+
+Year: 296
+NS_Years_Delta: 84.7498
+
+Year: 297
+NS_Years_Delta: 99.7631
+
+Year: 298
+NS_Years_Delta: 98.7946
+
+Year: 299
+NS_Years_Delta: 97.8261
+
+Year: 300
+NS_Years_Delta: 96.845
+
+Year: 301
+NS_Years_Delta: 94.8578

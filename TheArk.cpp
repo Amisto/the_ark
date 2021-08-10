@@ -37,6 +37,18 @@ void TheArk::deleteArk()
 
 TheArk::~TheArk()
 {
+    if (!std::stoi(interface->getGeneral()["Debug_Output"]))
+    {
+        std::clog.rdbuf(old_rdbufs[0]);
+        delete log_stream;
+    }
+
+    if (!std::stoi(interface->getGeneral()["Show_Errors"]))
+    {
+        std::cerr.rdbuf(old_rdbufs[1]);
+        delete err_stream;
+    }
+
     for (auto &s: services) {
         delete s;
         s = nullptr;
@@ -75,6 +87,25 @@ void TheArk::init()
     for (int i = 0; i < 6; ++i)
     {
         services[i]->setState(std::stoi(interface->getServices()[i]["State"]));
+    }
+
+    if (!std::stoi(interface->getGeneral()["Debug_Output"]))
+    {
+        log_stream = new std::ofstream;
+        log_stream->open("../Logs/Main_Log.txt");
+
+        old_rdbufs[0] = std::clog.rdbuf();
+
+        std::clog.rdbuf(log_stream->rdbuf());
+    }
+
+    if (!std::stoi(interface->getGeneral()["Show_Errors"]))
+    {
+        err_stream = new std::ofstream;
+        err_stream->open("../Logs/Errors.txt");
+
+        old_rdbufs[1] = std::cerr.rdbuf();
+        std::cerr.rdbuf(err_stream->rdbuf());
     }
 }
 
@@ -130,6 +161,7 @@ Interface* TheArk::getInterface()
 }
 
 void TheArk::processYear() {
+    std::clog << endl << "Year: " << current_year << endl;
     population->processYear();
     resources->processYear();
     for (auto s: services)
