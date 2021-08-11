@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 # loading data
-file = open('../Emergency_Log.txt')
+file = open('../Logs/Emergency_Log.txt')
 data0 = file.read()
 data0 = data0.replace(' ', '')
 data0 = data0.replace('\n', '')

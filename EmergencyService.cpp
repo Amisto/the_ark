@@ -19,7 +19,7 @@ EmergencyService::EmergencyService(): state(0), staff(0), resources(0), max_reso
         }
     }
     inp.close();
-    emergency_log.open("../Emergency_Log.txt");
+    emergency_log.open("../Logs/Emergency_Log.txt");
     emergency_log << setw(CELL_WIDTH + 1) << "Year,"
     << setw(CELL_WIDTH_S + 1) << "Service,"
     << setw(CELL_WIDTH + 1) << "Severity," << endl;
