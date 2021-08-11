@@ -21,7 +21,7 @@ void MedicalService::process_accident(AccidentSeverity as) {
 
 void MedicalService::process_year() {
 
-    RandomNumberGenerator RNG;
+    static auto RNG = *TheArk::get_instance()->getRandomGenerator();
     retirementAge = static_cast<unsigned int>(round(51 * (2 - TheArk::get_instance()->getSocialService()->getState() *
                                                               State * State / 1000000)));
     n_staff = static_cast<unsigned int>(round(0.1 * TheArk::get_instance()->getPopulation()->getTotal()));
