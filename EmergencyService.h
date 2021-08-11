@@ -52,15 +52,12 @@ private:
     // This template is used for initializing const coefficients
     // Use any lower_bound == upper_bound if there are no limitations
     template<typename T>
-    T constFieldInit(const std::string& name, double lower_bound, double upper_bound, double default_value) const
+    [[nodiscard]] T constFieldInit(const std::string& name, double lower_bound, double upper_bound, double default_value) const
     {
         T result = (T)(std::stod(TheArk::get_instance()->getInterface()->getServices()
                 [Emergency_Service][name]));
 
-        if (lower_bound == upper_bound) {
-            return result;
-        }
-        else if (upper_bound < lower_bound) {
+        if (upper_bound < lower_bound) {
             std::cerr << "EmergencyService error 1: incorrect constFieldInit(...) boundaries.";
         }
         else if (result < lower_bound or result > upper_bound) {
