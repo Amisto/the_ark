@@ -1,16 +1,18 @@
-
+//
 // Created by Amisto on 4/2/2021.
+//
 
 #include "EmergencyService.h"
-#include "Interface.h"
-#include "TheArk.h"
 #include "Resources.h"
 #include "RandomNumberGenerator.h"
 
-EmergencyService::EmergencyService(): state(0), staff(0), resources(0), max_resources(0), Junk(0) {
+EmergencyService::EmergencyService(): state(0), staff(0), resources(0), max_resources(0), Junk(0)
+{
     max_staff = std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Population"])
             * std::stod(TheArk::get_instance()->getInterface()->getServices()
             [Emergency_Service]["Propotion_of_people"]);
+
+    std::clog << "EFFECTIVE_STATE_RATIO " << EFFECTIVE_STATE_RATIO << endl;
     std::ifstream inp;
     inp.open("../EmergencyService_setup/output.txt");
     for(auto i = 0; i < 6; i++) {
@@ -19,6 +21,7 @@ EmergencyService::EmergencyService(): state(0), staff(0), resources(0), max_reso
         }
     }
     inp.close();
+
     emergency_log.open("../Logs/Emergency_Log.txt");
     emergency_log << setw(CELL_WIDTH + 1) << "Year,"
     << setw(CELL_WIDTH_S + 1) << "Service,"
@@ -29,7 +32,7 @@ EmergencyService::EmergencyService(): state(0), staff(0), resources(0), max_reso
 // Low service's state increases the probability of accident
 void EmergencyService::create_accident(Service* s)
 {
-    double effective_state = EFFECTIVE_STATE_RATIO * this->state + (1.f - EFFECTIVE_STATE_RATIO) * s->getState(); // Emergency
+    double effective_state = EFFECTIVE_STATE_RATIO * this->state + (1.0 - EFFECTIVE_STATE_RATIO) * s->getState(); // Emergency
     // usually helps to fix the accident, so effective state is combined
 
     std::array <double, 7> probabilities {0}; // For each severity and one for their sum
