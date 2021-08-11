@@ -64,6 +64,25 @@ void TheArk::init()
     interface = new Interface();
     interface->init();
 
+    if (!std::stoi(interface->getGeneral()["Debug_Output"]))
+    {
+        log_stream = new std::ofstream;
+        log_stream->open("../Logs/Main_Log.txt");
+
+        old_rdbufs[0] = std::clog.rdbuf();
+
+        std::clog.rdbuf(log_stream->rdbuf());
+    }
+
+    if (!std::stoi(interface->getGeneral()["Show_Errors"]))
+    {
+        err_stream = new std::ofstream;
+        err_stream->open("../Logs/Errors.txt");
+
+        old_rdbufs[1] = std::cerr.rdbuf();
+        std::cerr.rdbuf(err_stream->rdbuf());
+    }
+
     std::array<std::string, 6> services_names = {"Technical", "Biological",
                                                  "Medical", "Navigation",
                                                  "Emergency", "Social"};
@@ -87,25 +106,6 @@ void TheArk::init()
     for (int i = 0; i < 6; ++i)
     {
         services[i]->setState(std::stoi(interface->getServices()[i]["State"]));
-    }
-
-    if (!std::stoi(interface->getGeneral()["Debug_Output"]))
-    {
-        log_stream = new std::ofstream;
-        log_stream->open("../Logs/Main_Log.txt");
-
-        old_rdbufs[0] = std::clog.rdbuf();
-
-        std::clog.rdbuf(log_stream->rdbuf());
-    }
-
-    if (!std::stoi(interface->getGeneral()["Show_Errors"]))
-    {
-        err_stream = new std::ofstream;
-        err_stream->open("../Logs/Errors.txt");
-
-        old_rdbufs[1] = std::cerr.rdbuf();
-        std::cerr.rdbuf(err_stream->rdbuf());
     }
 }
 
