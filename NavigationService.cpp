@@ -3,9 +3,7 @@
 //
 
 #include "NavigationService.h"
-#include "TheArk.h"
 #include "Resources.h"
-#include "Interface.h"
 #include "RandomNumberGenerator.h"
 
 NavigationService::NavigationService(): staff(0), /*need_resources(0),*/ years_delta(0)

@@ -10,8 +10,10 @@
 #include <algorithm>
 #include <cmath>
 
+#include "Interface.h"
 #include "Service.h"
 #include "NavigationBlock.h"
+#include "TheArk.h"
 
 using std::unique_ptr;
 
@@ -26,19 +28,23 @@ class NavigationService : public Service {
 private:
     // Total amount of workers here
     unsigned int staff;
+
     // Hiring more people than this value * default
     // required_staff is useless for upgrades
     const double MAX_STAFF_RATIO = 1.2;
+
     // Basically Population / 8, but can be higher
     // More people — faster repair, higher efficiency
     unsigned int required_staff;
+
     // Starting population / this coef. is default staff number
     const char DEFAULT_STAFF_DENOMINATOR = 20;
+
     // Staff required for fully functioning systems
     unsigned DEFAULT_STAFF;
 
     // Shows how effective repairing is for a full team
-    const unsigned short REPAIR_PERCENT_PER_YEAR = 20;
+    const unsigned short REPAIR_PERCENT_PER_YEAR = constFieldInit<unsigned short>("REPAIR_PERCENT_PER_YEAR", 0, NavDevAMOUNT * 100.0, 20);
 
     //unsigned int need_resources;
 
@@ -76,10 +82,31 @@ private:
     // If years_total is higher this value times,
     // there will be a warning to prevent from endless
     // travelling
-    unsigned short int LOST_THE_WAY_WARNING = 3;
+    unsigned short int LOST_THE_WAY_WARNING = constFieldInit<unsigned short>("LOST_THE_WAY_WARNING", 2, 1000, 3);
 
     // Every year each device's state will decrease by this amount
-    const double ANNUAL_DEGRADATION = -2;
+    const double ANNUAL_DEGRADATION = constFieldInit<double>("ANNUAL_DEGRADATION", NavDevAMOUNT*(-100.0), 0, -2);
+
+    // This template is used for initializing const coefficients
+    // Use any lower_bound == upper_bound if there are no limitations
+    template<typename T>
+    [[nodiscard]] T constFieldInit(const std::string& name, double lower_bound, double upper_bound, double default_value) const
+    {
+        T result = (T)(std::stod(TheArk::get_instance()->getInterface()->getServices()
+                [Navigation_Service][name]));
+
+        if (upper_bound < lower_bound) {
+            std::cerr << "NavigationService error 1: incorrect constFieldInit(...) boundaries.";
+        }
+        else if (result < lower_bound or result > upper_bound) {
+            std::cerr << "NavigationService error 2: incorrect " << name << " value.";
+        }
+        else {
+            return result;
+        }
+        std::cerr << endl << "Default value of " << default_value << " has been set." << endl;
+        return (T)default_value;
+    }
 
 public:
     NavigationService();
