@@ -173,7 +173,7 @@ void Population::processYear() {
         if (HisAge < this->borderChildrenToAdults())  // CHILDREN
         {
             children++;
-            if (rand() <= this->deathRateChildren() * RAND_MAX || (*it)->getPhysicalHealth() < CriticalHealth)
+            if (rand() <= this->deathRateChildren() * RAND_MAX || (*it)->getPhysicalHealth() < CriticalHealth or !(*it)->isAlive())
             {
                 (*it)->setIsAlive(false);
                 children--;
@@ -182,7 +182,7 @@ void Population::processYear() {
         if ((HisAge >= this->borderChildrenToAdults()) && (HisAge < borderAdultsToOldmen()))  // ADULTS
         {
             adults++;
-            if (rand() <= this->deathRateAdults() * RAND_MAX  || (*it)->getPhysicalHealth() < CriticalHealth)
+            if (rand() <= this->deathRateAdults() * RAND_MAX  || (*it)->getPhysicalHealth() < CriticalHealth or !(*it)->isAlive())
             {
                 (*it)->setIsAlive(false);
                 adults--;
@@ -193,7 +193,7 @@ void Population::processYear() {
         if (HisAge >= this->borderAdultsToOldmen())  // OLD
         {
             oldmen++;
-            if (rand() <= this->deathRateOldmen() * RAND_MAX || HisAge > 100  || (*it)->getPhysicalHealth() < CriticalHealth)
+            if (rand() <= this->deathRateOldmen() * RAND_MAX || HisAge > 100  || (*it)->getPhysicalHealth() < CriticalHealth or !(*it)->isAlive())
             {
                 (*it)->setIsAlive(false);
                 oldmen--;
@@ -216,6 +216,7 @@ void Population::processYear() {
 
     // POP DEAD PEOPLE IN SERVICE LISTS
     this->check_dead_people_in_services();
+    std::clog  << "DIff " << getTotal()-getChildren()-getAdults()-getOldmen() << endl;
 }
 
 void Population::check_dead_people_in_services()
