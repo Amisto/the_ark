@@ -16,6 +16,7 @@
 #include "TheArk.h"
 
 using std::unique_ptr;
+using std::clog;
 
 enum FlightStage
 {
@@ -31,7 +32,7 @@ private:
 
     // Hiring more people than this value * default
     // required_staff is useless for upgrades
-    const double MAX_STAFF_RATIO = 1.2;
+    const double MAX_STAFF_RATIO = 1.3;
 
     // Basically Population / 8, but can be higher
     // More people — faster repair, higher efficiency
@@ -46,7 +47,9 @@ private:
     // Shows how effective repairing is for a full team
     const unsigned short REPAIR_PERCENT_PER_YEAR = constFieldInit<unsigned short>("REPAIR_PERCENT_PER_YEAR", 0, NavDevAMOUNT * 100.0, 20);
 
-    //unsigned int need_resources;
+    // For resources management
+    unsigned int need_resources;
+    unsigned int junk;
 
     // Stages' of the flight management
     FlightStage stage;
@@ -76,7 +79,7 @@ private:
     // then total distance of flight decreases
     const double MINIMAL_PRODUCTIVITY = 0.35;
 
-    // Total years amount is changing by this value
+    // Total years amount is changing if years_delta is higher than this value
     const unsigned short BASIC_DELTA = 2;
 
     // If years_total is higher this value times,
@@ -114,7 +117,7 @@ public:
     void process_accident(AccidentSeverity as)  override; // каждая служба должна уметь в своих терминах обработать переданную ей аварию
     void process_year()  override;                        // если у службы есть какая-то личная жизнь, она может заниматься ей тут
     [[nodiscard]] double getState()  override;                          // каждая служба должна уметь вернуть свое состояние в процентах, посчитав его в своих терминах
-    void setState(double s)  override;                    // функция для инициализации, каждая служба должна уметь получить состояние в процентах и пересчитать  его в своих терминах
+    void setState(double s)  override;                    // функция для инициализации, каждая служба должна уметь получить состояние в процентах и пересчитать его в своих терминах
 
     [[nodiscard]] unsigned int getStaffDemand() override;
     [[nodiscard]] unsigned int getResourceDemand() override;
@@ -122,9 +125,6 @@ public:
 
     // Kills some staff members. Var victims HAS to be less than staff!
     void killStaff(unsigned victims);
-
-    [[nodiscard]] bool isChangedEfficiency() const;
-    void setChangedEfficiency(bool new_changed_efficiency);
 };
 
 #endif //THE_ARK_NAVIGATIONSERVICE_H

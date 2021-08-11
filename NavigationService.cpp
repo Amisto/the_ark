@@ -6,7 +6,7 @@
 #include "Resources.h"
 #include "RandomNumberGenerator.h"
 
-NavigationService::NavigationService(): staff(0), /*need_resources(0),*/ years_delta(0)
+NavigationService::NavigationService(): staff(0), need_resources(0), years_delta(0), junk(0)
 {
     DEFAULT_STAFF = std::stoi(
             TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / DEFAULT_STAFF_DENOMINATOR;
@@ -116,6 +116,7 @@ void NavigationService::process_accident(AccidentSeverity as)
 void NavigationService::process_year()
 {
     std::clog << "NS_Years_Delta: " << years_delta << endl;
+    std::clog << "Total_Y: " << TheArk::get_instance()->getYearsTotal() << endl;
     // Block for flight stage management
     time_until_next_stage--;
     if (not time_until_next_stage) {
@@ -137,15 +138,16 @@ void NavigationService::process_year()
     for (auto & it : devices)
         effective_sum += it->getState() * it->getEfficiency() / 10000.f;
 
-    years_delta -= 6 * pow((effective_sum - MINIMAL_PRODUCTIVITY), 5);
+    years_delta -= 10 * pow((effective_sum - MINIMAL_PRODUCTIVITY), 5);
+    auto current_year_change = static_cast<int>(years_delta);
 
     if (years_delta > BASIC_DELTA) {
-        TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getYearsTotal() + BASIC_DELTA);
-        years_delta -= BASIC_DELTA;
+        TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getYearsTotal() + current_year_change);
+        years_delta -= current_year_change;
     }
     else if (years_delta < -BASIC_DELTA) {
-        TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getYearsTotal() - BASIC_DELTA);
-        years_delta -= -BASIC_DELTA;
+        TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getYearsTotal() + current_year_change);
+        years_delta -= current_year_change;
     }
 
     if (TheArk::get_instance()->getCurrentYear() >
@@ -168,57 +170,68 @@ void NavigationService::process_year()
 
 
     // Block for staff management
-    if (staff < DEFAULT_STAFF) {
-        required_staff = DEFAULT_STAFF;
-    }
-    else if (TheArk::get_instance()->getPopulation()->getUnemployedPeople() >=
-        (required_staff / 15) and required_staff < MAX_STAFF_RATIO * DEFAULT_STAFF) {
-        required_staff += TheArk::get_instance()->getPopulation()->getUnemployedPeople() / 8;
-    }
+    // CURRENTLY DISABLED
+//    if (staff < DEFAULT_STAFF) {
+//        required_staff = DEFAULT_STAFF;
+//    }
+//    else if (TheArk::get_instance()->getPopulation()->getUnemployedPeople() >=
+//        (required_staff / 15) and required_staff < MAX_STAFF_RATIO * DEFAULT_STAFF) {
+//        required_staff += TheArk::get_instance()->getPopulation()->getUnemployedPeople() / 8;
+//    }
 
     staff = TheArk::get_instance()->getPopulation()->getServiceStaff(Navigation_Service).size();
     //
 
     // Block for resource management
+    // CURRENTLY DISABLED BECAUSE OF STRANGE BEHAVIOUR IN RESOURCES.CPP
+//    auto used_currently = TheArk::get_instance()->getResources()->getUsedByService(Navigation_Service);
+//    junk = used_currently;
+//    clog << "Used res: " << used_currently << endl;
+//    if (used_currently < need_resources)
+//        devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
+//                TheArk::get_instance()->getRandomGenerator()->
+//                getRandomDouble(-100 * (1.0 - used_currently * 1.0 / need_resources), 0.0));
+//    need_resources = staff;
+    //
     //
 
     // Block for devices
-     // Efficiency upgrades
-      // Adding points to the device with max state
-    if(staff > DEFAULT_STAFF) {
-        if (gained_efficiency_points != MAX_UPGRADE_POINTS)
-        {
-            setChangedEfficiency(true);
-            double x;
-            if (staff < MAX_STAFF_RATIO * DEFAULT_STAFF)
-                x = (staff * 1.0) / DEFAULT_STAFF;
-            else
-                x = MAX_STAFF_RATIO;
-            double current_max_points = MAX_UPGRADE_POINTS * pow((x - 1) / (MAX_STAFF_RATIO - 1), 0.1);
+      // Efficiency upgrades: CURRENTLY DISABLED 'CAUSE STAFF CANNOT BE
+      // HIGHER THAN DEFAULT VALUE
+        // Adding points to the device with max state
+//    if(staff > DEFAULT_STAFF) {
+//        if (gained_efficiency_points != MAX_UPGRADE_POINTS)
+//        {
+//            setChangedEfficiency(true);
+//            double x;
+//            if (staff < MAX_STAFF_RATIO * DEFAULT_STAFF)
+//                x = (staff * 1.0) / DEFAULT_STAFF;
+//            else
+//                x = MAX_STAFF_RATIO;
+//            double current_max_points = MAX_UPGRADE_POINTS * pow((x - 1) / (MAX_STAFF_RATIO - 1), 0.1);
+//
+//            double eff_points = MAX_UPGRADE_POINTS_PER_YEAR * pow((x - 1) / (MAX_STAFF_RATIO - 1), 0.3);
+//            if (staff >= MAX_STAFF_RATIO * DEFAULT_STAFF)
+//                eff_points = MAX_UPGRADE_POINTS_PER_YEAR;
+//            if (eff_points + gained_efficiency_points < current_max_points) {
+//                gained_efficiency_points += eff_points;
+//            }
+//            else {
+//                eff_points = current_max_points - gained_efficiency_points;
+//                gained_efficiency_points = current_max_points;
+//            }
+//
+//            auto upgrd_dev = std::max_element(devices.begin(), devices.end(), CompareDevicesState());// upgraded device
+//            upgrd_dev->get()->setEfficiency(upgrd_dev->get()->getEfficiency() + eff_points);
+//        }
+//    }
+//    else if (isChangedEfficiency()) {
+//        for (auto i = 0; i < NavDevAMOUNT; i++)
+//            devices[i]->setEfficiency(devices[i]->getDefaultEfficiency(
+//                    static_cast<NavigationDevices>(i)));
+//        gained_efficiency_points = 0;
+//    }
 
-            double eff_points = MAX_UPGRADE_POINTS_PER_YEAR * pow((x - 1) / (MAX_STAFF_RATIO - 1), 0.3);
-            if (staff >= MAX_STAFF_RATIO * DEFAULT_STAFF)
-                eff_points = MAX_UPGRADE_POINTS_PER_YEAR;
-            if (eff_points + gained_efficiency_points < current_max_points) {
-                gained_efficiency_points += eff_points;
-            }
-            else {
-                eff_points = current_max_points - gained_efficiency_points;
-                gained_efficiency_points = current_max_points;
-            }
-
-            auto upgrd_dev = std::max_element(devices.begin(), devices.end(), CompareDevicesState());// upgraded device
-            upgrd_dev->get()->setEfficiency(upgrd_dev->get()->getEfficiency() + eff_points);
-        }
-    }
-    else if (isChangedEfficiency()) {
-        for (auto i = 0; i < NavDevAMOUNT; i++)
-            devices[i]->setEfficiency(devices[i]->getDefaultEfficiency(
-                    static_cast<NavigationDevices>(i)));
-        gained_efficiency_points = 0;
-    }
-
-    //cout << gained_efficiency_points << endl;
      // Annual degradation
      for (auto & it : devices)
          it->changeState(ANNUAL_DEGRADATION);
@@ -268,17 +281,10 @@ unsigned int NavigationService::getStaffDemand() {
 }
 
 unsigned int NavigationService::getResourceDemand() {
-    return 0;
+    return need_resources;
 }
 
 unsigned int NavigationService::returnJunk() {
-    return 0;
+    return junk;
 }
 
-bool NavigationService::isChangedEfficiency() const {
-    return changed_efficiency;
-}
-
-void NavigationService::setChangedEfficiency(bool new_changed_efficiency) {
-    changed_efficiency = new_changed_efficiency;
-}
