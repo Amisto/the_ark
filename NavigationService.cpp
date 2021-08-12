@@ -153,7 +153,7 @@ void NavigationService::process_year()
     if (TheArk::get_instance()->getCurrentYear() >
     LOST_THE_WAY_WARNING
     * std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Years"])) {
-        cout << "We've been travelling " << LOST_THE_WAY_WARNING << " times longer than estimated" << endl
+        std::cout << "We've been travelling " << LOST_THE_WAY_WARNING << " times longer than estimated" << endl
         << "Probably we are lost forever" << endl
         << "Would you like to continue? (y/n)" << endl;
         string h;
