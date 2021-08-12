@@ -264,15 +264,7 @@ unsigned int SocialService::borderChildrenToAdults()
 }
 
 double SocialService::getState() {
-    double moral_health_sum = 0;
-    unsigned int population_size = TheArk::get_instance()->getPopulation()->getTotal();
-    if (population_size == 0)
-        return 0;
-    for (auto person : TheArk::get_instance()->getPopulation()->getPeople())
-    {
-        moral_health_sum += person->getMoralHealth();
-    }
-    return moral_health_sum / population_size;
+    return 50;
 }
 
 void SocialService::setState(double s) {/*nothing to do*/}
