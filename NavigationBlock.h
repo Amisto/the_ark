@@ -8,7 +8,6 @@
 #include <memory>
 #include <iostream>
 
-using std::cout;
 using std::endl;
 using std::unique_ptr;
 

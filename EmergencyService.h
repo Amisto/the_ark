@@ -17,7 +17,6 @@
 
 using std::array;
 using std::setw;
-using std::cout;
 using std::endl;
 
 

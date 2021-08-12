@@ -12,7 +12,7 @@
 #include <iomanip>
 
 using std::cin;
-using std::cout;
+using std::cerr;
 using std::endl;
 using std::setw;
 
@@ -31,7 +31,7 @@ void Interface::init() {
     std::ifstream fi(ifname, std::ios::in);
 
     if (!fi.is_open()) {
-        cout << "No config file with name " << ifname << " exists." << endl;
+        cerr << "No config file with name " << ifname << " exists." << endl;
         return;
     }
 
@@ -39,7 +39,7 @@ void Interface::init() {
 
     fi >> s0;
     if (s0 != "General") {
-        cout << "No General block in config file." << endl;
+        cerr << "No General block in config file." << endl;
         return;
     }
 
@@ -50,7 +50,7 @@ void Interface::init() {
         general[s0] = s1;
         if (fi.eof())
         {
-            cout << "No Services block in config file." << endl;
+            cerr << "No Services block in config file." << endl;
             return;
         }
         fi >> s0;
@@ -59,7 +59,7 @@ void Interface::init() {
     fi >> s0;
     if (s0 != "Technical")
     {
-        cout << "No Technical service block in config file." << endl;
+        cerr << "No Technical service block in config file." << endl;
         return;
     }
     fi >> s0;
@@ -69,7 +69,7 @@ void Interface::init() {
         services[Services::Technical_Service][s0] = s1;
         if (fi.eof())
         {
-            cout << "No Biological block in config file." << endl;
+            cerr << "No Biological block in config file." << endl;
             return;
         }
         fi >> s0;
@@ -81,7 +81,7 @@ void Interface::init() {
         services[Services::Biological_Service][s0] = s1;
         if (fi.eof())
         {
-            cout << "No Medical block in config file." << endl;
+            cerr << "No Medical block in config file." << endl;
             return;
         }
         fi >> s0;
@@ -93,7 +93,7 @@ void Interface::init() {
         services[Services::Medical_Service][s0] = s1;
         if (fi.eof())
         {
-            cout << "No Navigation block in config file." << endl;
+            cerr << "No Navigation block in config file." << endl;
             return;
         }
         fi >> s0;
@@ -105,7 +105,7 @@ void Interface::init() {
         services[Services::Navigation_Service][s0] = s1;
         if (fi.eof())
         {
-            cout << "No Emergency block in config file." << endl;
+            cerr << "No Emergency block in config file." << endl;
             return;
         }
         fi >> s0;
@@ -117,7 +117,7 @@ void Interface::init() {
         services[Services::Emergency_Service][s0] = s1;
         if (fi.eof())
         {
-            cout << "No Social block in config file." << endl;
+            cerr << "No Social block in config file." << endl;
             return;
         }
         fi >> s0;

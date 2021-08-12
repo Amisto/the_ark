@@ -177,7 +177,7 @@ void Resources::init(unsigned int total)
 	}
 	else
 	{
-		std::cout<<"proportion of not org resources cannot be more than 1"<<std::endl;
+		std::cerr << "Resources error: proportion of not org resources cannot be more than 1" << std::endl;
 	}
 }
 
