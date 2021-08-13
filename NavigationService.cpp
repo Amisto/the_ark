@@ -181,16 +181,14 @@ void NavigationService::process_year()
     //
 
     // Block for resource management
-    // CURRENTLY DISABLED BECAUSE OF STRANGE BEHAVIOUR IN RESOURCES.CPP
-//    auto used_currently = TheArk::get_instance()->getResources()->getUsedByService(Navigation_Service);
-//    junk = used_currently;
-//    clog << "Used res: " << used_currently << endl;
-//    if (used_currently < need_resources)
-//        devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
-//                TheArk::get_instance()->getRandomGenerator()->
-//                getRandomDouble(-100 * (1.0 - used_currently * 1.0 / need_resources), 0.0));
-//    need_resources = staff;
-    //
+    auto used_currently = TheArk::get_instance()->getResources()->getUsedByService(Navigation_Service);
+    junk = used_currently;
+
+    if (used_currently < need_resources)
+        devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
+                TheArk::get_instance()->getRandomGenerator()->
+                getRandomDouble(-100 * (1.0 - used_currently * 1.0 / need_resources), 0.0));
+    need_resources = staff;
     //
 
     // Block for devices
