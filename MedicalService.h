@@ -6,48 +6,70 @@
 #define THE_ARK_MEDICALSERVICE_H
 
 #include "Service.h"
+#include "Interface.h"
+#include "TheArk.h"
+#include "RandomNumberGenerator.h"
 #include <list>
 
 using std::list;
 
-class MedicalService : public Service {
+class MedicalService : public Service 
+{
 private:
-    unsigned int n_staff;                                 // количество рабочих всего
-    unsigned int resources;                               // количество имеющихся ресурсов
-    unsigned int Junk;					  // количество мусора
-    unsigned int NeedResources;                           // количество необходимых ресурсов
-    double State;                                         // состояние системы по 100-бальной шкале
-    unsigned int retirementAge;                           // возраст старения
-    double ChildrenDeath;                                 // средняя вероятность, что один ребенок подгибнет в течение года
-    double AdultDeath;                                    // средняя вероятность, что один взрослый подгибнет в течение года
-    double OldDeath;                                      // средняя вероятность, что один старик подгибнет в течение года
-    double Birth;                                         // рождаемость в год
-    unsigned int HealthYearAgo;                           // общее здоровье в прошлом году
-    unsigned int CriticalHealth;                          // критическое здоровье
+
+    // FIELDS //
+    const double PROPOTION_OF_PEOPLE         = std::stod(TheArk::get_instance()->getInterface()->getServices()[Medical_Service]["Propotion_of_people"]);
+    const double AVERAGE_BIRTH_RATE          = std::stod(TheArk::get_instance()->getInterface()->getServices()[Medical_Service]["Birth_rate"]);
+    const double AVERAGE_DEATH_RATE_CHILDREN = std::stod(TheArk::get_instance()->getInterface()->getServices()[Medical_Service]["Death_rate_children"]);
+    const double AVERAGE_DEATH_RATE_ADULTS   = std::stod(TheArk::get_instance()->getInterface()->getServices()[Medical_Service]["Death_rate_adults"]);
+    const double AVERAGE_DEATH_RATE_OLD      = std::stod(TheArk::get_instance()->getInterface()->getServices()[Medical_Service]["Death_rate_old"]);
+    const unsigned RETIREMENT_AGE            = std::stoi(TheArk::get_instance()->getInterface()->getServices()[Medical_Service]["Retirement_age"]);
+    const unsigned RESOURCES_PER_HEALTH      = std::stoi(TheArk::get_instance()->getInterface()->getServices()[Medical_Service]["Resources_per_health"]);
+    
+    unsigned int n_staff;                                 // current number of workers
+    unsigned int resources;                               // current amount of resources
+    unsigned int Junk;					                  // amount of junk to be returned this year
+    unsigned int NeedResources;                           // demand resources to be requested this year
+    double State;                                         // state of service
+    unsigned int retirementAge;                           // age Adults-->Old 
+    double ChildrenDeath;                                 // possibility of child death
+    double AdultDeath;                                    // possibility of adult death
+    double OldDeath;                                      // possibility of old death
+    double Birth;                                         // number of new people
+    unsigned int HealthYearAgo;                           // total health year ago
+    unsigned int CriticalHealth;                          // critical health to die
+    RandomNumberGenerator RNG = *TheArk::get_instance()->getRandomGenerator();
 
 public:
     MedicalService();
 
-    void process_accident(AccidentSeverity as) override;  // каждая служба должна уметь в своих терминах обработать переданную ей аварию
-    void process_year() override;                         // если у службы есть какая-то личная жизнь, она может заниматься ей тут
-    double getState() override;                           // каждая служба должна уметь вернуть свое состояние в процентах, посчитав его в своих терминах
-    unsigned int getCriticalHealth() const;               // возвращает поле CriticalHealth
-    void setState(double s) override;                     // функция для инициализации, каждая служба должна уметь получить состояние в процентах и пересчитать  его в своих терминах
+    // GETTERS //
+    double getState() override;                           // returns State
+    unsigned int getCriticalHealth() const;               // returns CriticalHealth
+    unsigned int borderAdultsToOldmen() const;            // returns RetirementAge
+    double deathRateChildren() const;                     // returns ChildrenDeath
+    double deathRateAdult() const;                        // returns AdultDeath
+    double deathRateOldmen() const;                       // returns OldDeath
+    double BirthRate() const;                             // returns Birth
+    unsigned int getResourceDemand() override;            // returns NeedResources
+    unsigned int getResourcePriority();                   //
+    unsigned int getStaffDemand() override;               // returns demand staff
+    unsigned int getStaffPriority();                      //
+    
+    // SETTERS //
+    void setState(double s) override;
 
-    unsigned int borderAdultsToOldmen() const;            // возраст старения
-    double deathRateChildren() const;                     // средняя вероятность, что один ребенок подгибнет в течение года
-    double deathRateAdult() const;                        // средняя вероятность, что один взрослый подгибнет в течение года
-    double deathRateOldmen() const;                       // средняя вероятность, что один старик подгибнет в течение года
-    double BirthRate() const;                             // рождаемость в год
-
-    unsigned int getResourceDemand() override;            // сколько ресурсов требуется
-    unsigned int getResourcePriority();          // с каким приоритетом служба будет требовать ресурсы
-    unsigned int getStaffDemand() override;               // сколько людей требуется
-    unsigned int getStaffPriority();             // с каким приоритетом слуюба будет требовать людей
-    bool changeStaff(int delta);                 // сколько людей добавили или забрали (в т.ч. смертность)
-    bool changeResources(int delta);             // сколько ресурсов добавили или забрали (в т.ч. износ)
-    unsigned int returnJunk() override;		 // сколько мусора вернули
-
+    // GAME MECHANICS //
+    void process_accident(AccidentSeverity as) override;  // 
+    void process_year() override;                         //
+    unsigned int returnJunk() override;                   //
+    void process_child(std::shared_ptr<Human> human);     // updates child state
+    void process_adult(std::shared_ptr<Human> human);     // updates adult state
+    void process_old(std::shared_ptr<Human> human);       // updates old state
+                   
+    // OTHER //       
+    bool changeStaff(int delta);                          //
+    bool changeResources(int delta);                      //
 };
 
 
