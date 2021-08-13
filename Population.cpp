@@ -173,7 +173,9 @@ void Population::processYear() {
         if (HisAge < this->borderChildrenToAdults())  // CHILDREN
         {
             children++;
-            if (rand() <= this->deathRateChildren() * RAND_MAX || (*it)->getPhysicalHealth() < CriticalHealth or !(*it)->isAlive())
+            if (TheArk::get_instance()->getRandomGenerator()->getRandomFloat(0, 1) <= this->deathRateChildren()
+                || (*it)->getPhysicalHealth() < CriticalHealth
+                or !(*it)->isAlive())
             {
                 (*it)->setIsAlive(false);
                 children--;
@@ -182,7 +184,9 @@ void Population::processYear() {
         if ((HisAge >= this->borderChildrenToAdults()) && (HisAge < borderAdultsToOldmen()))  // ADULTS
         {
             adults++;
-            if (rand() <= this->deathRateAdults() * RAND_MAX  || (*it)->getPhysicalHealth() < CriticalHealth or !(*it)->isAlive())
+            if (TheArk::get_instance()->getRandomGenerator()->getRandomFloat(0, 1) <= this->deathRateAdults()
+                || (*it)->getPhysicalHealth() < CriticalHealth
+                or !(*it)->isAlive())
             {
                 (*it)->setIsAlive(false);
                 adults--;
@@ -193,7 +197,9 @@ void Population::processYear() {
         if (HisAge >= this->borderAdultsToOldmen())  // OLD
         {
             oldmen++;
-            if (rand() <= this->deathRateOldmen() * RAND_MAX || HisAge > 100  || (*it)->getPhysicalHealth() < CriticalHealth or !(*it)->isAlive())
+            if (TheArk::get_instance()->getRandomGenerator()->getRandomFloat(0, 1) <= this->deathRateOldmen()
+                || HisAge > 100  || (*it)->getPhysicalHealth() < CriticalHealth
+                or !(*it)->isAlive())
             {
                 (*it)->setIsAlive(false);
                 oldmen--;
@@ -251,7 +257,7 @@ void Population::init(unsigned int total)
     for(int i = 0; i < this->children; i++) // CHILDREN
     {   
         auto* person = new Human();
-        person->setAge((rand()% this->borderChildrenToAdults()));
+        person->setAge(TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, borderChildrenToAdults() - 1) );
         person->setTypeAsAWorker(CHILD);
         auto ptr = shared_ptr<Human>(person);
         this->people.push_back(ptr);
@@ -260,7 +266,7 @@ void Population::init(unsigned int total)
     for(int i = 0; i < this->oldmen; i++) // OLD
     {
         auto *person = new Human;
-        person->setAge((this->borderAdultsToOldmen() + rand() % (100 - this->borderAdultsToOldmen() + 1)));
+        person->setAge(TheArk::get_instance()->getRandomGenerator()->getRandomInt(borderAdultsToOldmen(), 100));
         person->setTypeAsAWorker(RETIRED);
         auto ptr = shared_ptr<Human>(person);
         this->people.push_back(ptr);
@@ -269,7 +275,7 @@ void Population::init(unsigned int total)
     for(int i = 0; i < this->adults; i++) // ADULTS
     {
         auto* person = new Human;
-        person->setAge((this->borderChildrenToAdults()+ rand()% (this->borderAdultsToOldmen() - this->borderChildrenToAdults() + 1)));
+        person->setAge(TheArk::get_instance()->getRandomGenerator()->getRandomInt(borderChildrenToAdults(), borderAdultsToOldmen() - 1));
         person->setTypeAsAWorker(UNEMPLOYED);
         auto ptr = shared_ptr<Human>(person);
         this->people.push_back(ptr);
