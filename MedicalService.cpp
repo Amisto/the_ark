@@ -12,7 +12,7 @@
 #include <iostream>
 
 
-MedicalService::MedicalService() : retirementAge(65), ChildrenDeath(0.0001), AdultDeath(0.001), OldDeath(0.01), State(100), n_staff(0), resources(1000), Junk(0), Birth(0), NeedResources(1000), HealthYearAgo(100), CriticalHealth(10) 
+MedicalService::MedicalService() : retirementAge(65), ChildrenDeath(0.0001), AdultDeath(0.001), OldDeath(0.01), State(100), n_staff(0), resources(1000), junk(0), Birth(0), demand_resources(1000), HealthYearAgo(100), CriticalHealth(10), staff(0) 
 {}
 
 void MedicalService::process_accident(AccidentSeverity as) 
@@ -53,13 +53,11 @@ void MedicalService::process_accident(AccidentSeverity as)
 void MedicalService::process_year() 
 {
     // UPDATE OF FIELDS //
-    retirementAge = RETIREMENT_AGE;
-    n_staff = (unsigned int)(PROPOTION_OF_PEOPLE * TheArk::get_instance()->getPopulation()->getTotal());
-    NeedResources = static_cast<unsigned int>(20 * TheArk::get_instance()->getPopulation()->getTotal());
-    double ResourcePercent = double(resources) / NeedResources;
-    double StaffPercent = double(TheArk::get_instance()->getPopulation()->getServiceStaff(Medical_Service).size()) / n_staff;
+    this->retirementAge = RETIREMENT_AGE;
+    this->n_staff = (unsigned int)(PROPOTION_OF_PEOPLE * TheArk::get_instance()->getPopulation()->getTotal());
     double birth_splash = double(this->State) / 100 * AVERAGE_BIRTH_RATE;
-    Birth = (unsigned int)(RNG.getRandomDouble(AVERAGE_BIRTH_RATE - birth_splash, AVERAGE_BIRTH_RATE + birth_splash) * TheArk::get_instance()->getPopulation()->getAdults());
+    this->Birth = (unsigned int)(RNG.getRandomDouble(AVERAGE_BIRTH_RATE - birth_splash, AVERAGE_BIRTH_RATE + birth_splash) * TheArk::get_instance()->getPopulation()->getAdults());
+    this->staff = TheArk::get_instance()->getPopulation()->getServiceStaff(Medical_Service).size();
 
     // UPDATING HUMAN STATE //
     unsigned int total_health = 0;                                                                                  
@@ -105,14 +103,24 @@ void MedicalService::process_year()
 
 void MedicalService::process_child(std::shared_ptr<Human> human)
 {
-    if ((human->getPhysicalHealth() < 60) && (human->getPhysicalHealth() > 30))
+    if (human->getPhysicalHealth() < 95 && human->getPhysicalHealth() > 30)
     {     
-        human->setPhysicalHealth(static_cast<unsigned int>(round(human->getPhysicalHealth() + RNG.getRandomInt(0, 3) - RNG.getRandomInt(0, 4) + (TheArk::get_instance()->getSocialService()->getState() * State - 90000) / 10000)));
+        int change_health = RNG.getRandomInt(-3, 4);
+        human->setPhysicalHealth(human->getPhysicalHealth() + change_health);
     }
 
     if (human->getPhysicalHealth() < 30) 
     {
-        human->setPhysicalHealth(static_cast<unsigned int>(round(human->getPhysicalHealth() + RNG.getRandomInt(0, 3) - RNG.getRandomInt(0, 3) + (TheArk::get_instance()->getSocialService()->getState() * State - 90000) / 10000)));
+        int change_health = RNG.getRandomInt(-4, 2);
+        int heal = this->State / 15 * (double(staff) / n_staff);
+        human->setPhysicalHealth(human->getPhysicalHealth() + change_health);
+        if (this->resources > heal * RESOURCES_PER_HEALTH)
+        {
+            human->setPhysicalHealth(human->getPhysicalHealth() + heal);
+            this->resources -= heal * RESOURCES_PER_HEALTH;
+            this->demand_resources += heal * RESOURCES_PER_HEALTH;
+            this->junk += heal * RESOURCES_PER_HEALTH;
+        }
     }
 
     if (human->getPhysicalHealth() > 100) 
@@ -121,14 +129,24 @@ void MedicalService::process_child(std::shared_ptr<Human> human)
 
 void MedicalService::process_adult(std::shared_ptr<Human> human)
 {
-    if (human->getPhysicalHealth() < 60 && human->getPhysicalHealth() > 30) 
-    {
-        human->setPhysicalHealth(static_cast<unsigned int>(round(human->getPhysicalHealth() + RNG.getRandomInt(0, 2) - RNG.getRandomInt(0, 2))));
+    if (human->getPhysicalHealth() < 95 && human->getPhysicalHealth() > 30)
+    {     
+        int change_health = RNG.getRandomInt(-2, 2);
+        human->setPhysicalHealth(human->getPhysicalHealth() + change_health);
     }
 
     if (human->getPhysicalHealth() < 30) 
     {
-        human->setPhysicalHealth(static_cast<unsigned int>(round(human->getPhysicalHealth() + State / 10)));             
+        int change_health = RNG.getRandomInt(-4, 2);
+        int heal = this->State / 10 * (double(staff) / n_staff);
+        human->setPhysicalHealth(human->getPhysicalHealth() + change_health);
+        if (this->resources > heal * RESOURCES_PER_HEALTH)
+        {
+            human->setPhysicalHealth(human->getPhysicalHealth() + heal);
+            this->resources -= heal * RESOURCES_PER_HEALTH;
+            this->demand_resources += heal * RESOURCES_PER_HEALTH;
+            this->junk += heal * RESOURCES_PER_HEALTH;
+        }
     }
 
     if (human->getPhysicalHealth() > 100) 
@@ -137,14 +155,24 @@ void MedicalService::process_adult(std::shared_ptr<Human> human)
 
 void MedicalService::process_old(std::shared_ptr<Human> human)
 {
-    if (human->getPhysicalHealth() < 60 && human->getPhysicalHealth() > 30) 
-    {
-        human->setPhysicalHealth(static_cast<unsigned int>(round(human->getPhysicalHealth() + RNG.getRandomInt(0, 2) - RNG.getRandomInt(0, 3) + (TheArk::get_instance()->getSocialService()->getState() * State - 90000) / 10000)));
+    if (human->getPhysicalHealth() < 95 && human->getPhysicalHealth() > 30)
+    {     
+        int change_health = RNG.getRandomInt(-3, 2);
+        human->setPhysicalHealth(human->getPhysicalHealth() + change_health);
     }
 
     if (human->getPhysicalHealth() < 30) 
     {
-        human->setPhysicalHealth(static_cast<unsigned int>(round(human->getPhysicalHealth() + RNG.getRandomInt(0, 2) - RNG.getRandomInt(0, 4) + (TheArk::get_instance()->getSocialService()->getState() * State - 90000) / 10000)));
+        int change_health = RNG.getRandomInt(-5, 2);
+        int heal = this->State / 10 * (double(staff) / n_staff);
+        human->setPhysicalHealth(human->getPhysicalHealth() + change_health);
+        if (this->resources > heal * RESOURCES_PER_HEALTH)
+        {
+            human->setPhysicalHealth(human->getPhysicalHealth() + heal);
+            this->resources -= heal * RESOURCES_PER_HEALTH;
+            this->demand_resources += heal * RESOURCES_PER_HEALTH;
+            this->junk += heal * RESOURCES_PER_HEALTH;
+        }
     }
 
     if (human->getPhysicalHealth() > 100) 
@@ -164,22 +192,27 @@ unsigned int MedicalService::getCriticalHealth() const
 
 unsigned int MedicalService::getStaffDemand() 
 {
-    return static_cast<unsigned int>(round(double(n_staff - TheArk::get_instance()->getPopulation()->getServiceStaff(Medical_Service).size())));
+    if (this->n_staff > this->staff)
+        return (unsigned int)(this->n_staff - this->staff);
+    else
+        return 0;
 }
 
 unsigned int MedicalService::getResourceDemand() 
 {
-    return static_cast<unsigned int>(round((NeedResources - resources) * (double(1.8) - (State / 100.0))));
+    unsigned int tmp = this->demand_resources;
+    this->demand_resources = 0;
+	return tmp;
 }
 
 unsigned int MedicalService::getStaffPriority() 
 {
-    return static_cast<unsigned int>(round(exp(1.8 * (1 - double(TheArk::get_instance()->getPopulation()->getServiceStaff(Medical_Service).size())/n_staff))));
+    return 0;
 }
 
 unsigned int MedicalService::getResourcePriority() 
 {
-    return static_cast<unsigned int>(round(exp(1.8 * (1 - double(resources) / NeedResources))));
+    return 0;
 }
 
 unsigned int MedicalService::borderAdultsToOldmen() const 
@@ -219,12 +252,12 @@ bool MedicalService::changeStaff(int delta)
 
 bool MedicalService::changeResources(int delta) 
 {
-    resources += delta;
-    Junk = delta;
     return true;
 }
 
 unsigned int MedicalService::returnJunk()
 {
-	return Junk;
+    unsigned int tmp = this->junk;
+    this->junk = 0;
+	return tmp;
 }

@@ -27,9 +27,10 @@ private:
     const unsigned RESOURCES_PER_HEALTH      = std::stoi(TheArk::get_instance()->getInterface()->getServices()[Medical_Service]["Resources_per_health"]);
     
     unsigned int n_staff;                                 // current number of workers
+    unsigned int staff;                                   // current staff
     unsigned int resources;                               // current amount of resources
-    unsigned int Junk;					                  // amount of junk to be returned this year
-    unsigned int NeedResources;                           // demand resources to be requested this year
+    unsigned int junk;					                  // amount of junk to be returned this year
+    unsigned int demand_resources;                        // demand resources to be requested this year
     double State;                                         // state of service
     unsigned int retirementAge;                           // age Adults-->Old 
     double ChildrenDeath;                                 // possibility of child death
@@ -39,6 +40,11 @@ private:
     unsigned int HealthYearAgo;                           // total health year ago
     unsigned int CriticalHealth;                          // critical health to die
     RandomNumberGenerator RNG = *TheArk::get_instance()->getRandomGenerator();
+
+    // METHODS //
+    void process_child(std::shared_ptr<Human> human);     // updates child state
+    void process_adult(std::shared_ptr<Human> human);     // updates adult state
+    void process_old(std::shared_ptr<Human> human);       // updates old state
 
 public:
     MedicalService();
@@ -63,9 +69,6 @@ public:
     void process_accident(AccidentSeverity as) override;  // 
     void process_year() override;                         //
     unsigned int returnJunk() override;                   //
-    void process_child(std::shared_ptr<Human> human);     // updates child state
-    void process_adult(std::shared_ptr<Human> human);     // updates adult state
-    void process_old(std::shared_ptr<Human> human);       // updates old state
                    
     // OTHER //       
     bool changeStaff(int delta);                          //
