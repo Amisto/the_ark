@@ -16,6 +16,11 @@ def lower_func(z):  # 6x3 equations for each distribution
     while cc != len(y):
         y[cc] = 1 / y[cc]
         cc += 1
+
+    if sum(y[0:5]) > 1 or sum(y[6:11]) > 1 or sum(y[12:18]) > 1:
+        print("ERROR: Total probability is higher than 1! \n Check input.csv parameters.\n")
+        return 0
+
     cc = 1
     while cc != 7:
         out[3*(cc-1)] = z[3*(cc-1)] * numpy.exp((-1) * z[3*(cc-1)+1] * x[cc - 1]**2) + z[3*(cc-1)+2] - y[cc-1]

@@ -163,9 +163,9 @@ void NavigationService::process_year()
         else
             LOST_THE_WAY_WARNING += 2;
     }
-    if (std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Years"]) * 0.9 >
+    if (std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Years"]) * MINIMAL_FLIGHT_TIME / 100.0 >
         TheArk::get_instance()->getYearsTotal())
-        TheArk::get_instance()->setYearsTotal(std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Years"]) * 9 / 10);
+        TheArk::get_instance()->setYearsTotal(std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Years"]) * MINIMAL_FLIGHT_TIME / 100);
     //
 
 

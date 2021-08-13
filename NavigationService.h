@@ -31,18 +31,22 @@ private:
     unsigned int staff;
 
     // Hiring more people than this value * default
-    // required_staff is useless for upgrades
-    const double MAX_STAFF_RATIO = 1.3;
+    // required_staff is useless for upgrades //CURRENTLY DISABLED
+    //const double MAX_STAFF_RATIO = 1.3;
 
     // Basically Population / 8, but can be higher
     // More people — faster repair, higher efficiency
     unsigned int required_staff;
 
     // Starting population / this coef. is default staff number
-    const char DEFAULT_STAFF_DENOMINATOR = 20;
+    const unsigned short DEFAULT_STAFF_DENOMINATOR = 1.0 /
+            constFieldInit<double>("Propotion_of_people", 0.001, 1, 0.15);
 
     // Staff required for fully functioning systems
     unsigned DEFAULT_STAFF;
+
+    // Value in percents from initial amount of years
+    const double MINIMAL_FLIGHT_TIME = constFieldInit<double>("MINIMAL_FLIGHT_TIME", 0.1, 1000, 90);
 
     // Shows how effective repairing is for a full team
     const unsigned short REPAIR_PERCENT_PER_YEAR = constFieldInit<unsigned short>("REPAIR_PERCENT_PER_YEAR", 0, NavDevAMOUNT * 100.0, 20);
@@ -60,16 +64,16 @@ private:
     const unsigned short ACCELERATION_TIME = 3;
 
     array<unique_ptr<NavigationBlock>, NavDevAMOUNT> devices;
-    // Flag for process_year optimization
-    bool changed_efficiency = false;
+    // Flag for process_year optimization //CURRENTLY DISABLED
+    //bool changed_efficiency = false;
 
     // Is used with the next field
-    double gained_efficiency_points = 0;
+    //double gained_efficiency_points = 0; //CURRENTLY DISABLED
     // E.g. this value = 10, total efficiency of all devices
     // is always lower than 110%
-    const unsigned short MAX_UPGRADE_POINTS = 20;
+    //const unsigned short MAX_UPGRADE_POINTS = 20; //CURRENTLY DISABLED
     //
-    const double MAX_UPGRADE_POINTS_PER_YEAR = 2;
+    //const double MAX_UPGRADE_POINTS_PER_YEAR = 2; //CURRENTLY DISABLED
 
     // Shows gained or lost time due to the work
     // of devices, < 0 means faster flight
