@@ -222,7 +222,6 @@ void Population::processYear() {
 
     // POP DEAD PEOPLE IN SERVICE LISTS
     this->check_dead_people_in_services();
-    std::clog  << "DIff " << getTotal()-getChildren()-getAdults()-getOldmen() << endl;
 }
 
 void Population::check_dead_people_in_services()
