@@ -23,14 +23,29 @@ using std::endl;
 class EmergencyService : public Service
 {
 private:
-    double state;
+    // Shows how many resources service needs, 100% — enough, 0 — nothing
+    double resources_state;
+    // Shows how many staff members service needs, 100% — enough, 0 — nothing
+    double staff_state;
+    // Shows the state of tools, which are used during the emergency situations
+    double tools_state;
+    // Mean value of other states
+    double system_state;
 
-    unsigned int staff; // Current staff amount
-    unsigned int max_staff;
+    // Shows how effective repairing of tools is for a full team
+    const unsigned short REPAIR_PERCENT_PER_YEAR = constFieldInit<unsigned short>("REPAIR_PERCENT_PER_YEAR", 0, 100.0, 5);
 
-    unsigned int resources;
-    unsigned int max_resources;
-    unsigned int Junk;
+    // Every year tool's state will decrease by this amount
+    const double ANNUAL_DEGRADATION = constFieldInit<double>("ANNUAL_DEGRADATION", -100.0, 0, -2);
+
+    // Current staff amount
+    unsigned int staff;
+    // Staff required for 100% staff_state
+    unsigned int required_staff;
+
+    // Resources per year required for 100% resource_staff
+    unsigned int need_resources;
+    unsigned int junk;
 
     // Coefficients for probabilities of accidents depending on
     // service's state
@@ -38,8 +53,8 @@ private:
 
     // Accidents' output
     std::ofstream emergency_log;
-    const unsigned short CELL_WIDTH = 11;
-    const unsigned short CELL_WIDTH_S = 20;
+    const char CELL_WIDTH = 11;
+    const char CELL_WIDTH_S = 20;
 
     // Controls the impact of this Service on accident's severity
     // Higher ratio — lower dependence on Emergency service's state,
@@ -81,7 +96,6 @@ public:
     unsigned int getResourceDemand() override;
     unsigned int returnJunk() override;
 
-    void changeResources(int delta);
     void killStaff(int delta); // Has protection from delta > current Staff value
 
 };

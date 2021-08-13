@@ -6,13 +6,17 @@
 #include "Resources.h"
 #include "RandomNumberGenerator.h"
 
-EmergencyService::EmergencyService(): state(0), staff(0), resources(0), max_resources(0), Junk(0)
+EmergencyService::EmergencyService():
+system_state(0), staff(0), need_resources(1), junk(0),
+resources_state(0), staff_state(0), tools_state(0)
 {
-    max_staff = std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Population"])
-            * std::stod(TheArk::get_instance()->getInterface()->getServices()
+    required_staff = std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Population"])
+                     * std::stod(TheArk::get_instance()->getInterface()->getServices()
             [Emergency_Service]["Propotion_of_people"]);
 
-    std::clog << "EFFECTIVE_STATE_RATIO " << EFFECTIVE_STATE_RATIO << endl;
+    if (!required_staff)
+        std::cerr << "ERROR: EmergencyService's staff is empty!" << endl;
+
     std::ifstream inp;
     inp.open("../EmergencyService_setup/output.txt");
     for(auto i = 0; i < 6; i++) {
@@ -32,7 +36,7 @@ EmergencyService::EmergencyService(): state(0), staff(0), resources(0), max_reso
 // Low service's state increases the probability of accident
 void EmergencyService::create_accident(Service* s)
 {
-    double effective_state = EFFECTIVE_STATE_RATIO * this->state + (1.0 - EFFECTIVE_STATE_RATIO) * s->getState(); // Emergency
+    double effective_state = EFFECTIVE_STATE_RATIO * this->system_state + (1.0 - EFFECTIVE_STATE_RATIO) * s->getState(); // Emergency
     // usually helps to fix the accident, so effective state is combined
 
     std::array <double, 7> probabilities {0}; // For each severity and one for their sum
@@ -63,17 +67,10 @@ void EmergencyService::create_accident(Service* s)
 }
 
 
-void EmergencyService:: process_year()
+void EmergencyService::process_year()
 {
-    // Updating State depending on Resources, current state and accidents
     staff = TheArk::get_instance()->getPopulation()->getServiceStaff(Emergency_Service).size();
-    //this->changeResources(this->getResourceDemand() - 10);
-    //this->killStaff(3);
-    //this->setState(100 * (double)((this->staff + this->resources) / 205.f));
-
-    setState(staff * 100.f / max_staff);
-    if(getState() > 100)
-        setState(100);
+    auto used_currently = TheArk::get_instance()->getResources()->getUsedByService(Emergency_Service);
 
     // Creating accidents
     for (auto s : TheArk::get_instance()->getServices())
@@ -81,56 +78,54 @@ void EmergencyService:: process_year()
         this->create_accident(s);
     }
 
+    tools_state += ANNUAL_DEGRADATION;
+
+    // Updating states
+    staff_state = staff * 100.0 / required_staff;
+    if (staff_state > 100.0)
+        staff_state = 100.0;
+
+    resources_state = used_currently * 100.0 / need_resources;
+
+    tools_state += (staff_state * 0.7 + resources_state * 0.3) * REPAIR_PERCENT_PER_YEAR / 100.0;
+    if (tools_state < 0)
+        tools_state = 0;
+    else if (tools_state > 100)
+        tools_state = 100;
+
+    system_state = (resources_state + tools_state + staff_state) / 3.0;
+
+    // Resource management
+    junk = used_currently;
+    need_resources = staff;
+    if (!need_resources)
+        need_resources = 1;
 }
 
 // Damaging this service depending on the severity
-void EmergencyService::process_accident(AccidentSeverity as)
-{
-    //changeResources(-(12 * as + 10));
-    killStaff((0.0243 * pow((as + 1), 2) + 0.0257) * max_staff);
-    //setState(100 - (as * 5.1 + 10));
+void EmergencyService::process_accident(AccidentSeverity as) {
+    killStaff((0.0243 * pow((as + 1), 2) + 0.0257) * required_staff);
+    tools_state -= pow((as + 1), 2.3);
 }
 
 double EmergencyService::getState() {
-    return state;
+    return system_state;
 }
 
 void EmergencyService::setState(double s) {
-    state = s;
+    system_state = s;
+    resources_state = s;
+    staff_state = s;
+    tools_state = s;
 }
 
-// Resources management
-//-----------------------------
-void EmergencyService::changeResources(int delta)
-{
-    if (delta < 0)//отняли ресурсы; из-за аварии 
-    {
-	this->Junk = delta;
-        //TheArk::get_instance()->getResources()->setUsedToJunk(- delta, Emergency_Service);  //вернули мусор
-    }
-    else //добавляем ресурсы в количестве недостающих - 10 - ежегодный износ
-    {
-        //TheArk::get_instance()->getResources()->setComponentsToUsed(delta, Emergency_Service);
-    }
-    this->resources += delta;
+unsigned int EmergencyService::getResourceDemand() {
+    return need_resources;
 }
 
-unsigned int EmergencyService::getResourceDemand()
-{
-    return this->max_resources - this->resources;
-    
+unsigned int EmergencyService::returnJunk() {
+	return this->junk;
 }
-
-unsigned int EmergencyService::returnJunk()
-{
-	return this->Junk;
-}
-
-//-------------------------------------
-
-// Staff management
-
-//-------------------------------------
 
 void EmergencyService::killStaff(int delta)
 {
@@ -150,13 +145,11 @@ void EmergencyService::killStaff(int delta)
     }
 }
 
-unsigned int EmergencyService::getStaffDemand()
-{
-    return this->max_staff - this->staff;
+unsigned int EmergencyService::getStaffDemand() {
+    return required_staff - staff;
 }
 
 EmergencyService::~EmergencyService() {
     emergency_log.close();
 }
 
-//----------------------------------------
