@@ -81,10 +81,13 @@ TheArk::get_instance()->getInterface()->getServices()[Services::Social_Service][
 
 Требования для корретного запуска и работы:
 
-- Установлена библиотека telebot на python
+- Установлена библиотека telebot на python (pip install pytelegrambotapi)
 - Должен существовать исполняемый файл ../the_ark/build/the_ark (для его запуска из программы)
 - При исполнении файла the_ark он не должен запрашивать никакого ввода (название config файла уже захардкожено в Interface.cpp, присутствует только запрос y/n в NavigationService.cpp)
 - Скорее всего, бот будет корректно запускать другие программы только на Linux (но это неточно)
+- Для запуска под Windows: 
+      1) Заменить 8 строку на file = open('../the_ark_bot/media/texts.txt', encoding="utf-8") (опционально)
+      2) Заменить 73 строку на os.system('..\\cmake-build-debug\\the_ark.exe') (или другое расположение файла в таком формате)
 
 Функционал бота на данный момент:
 
