@@ -10,14 +10,22 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <map>
+#include <array>
+#include <list>
+#include <algorithm>
 
 #include "Service.h"
 #include "TheArk.h"
 #include "Interface.h"
 
+using std::clog;
+using std::map;
+using std::list;
 using std::array;
 using std::setw;
 using std::endl;
+using std::pair;
 
 
 class EmergencyService : public Service
@@ -50,6 +58,12 @@ private:
     // Coefficients for probabilities of accidents depending on
     // service's state
     array<array<double, 3>, 6> distribution_coefficients = {0};
+
+    // Every accident has its own properties
+    array<array<map<unsigned, list<pair<char, char>>>, 6>, 6> acc_properties;
+    void accPropertiesInit();
+    // Flag for protection from infinite chain of accidents
+    bool CHAIN_REACTION_FLAG = false; // 1 means there was a multi-accident this year, no more are allowed
 
     // Accidents' output
     std::ofstream emergency_log;

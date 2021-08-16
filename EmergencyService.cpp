@@ -18,7 +18,7 @@ resources_state(0), staff_state(0), tools_state(0)
         std::cerr << "ERROR: EmergencyService's staff is empty!" << endl;
 
     std::ifstream inp;
-    inp.open("../EmergencyService_setup/output.txt");
+    inp.open("../EmergencyService_setup/coefficients.txt");
     for(auto i = 0; i < 6; i++) {
         for(auto k = 0; k < 3; k++) {
             inp >> distribution_coefficients[i][k];
@@ -26,10 +26,62 @@ resources_state(0), staff_state(0), tools_state(0)
     }
     inp.close();
 
+    accPropertiesInit();
+
     emergency_log.open("../Logs/Emergency_Log.txt");
     emergency_log << setw(CELL_WIDTH + 1) << "Year,"
     << setw(CELL_WIDTH_S + 1) << "Service,"
-    << setw(CELL_WIDTH + 1) << "Severity," << endl;
+    << setw(CELL_WIDTH + 1) << "Severity," << setw(CELL_WIDTH + 1) << "Id," << endl;
+}
+
+void EmergencyService::accPropertiesInit()
+{
+    std::ifstream inp;
+    inp.open("../EmergencyService_setup/e_ids.txt");
+    std::string order_check_services[6] = {"T", "B", "M", "N", "E", "S"};
+    std::string order_check_severities[6] = {"N", "L", "M", "S", "D", "C"};
+    std::string line = " ";
+    char service = -1;
+    char severity = -1;
+    while (line != "!@#")
+    {
+        inp >> line;
+        if (line == "///") {
+            service++;
+            severity = -1;
+            inp >> line;
+            if (line != order_check_services[service]) {
+                std::cerr << "EMERGENCY ERROR: Wrong order of severities in e_ids.txt" << endl
+                          << "Received line: " << line << endl << "Expected line: " << order_check_services[service] << endl;
+            }
+            else { inp >> line; }
+        }
+        if (line == "//") {
+            severity++;
+            inp >> line;
+            if (line != order_check_severities[severity]) {
+                std::cerr << "EMERGENCY ERROR: Wrong order of severities in e_ids.txt" << endl
+                << "Received line: " << line << endl << "Expected line: " << order_check_severities[severity] << endl
+                << "Service: " << order_check_services[severity] << endl;
+            }
+            else { inp >> line; }
+        }
+        if (line == "#") {
+            unsigned id;
+            inp >> id;
+            list<pair<char, char>> temp_list;
+            inp >> line;
+            while (line != "##") {
+                auto first = std::stoi(line) / 10;
+                auto second = std::stoi(line) % 10;
+                clog << first <<"---" << second << endl;
+                temp_list.emplace_back(std::make_pair(first, second));
+                inp >> line;
+            }
+            acc_properties[service][severity].emplace(std::make_pair(id, temp_list));
+        }
+    }
+    inp.close();
 }
 
 // Generation of accidents
@@ -50,6 +102,7 @@ void EmergencyService::create_accident(Service* s)
     auto rand_number = TheArk::get_instance()->getRandomGenerator()->getRandomDouble(0, 1);
 
     if (rand_number < probabilities[6]) {
+        static array<char, 6> services_order = {'T', 'B', 'M', 'N', 'E', 'S'};
         unsigned short resulting_damage = 0;
 
         while (rand_number > std::accumulate(probabilities.begin(), probabilities.begin() + resulting_damage, 0.l))
@@ -60,15 +113,28 @@ void EmergencyService::create_accident(Service* s)
         string service_name = typeid(*s).name();
         service_name.erase(0, 2);
 
+        auto service_number = std::find(services_order.begin(), services_order.end(), service_name[0])
+                - services_order.begin();
+        auto current_map = acc_properties[service_number][resulting_damage];
+        auto current_id = TheArk::get_instance()->getRandomGenerator()->getRandomInt(1, current_map.size());
+
+        if (!(current_map[current_id].empty() or CHAIN_REACTION_FLAG)) {
+            for (auto & it : current_map[current_id])
+                TheArk::get_instance()->getServices()[it.first]->process_accident(static_cast<AccidentSeverity>(it.second));
+            CHAIN_REACTION_FLAG = true;
+        }
+
         emergency_log << setw(CELL_WIDTH) << TheArk::get_instance()->getCurrentYear() << ","
         << setw(CELL_WIDTH_S) << service_name << "," << setw(CELL_WIDTH)
-        << static_cast<AccidentSeverity>(resulting_damage) << "," << endl;
+        << resulting_damage << "," << setw(CELL_WIDTH) << current_id << "," << endl;
     }
 }
 
 
 void EmergencyService::process_year()
 {
+    CHAIN_REACTION_FLAG = false;
+
     staff = TheArk::get_instance()->getPopulation()->getServiceStaff(Emergency_Service).size();
     auto used_currently = TheArk::get_instance()->getResources()->getUsedByService(Emergency_Service);
 
