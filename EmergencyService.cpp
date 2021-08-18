@@ -10,9 +10,9 @@ EmergencyService::EmergencyService():
 system_state(0), staff(0), need_resources(1), junk(0),
 resources_state(0), staff_state(0), tools_state(0)
 {
-    required_staff = std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Population"])
+    required_staff = static_cast<unsigned>(std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Population"])
                      * std::stod(TheArk::get_instance()->getInterface()->getServices()
-            [Emergency_Service]["Propotion_of_people"]);
+                        [Emergency_Service]["Propotion_of_people"]));
 
     if (!required_staff)
         std::cerr << "ERROR: EmergencyService's staff is empty!" << endl;
@@ -74,7 +74,6 @@ void EmergencyService::accPropertiesInit()
             while (line != "##") {
                 auto first = std::stoi(line) / 10;
                 auto second = std::stoi(line) % 10;
-                clog << first <<"---" << second << endl;
                 temp_list.emplace_back(std::make_pair(first, second));
                 inp >> line;
             }
@@ -116,7 +115,7 @@ void EmergencyService::create_accident(Service* s)
         auto service_number = std::find(services_order.begin(), services_order.end(), service_name[0])
                 - services_order.begin();
         auto current_map = acc_properties[service_number][resulting_damage];
-        auto current_id = TheArk::get_instance()->getRandomGenerator()->getRandomInt(1, current_map.size());
+        auto current_id = TheArk::get_instance()->getRandomGenerator()->getRandomInt(1, static_cast<int>(current_map.size()));
 
         if (!(current_map[current_id].empty() or CHAIN_REACTION_FLAG)) {
             for (auto & it : current_map[current_id])
@@ -140,9 +139,8 @@ void EmergencyService::process_year()
 
     // Creating accidents
     for (auto s : TheArk::get_instance()->getServices())
-    {
         this->create_accident(s);
-    }
+
 
     tools_state += ANNUAL_DEGRADATION;
 
@@ -153,7 +151,8 @@ void EmergencyService::process_year()
 
     resources_state = used_currently * 100.0 / need_resources;
 
-    tools_state += (staff_state * 0.7 + resources_state * 0.3) * REPAIR_PERCENT_PER_YEAR / 100.0;
+    double current_repair_percent = (staff_state * 0.7 + resources_state * 0.3) * REPAIR_PERCENT_PER_YEAR / 100.0;
+    tools_state += current_repair_percent;
     if (tools_state < 0)
         tools_state = 0;
     else if (tools_state > 100)
@@ -163,14 +162,14 @@ void EmergencyService::process_year()
 
     // Resource management
     junk = used_currently;
-    need_resources = staff;
+    need_resources = staff + static_cast<int>(current_repair_percent);
     if (!need_resources)
         need_resources = 1;
 }
 
 // Damaging this service depending on the severity
 void EmergencyService::process_accident(AccidentSeverity as) {
-    killStaff((0.0243 * pow((as + 1), 2) + 0.0257) * required_staff);
+    killStaff(static_cast<unsigned>((0.0243 * pow((as + 1), 2) + 0.0257) * required_staff));
     tools_state -= pow((as + 1), 2.3);
 }
 
@@ -193,22 +192,19 @@ unsigned int EmergencyService::returnJunk() {
 	return this->junk;
 }
 
-void EmergencyService::killStaff(int delta)
+void EmergencyService::killStaff(unsigned victims)
 {
     list<shared_ptr<Human>>& people = TheArk::get_instance()->getPopulation()->getAllClassification()[Emergency_Service];
     staff = people.size();
-    if (this->staff > delta)
+    if (this->staff < victims)
+        victims = staff;
+    auto it = people.begin();
+    for (auto i = 0; i < victims; i++)
     {
-        auto it = people.begin();
-        for (auto i = 0; i < delta; i++)
-        {
-            (*it)->setIsAlive(false);
-        }
-        this->staff -= delta;
+        (*it)->setIsAlive(false);
+        it++;
     }
-    else {
-        staff = 0;
-    }
+    this->staff -= victims;
 }
 
 unsigned int EmergencyService::getStaffDemand() {

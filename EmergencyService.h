@@ -41,7 +41,7 @@ private:
     double system_state;
 
     // Shows how effective repairing of tools is for a full team
-    const unsigned short REPAIR_PERCENT_PER_YEAR = constFieldInit<unsigned short>("REPAIR_PERCENT_PER_YEAR", 0, 100.0, 5);
+    const double REPAIR_PERCENT_PER_YEAR = constFieldInit<double>("REPAIR_PERCENT_PER_YEAR", 0, 100.0, 5);
 
     // Every year tool's state will decrease by this amount
     const double ANNUAL_DEGRADATION = constFieldInit<double>("ANNUAL_DEGRADATION", -100.0, 0, -2);
@@ -110,7 +110,7 @@ public:
     unsigned int getResourceDemand() override;
     unsigned int returnJunk() override;
 
-    void killStaff(int delta); // Has protection from delta > current Staff value
+    void killStaff(unsigned victims); // Has protection from delta > current Staff value
 
 };
 

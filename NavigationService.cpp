@@ -139,11 +139,7 @@ void NavigationService::process_year()
     years_delta -= 10 * pow((effective_sum - MINIMAL_PRODUCTIVITY), 5);
     auto current_year_change = static_cast<int>(years_delta);
 
-    if (years_delta > BASIC_DELTA) {
-        TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getYearsTotal() + current_year_change);
-        years_delta -= current_year_change;
-    }
-    else if (years_delta < -BASIC_DELTA) {
+    if (years_delta > BASIC_DELTA or years_delta < -BASIC_DELTA) {
         TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getYearsTotal() + current_year_change);
         years_delta -= current_year_change;
     }
@@ -163,7 +159,8 @@ void NavigationService::process_year()
     }
     if (std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Years"]) * MINIMAL_FLIGHT_TIME / 100.0 >
         TheArk::get_instance()->getYearsTotal())
-        TheArk::get_instance()->setYearsTotal(std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Years"]) * MINIMAL_FLIGHT_TIME / 100);
+        TheArk::get_instance()->setYearsTotal(
+                static_cast<unsigned>(std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Years"]) * MINIMAL_FLIGHT_TIME / 100));
     //
 
 
@@ -238,10 +235,12 @@ void NavigationService::process_year()
     double CURRENT_YEAR_REPAIR_PERCENT = TheArk::get_instance()->getRandomGenerator()->getRandomDouble(0.7, 1.5)
             * REPAIR_PERCENT_PER_YEAR * staff / DEFAULT_STAFF;
 
+    need_resources += static_cast<unsigned>(CURRENT_YEAR_REPAIR_PERCENT);
+
     auto rprd_dev = std::max_element(devices.begin(), devices.end(), CompareDevicesEfficiency()); // repaired device
     CURRENT_YEAR_REPAIR_PERCENT = rprd_dev->get()->repairDevice(CURRENT_YEAR_REPAIR_PERCENT);
 
-    if (CURRENT_YEAR_REPAIR_PERCENT) {
+    if (static_cast<bool>(CURRENT_YEAR_REPAIR_PERCENT)) {
         rprd_dev = std::min_element(devices.begin(), devices.end(), CompareDevicesState());
         CURRENT_YEAR_REPAIR_PERCENT = rprd_dev->get()->repairDevice(CURRENT_YEAR_REPAIR_PERCENT);
 
