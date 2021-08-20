@@ -6,7 +6,7 @@
 #include "Resources.h"
 #include "RandomNumberGenerator.h"
 
-NavigationService::NavigationService(): staff(0), need_resources(0), years_delta(0), junk(0)
+NavigationService::NavigationService(): staff(0), required_resources(0), years_delta(0), junk(0)
 {
     DEFAULT_STAFF = std::stoi(
             TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / DEFAULT_STAFF_DENOMINATOR;
@@ -24,13 +24,14 @@ void NavigationService::killStaff(unsigned int victims)
 {
     list<shared_ptr<Human>>& my_staff =
             TheArk::get_instance()->getPopulation()->getServiceStaff(Navigation_Service);
-
+    staff = my_staff.size();
     auto it = my_staff.begin();
     for (int i = 0; i < victims; i++)
     {
         (*it)->setIsAlive(false);
         it++;
     }
+    staff -= victims;
 }
 
 // NEGLIGIBLE — lost the way for some time
@@ -181,11 +182,11 @@ void NavigationService::process_year()
     auto used_currently = TheArk::get_instance()->getResources()->getUsedByService(Navigation_Service);
     junk = used_currently;
 
-    if (used_currently < need_resources)
+    if (used_currently < required_resources)
         devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
                 TheArk::get_instance()->getRandomGenerator()->
-                getRandomDouble(-100 * (1.0 - used_currently * 1.0 / need_resources), 0.0));
-    need_resources = staff;
+                getRandomDouble(-100 * (1.0 - used_currently * 1.0 / required_resources), 0.0));
+    required_resources = staff;
     //
 
     // Block for devices
@@ -235,7 +236,7 @@ void NavigationService::process_year()
     double CURRENT_YEAR_REPAIR_PERCENT = TheArk::get_instance()->getRandomGenerator()->getRandomDouble(0.7, 1.5)
             * REPAIR_PERCENT_PER_YEAR * staff / DEFAULT_STAFF;
 
-    need_resources += static_cast<unsigned>(CURRENT_YEAR_REPAIR_PERCENT);
+    required_resources += static_cast<unsigned>(CURRENT_YEAR_REPAIR_PERCENT);
 
     auto rprd_dev = std::max_element(devices.begin(), devices.end(), CompareDevicesEfficiency()); // repaired device
     CURRENT_YEAR_REPAIR_PERCENT = rprd_dev->get()->repairDevice(CURRENT_YEAR_REPAIR_PERCENT);
@@ -276,7 +277,7 @@ unsigned int NavigationService::getStaffDemand() {
 }
 
 unsigned int NavigationService::getResourceDemand() {
-    return need_resources;
+    return required_resources;
 }
 
 unsigned int NavigationService::returnJunk() {

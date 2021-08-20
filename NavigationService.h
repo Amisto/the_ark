@@ -45,6 +45,9 @@ private:
     // Staff required for fully functioning systems
     unsigned DEFAULT_STAFF;
 
+    // Kills some staff members. Var victims HAS to be less than staff!
+    void killStaff(unsigned victims);
+
     // Value in percents from initial amount of years
     const double MINIMAL_FLIGHT_TIME = constFieldInit<double>("MINIMAL_FLIGHT_TIME", 0.1, 1000, 90);
 
@@ -52,7 +55,7 @@ private:
     const unsigned short REPAIR_PERCENT_PER_YEAR = constFieldInit<unsigned short>("REPAIR_PERCENT_PER_YEAR", 0, NavDevAMOUNT * 100.0, 20);
 
     // For resources management
-    unsigned int need_resources;
+    unsigned int required_resources;
     unsigned int junk;
 
     // Stages' of the flight management
@@ -126,9 +129,6 @@ public:
     [[nodiscard]] unsigned int getStaffDemand() override;
     [[nodiscard]] unsigned int getResourceDemand() override;
     unsigned int returnJunk() override;
-
-    // Kills some staff members. Var victims HAS to be less than staff!
-    void killStaff(unsigned victims);
 };
 
 #endif //THE_ARK_NAVIGATIONSERVICE_H

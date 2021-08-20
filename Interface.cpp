@@ -26,7 +26,7 @@ Interface::~Interface() {
 
 void Interface::init() {
     string ifname = "test_000";
-    ifname = "/.." + ifname + ".cfg";
+    ifname = "../" + ifname + ".cfg";
     std::ifstream fi(ifname, std::ios::in);
 
     if (!fi.is_open()) {

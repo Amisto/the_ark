@@ -37,7 +37,7 @@ private:
     double staff_state;
     // Shows the state of tools, which are used during the emergency situations
     double tools_state;
-    // Mean value of other states
+    // Geometric mean value of other states
     double system_state;
 
     // Shows how effective repairing of tools is for a full team
@@ -50,6 +50,8 @@ private:
     unsigned int staff;
     // Staff required for 100% staff_state
     unsigned int required_staff;
+
+    void killStaff(unsigned victims); // Has protection from delta > current Staff value
 
     // Resources per year required for 100% resource_staff
     unsigned int need_resources;
@@ -109,8 +111,6 @@ public:
     unsigned int getStaffDemand() override;
     unsigned int getResourceDemand() override;
     unsigned int returnJunk() override;
-
-    void killStaff(unsigned victims); // Has protection from delta > current Staff value
 
 };
 

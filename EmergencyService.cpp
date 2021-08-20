@@ -158,7 +158,7 @@ void EmergencyService::process_year()
     else if (tools_state > 100)
         tools_state = 100;
 
-    system_state = (resources_state + tools_state + staff_state) / 3.0;
+    system_state = pow(resources_state * tools_state * staff_state, 1.0/3.0);
 
     // Resource management
     junk = used_currently;
@@ -214,4 +214,3 @@ unsigned int EmergencyService::getStaffDemand() {
 EmergencyService::~EmergencyService() {
     emergency_log.close();
 }
-
