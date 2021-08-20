@@ -3,29 +3,30 @@
 //
 
 #include "Human.h"
+#include "RandomNumberGenerator.h"
+#include "TheArk.h"
+#include "SocialService.h"
+
 
 //-----------------------Human-------------------------//
-
-Human::Human(): Human(10, 100){}
-
-Human::Human(unsigned int mentalStability, unsigned int PhysicalHealth)
+Human::Human()
 {
-    this->MENTAL_STABILITY = mentalStability;
+    this->MENTAL_STABILITY = 10;
     this->age = 0;
-
-    this->amount_of_black_accidents = 0;
     this->type_as_a_worker = Profession::UNDEFINED;
     this->is_alive = true;
     this->is_able_to_work = false;
     this->is_able_to_study = false;
 
-    this->physical_health = PhysicalHealth;
-    this->moral_health = 100;
+    this->physical_health = 100;
+    this->moral_health = TheArk::get_instance()->getRandomGenerator()->\
+            getRandomInt(static_cast<int>(TheArk::get_instance()->getSocialService()->getState()), 100);
+
     this->year_of_education = Education::NotStudying;
 }
 
 Human::Human(unsigned int common_status_of_the_ark):
-        Human(10, 100){
+        Human(){
     this->physical_health *= (common_status_of_the_ark / 100);
 }
 
@@ -41,16 +42,12 @@ unsigned int Human::getPhysicalHealth() const {
     return physical_health;
 }
 
-unsigned int Human::getMoralHealth() const {
+unsigned int Human::getMentalHealth() const {
     return moral_health;
 }
 
 Profession Human::getTypeAsAWorker() const {
     return type_as_a_worker;
-}
-
-unsigned int Human::getAmountOfBlackAccidents() const {
-    return amount_of_black_accidents;
 }
 
 Education Human::getYearOfEducation() const {
@@ -65,10 +62,6 @@ bool Human::isAbleToWork() const {
     return is_able_to_work;
 }
 
-void Human::setAmountOfBlackAccidents(unsigned int amountOfBlackAccidents) {
-    amount_of_black_accidents = amountOfBlackAccidents;
-}
-
 void Human::setYearOfEducation(Education yearOfEducation) {
     year_of_education = yearOfEducation;
 }
@@ -81,7 +74,7 @@ void Human::setPhysicalHealth(unsigned int physicalHealth) {
     this->physical_health = physicalHealth;
 }
 
-void Human::setMoralHealth(unsigned int moralHealth) {
+void Human::setMentalHealth(unsigned int moralHealth) {
     this->moral_health = moralHealth;
 }
 

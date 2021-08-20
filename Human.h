@@ -13,9 +13,6 @@ private:
     unsigned int age;
     unsigned int physical_health;
     unsigned int moral_health; // <- это поле контролирует СС
-    unsigned int amount_of_black_accidents; // количество негативных ситуаций, влияющих на человека
-    // если их больше, чем моральная стабильность, то моральное здоровье человека уменьшается
-    // <- это поле контролирует СС
 
     Profession type_as_a_worker; // возможный тип профессии можно увидеть в соответсвующем enum
 
@@ -28,13 +25,12 @@ private:
 
 public:
     Human();
-    Human(unsigned int mentalStability, unsigned int PhysicalHealth);
     Human(unsigned int common_status_of_the_ark);
 
     unsigned int getMentalStability() const;
     unsigned int getAge() const;
     unsigned int getPhysicalHealth() const;
-    unsigned int getMoralHealth() const;
+    unsigned int getMentalHealth() const;
     Profession getTypeAsAWorker() const;
     unsigned int getAmountOfBlackAccidents() const;
     Education getYearOfEducation() const;
@@ -44,7 +40,7 @@ public:
 
     void setAge(unsigned int Age);
     void setPhysicalHealth(unsigned int physicalHealth);
-    void setMoralHealth(unsigned int moralHealth);
+    void setMentalHealth(unsigned int moralHealth);
     void setTypeAsAWorker(Profession typeAsAWorker);
     void setIsAlive(bool isAlive);
     void setIsAbleToWork(bool isAbleToWork);

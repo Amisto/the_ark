@@ -16,9 +16,9 @@ using std::priority_queue;
 
 class ComparePersonsByMentalHealth{
 public:
-    bool operator() (const Human* per1, const Human* per2)
+    bool operator() (const std::shared_ptr<Human>& per1, const std::shared_ptr<Human>& per2)
     {
-        return per1->getMoralHealth() < per2->getMoralHealth();
+        return per1->getMentalHealth() < per2->getMentalHealth();
     }
 };
 
@@ -27,15 +27,18 @@ private:
     unsigned int efficiency_percentage; // эффективность работы одного психолога в количестве вылечивших за год
     unsigned int n_years_of_education;
     unsigned int suicide_counter;
+    unsigned state;
+
+    ComparePersonsByMentalHealth comparePersonsByMentalHealth;
 
     unsigned int count_all_accident_severity = 0; // полное число поступивих чрезвычайных событий
     unsigned int count_resolved_accident_severity = 0; // число чрезвычайных событий, которые удалось успешно решить
     unsigned int count_unresolved_accident_severity = 0; // число чрезвычайных событий, которые не удалось успешно решить
 
-    unsigned int n_staff_we_want{};
+    unsigned int n_staff_we_want;
 
-    void update_n_staff_we_want();
-    void update_person(Human& person);
+    void set_state();
+    void update_person(std::shared_ptr<Human> person);
     void update_people();
 public:
     SocialService();
@@ -46,11 +49,7 @@ public:
 
     unsigned int getResourceDemand() override;           // сколько ресурсов требуется
     unsigned int returnJunk() override;		// сколько мусора вернули
-    unsigned int getResourcePriority();         // с каким приоритетом служба будет требовать ресурсы
     unsigned int getStaffDemand() override;              // сколько людей требуется
-    unsigned int getStaffPriority();            // с каким приоритетом слуюба будет требовать людей
-    bool changeStaff (int delta) ;               // сколько людей добавили или забрали (в т.ч. смертность)
-    bool changeResources(int delta);            // сколько ресурсов добавили или забрали (в т.ч. износ)
 
     unsigned int borderChildrenToAdults();
 };

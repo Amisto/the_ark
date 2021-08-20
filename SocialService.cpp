@@ -4,15 +4,96 @@
 
 #include "SocialService.h"
 #include "RandomNumberGenerator.h"
+#include "Interface.h"
+#include <iostream>
+#include <algorithm>
 
 SocialService::SocialService()
 {
-    this->efficiency_percentage = 15;
-    this->n_years_of_education = 5; // <- все изначально учатся 5 лет
-    this->n_staff_we_want = 50; // <- на всякий случай, вдруг что поломается
-    this->update_n_staff_we_want();
-    this->suicide_counter = 0;
+    state = std::stoi(TheArk::get_instance()->getInterface()->getServices()[Services::Social_Service]["State"]);
+    efficiency_percentage = 15;
+    n_years_of_education = 5; // <- все изначально учатся 5 лет
+    n_staff_we_want = 50; // <- на всякий случай, вдруг что поломается
+    suicide_counter = 0;
 }
+
+//--------------------------------Private Methods-----------------------------------//
+void SocialService::set_state() {
+    unsigned sum_of_mental_health = 0;
+    unsigned sum_of_ph_health = 0;
+    for (const auto& human: TheArk::get_instance()->getPopulation()->getPeople()) {
+        sum_of_mental_health += human->getMentalHealth();
+        sum_of_ph_health += human->getPhysicalHealth();
+    }
+    unsigned n_peop = TheArk::get_instance()->getPopulation()->getPeople().size();
+    if (n_peop)
+        state = (sum_of_mental_health / n_peop) /** 0.33 + (sum_of_ph_health / n_peop) * 0.33 + (n_peop / std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Population"])) * 0.33*/;
+    else state = 0;
+}
+
+void SocialService::update_people(){
+    for (auto person : TheArk::get_instance()->getPopulation()->getPeople())
+    {
+        update_person(person);
+    }
+}
+
+void SocialService::update_person(std::shared_ptr<Human> person) {
+
+    // логика "влияние ментального здоровья на жизнедеятельность"
+    if (person->getMentalHealth() < 100) {
+        if (person->getMentalHealth() < 90)
+            if (person->isAbleToWork())
+                person->setIsAbleToWork(false);
+        if (person->isAbleToStudy())
+            person->setIsAbleToStudy(false);
+        if (person->getMentalHealth() < 4)
+            person->setIsAlive(false);
+    } else {
+        if (person->getTypeAsAWorker()) {
+            if (person->getYearOfEducation()) {
+                person->setIsAbleToWork(false);
+                person->setIsAbleToStudy(true);
+            } else {
+                person->setIsAbleToWork(true);
+                person->setIsAbleToStudy(false);
+            }
+        }
+    }
+
+    // логика "сособен ли обучаться"
+    if (!person->isAbleToStudy()){
+        if (person->getAge() >= this->borderChildrenToAdults()
+            && person->getMentalHealth() >= 75) {
+            person->setIsAbleToStudy(true);
+            if (person->getYearOfEducation() == NotStudying)
+                person->setYearOfEducation(FirstYear);
+        }
+    }
+
+    // логика "обработка обучения": если может, человек начинает учиться
+    if (person->isAbleToStudy()) {
+        if (person->getMentalHealth() < 40 || person->getPhysicalHealth() < 40) {
+            person->setIsAbleToStudy(false);
+        } else if (person->getYearOfEducation() != FifthYear) {
+            person->setYearOfEducation(static_cast<Education>(person->getYearOfEducation() + 1));
+            person->setMentalHealth(person->getMentalHealth() - 3);
+        } else {
+            person->setYearOfEducation(NotStudying);
+            person->setIsAbleToWork(true);
+            person->setIsAbleToStudy(false);
+        }
+    }
+#if 1
+    if (person->getMentalHealth() < 70) {
+        TheArk::get_instance()->getPopulation()->getAllClassification()
+            [Services::Clients_Of_Social_Service].push_back(person); // <- добавил поинтер в очередь
+    }
+#endif
+
+}
+
+//--------------------------------Public Methods-----------------------------------//
 
 void SocialService::process_accident(AccidentSeverity as) {
 
@@ -20,15 +101,12 @@ void SocialService::process_accident(AccidentSeverity as) {
     const unsigned int CHANGE_MENTAL_HEALTH = 1;
     // элементарное изменение физического здоровья в следствии каких-либо чрезвычайных событий:
     const unsigned int CHANGE_PHYSICAL_HEALTH = 1;
-
     // вероятность повышения ментального здоровья в следствии чрезвычайного события NEGLIGIBLE:
     const unsigned int PROBABILITY_CHANGE_MENTAL_HEALTH_LIGHT = 80;
-
     // вероятность повышения ментального здоровья в следствии чрезвычайных события LIGHT:
     const unsigned int PROBABILITY_CHANGE_MENTAL_HEALTH_NEGLIGIBLE = 40;
     // вероятность уменьшения физического здоровья в следствии чрезвычайных события LIGHT:
     const unsigned int PROBABILITY_CHANGE_PHYSICAL_HEALTH_NEGLIGIBLE = 40;
-
     // вероятность уменьшения ментального здоровья в следствии чрезвычайных событий
     // MEDIUM, SEVERE, DISASTROUS, CATASTROPHIC:
     const unsigned int PROBABILITY_CHANGE_MENTAL_HEALTH = 80;
@@ -48,11 +126,11 @@ void SocialService::process_accident(AccidentSeverity as) {
         for (auto& person : TheArk::get_instance()->getPopulation()->getPeople())
         {
             if (person->isAlive()) {
-                if (person->getMoralHealth() != 100
-                && person->getMoralHealth() > 3
+                if (person->getMentalHealth() != 100
+                && person->getMentalHealth() > 3
                 && person->getPhysicalHealth() != 0) {
                     if ((TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 99)) <= PROBABILITY_CHANGE_MENTAL_HEALTH_LIGHT) {
-                        person->setMoralHealth(person->getMoralHealth() + CHANGE_MENTAL_HEALTH);
+                        person->setMentalHealth(person->getMentalHealth() + CHANGE_MENTAL_HEALTH);
                     }
                 }
             }
@@ -71,24 +149,24 @@ void SocialService::process_accident(AccidentSeverity as) {
         {
             if (person->isAlive()) {
                 if (TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 1)) {
-                    if (person->getMoralHealth() != 100
-                    && person->getMoralHealth() > 3
+                    if (person->getMentalHealth() != 100
+                    && person->getMentalHealth() > 3
                     && person->getPhysicalHealth() != 0) {
                         if ((TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 99)) <= PROBABILITY_CHANGE_MENTAL_HEALTH_NEGLIGIBLE) {
-                            person->setMoralHealth(person->getMoralHealth() +
-                            2 * CHANGE_MENTAL_HEALTH);
+                            person->setMentalHealth(person->getMentalHealth() +
+                                                    2 * CHANGE_MENTAL_HEALTH);
                         }
                     }
                 }
                 else {
-                    if ((person->getMoralHealth() != 0) && (person->getPhysicalHealth() > 3)){
+                    if ((person->getMentalHealth() != 0) && (person->getPhysicalHealth() > 3)){
                         if ((TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 99)) <= 100 - PROBABILITY_CHANGE_MENTAL_HEALTH_NEGLIGIBLE) {
-                            person->setMoralHealth(person->getMoralHealth() - 2 * CHANGE_MENTAL_HEALTH);
+                            person->setMentalHealth(person->getMentalHealth() - 2 * CHANGE_MENTAL_HEALTH);
                         }
                         if ((TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 99)) <= 100 - PROBABILITY_CHANGE_PHYSICAL_HEALTH_NEGLIGIBLE) {
-                            person->setPhysicalHealth(person->getMoralHealth() - CHANGE_PHYSICAL_HEALTH);
+                            person->setPhysicalHealth(person->getMentalHealth() - CHANGE_PHYSICAL_HEALTH);
                         }
-                        if (person->getPhysicalHealth() == 0 || person->getMoralHealth() <= 3) {
+                        if (person->getPhysicalHealth() == 0 || person->getMentalHealth() <= 3) {
                             person->setIsAlive(false);
                         }
                     }
@@ -104,14 +182,14 @@ void SocialService::process_accident(AccidentSeverity as) {
         for (auto& person : TheArk::get_instance()->getPopulation()->getPeople())
         {
             if (person->isAlive()) {
-                if (person->getMoralHealth() > 3 && person->getPhysicalHealth() != 0){
+                if (person->getMentalHealth() > 3 && person->getPhysicalHealth() != 0){
                     if ((TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 99)) <= PROBABILITY_CHANGE_MENTAL_HEALTH) {
-                        person->setMoralHealth(person->getMoralHealth() - 3 * CHANGE_MENTAL_HEALTH);
+                        person->setMentalHealth(person->getMentalHealth() - 3 * CHANGE_MENTAL_HEALTH);
                     }
                     if ((TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 99)) <= PROBABILITY_CHANGE_PHYSICAL_HEALTH) {
-                        person->setMoralHealth(person->getMoralHealth() - 2 * CHANGE_MENTAL_HEALTH);
+                        person->setMentalHealth(person->getMentalHealth() - 2 * CHANGE_MENTAL_HEALTH);
                     }
-                    if (person->getPhysicalHealth() == 0 || person->getMoralHealth() <= 3) {
+                    if (person->getPhysicalHealth() == 0 || person->getMentalHealth() <= 3) {
                         person->setIsAlive(false);
                     }
                 }
@@ -128,16 +206,16 @@ void SocialService::process_accident(AccidentSeverity as) {
             for (auto& person : TheArk::get_instance()->getPopulation()->getPeople())
             {
                 if (person->isAlive()) {
-                    if (person->getMoralHealth() > 3 && person->getPhysicalHealth() != 0){
+                    if (person->getMentalHealth() > 3 && person->getPhysicalHealth() != 0){
                         if ((TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 99)) <= PROBABILITY_CHANGE_MENTAL_HEALTH) {
-                            person->setMoralHealth(person->getMoralHealth() -
-                            3 * CHANGE_MENTAL_HEALTH);
+                            person->setMentalHealth(person->getMentalHealth() -
+                                                    3 * CHANGE_MENTAL_HEALTH);
                         }
                         if ((TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 99)) <= PROBABILITY_CHANGE_PHYSICAL_HEALTH) {
-                            person->setPhysicalHealth(person->getMoralHealth() -
+                            person->setPhysicalHealth(person->getMentalHealth() -
                             2 * CHANGE_PHYSICAL_HEALTH);
                         }
-                        if (person->getPhysicalHealth() == 0 || person->getMoralHealth() <= 3) {
+                        if (person->getPhysicalHealth() == 0 || person->getMentalHealth() <= 3) {
                             person->setIsAlive(false);
                         }
                     }
@@ -149,16 +227,16 @@ void SocialService::process_accident(AccidentSeverity as) {
             for (auto& person : TheArk::get_instance()->getPopulation()->getPeople())
             {
                 if (person->isAlive()) {
-                    if (person->getMoralHealth() > 3 && person->getPhysicalHealth() != 0){
+                    if (person->getMentalHealth() > 3 && person->getPhysicalHealth() != 0){
                         if ((TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 99)) <= PROBABILITY_CHANGE_MENTAL_HEALTH) {
-                            person->setMoralHealth(person->getMoralHealth() -
-                            4 * CHANGE_MENTAL_HEALTH);
+                            person->setMentalHealth(person->getMentalHealth() -
+                                                    4 * CHANGE_MENTAL_HEALTH);
                         }
                         if ((TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 99)) <= PROBABILITY_CHANGE_PHYSICAL_HEALTH) {
-                            person->setPhysicalHealth(person->getMoralHealth() -
+                            person->setPhysicalHealth(person->getMentalHealth() -
                             3 * CHANGE_PHYSICAL_HEALTH);
                         }
-                        if (person->getPhysicalHealth() == 0 || person->getMoralHealth() <= 3) {
+                        if (person->getPhysicalHealth() == 0 || person->getMentalHealth() <= 3) {
                             person->setIsAlive(false);
                         }
                     }
@@ -182,16 +260,16 @@ void SocialService::process_accident(AccidentSeverity as) {
             for (auto& person : TheArk::get_instance()->getPopulation()->getPeople())
             {
                 if (person->isAlive()) {
-                    if (person->getMoralHealth() > 3 && person->getPhysicalHealth() != 0){
+                    if (person->getMentalHealth() > 3 && person->getPhysicalHealth() != 0){
                         if ((TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 99)) <= PROBABILITY_CHANGE_MENTAL_HEALTH) {
-                            person->setMoralHealth(person->getMoralHealth() -
-                            4 * CHANGE_MENTAL_HEALTH);
+                            person->setMentalHealth(person->getMentalHealth() -
+                                                    4 * CHANGE_MENTAL_HEALTH);
                         }
                         if ((TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 99)) <= PROBABILITY_CHANGE_PHYSICAL_HEALTH) {
-                            person->setPhysicalHealth(person->getMoralHealth() -
+                            person->setPhysicalHealth(person->getMentalHealth() -
                             3 * CHANGE_PHYSICAL_HEALTH);
                         }
-                        if (person->getPhysicalHealth() == 0 || person->getMoralHealth() <= 3) {
+                        if (person->getPhysicalHealth() == 0 || person->getMentalHealth() <= 3) {
                             person->setIsAlive(false);
                         }
                     }
@@ -203,16 +281,16 @@ void SocialService::process_accident(AccidentSeverity as) {
             for (auto& person : TheArk::get_instance()->getPopulation()->getPeople())
             {
                 if (person->isAlive()) {
-                    if (person->getMoralHealth() > 3 && person->getPhysicalHealth() != 0){
+                    if (person->getMentalHealth() > 3 && person->getPhysicalHealth() != 0){
                         if ((TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 99)) <= PROBABILITY_CHANGE_MENTAL_HEALTH) {
-                            person->setMoralHealth(person->getMoralHealth() -
-                            5 * CHANGE_MENTAL_HEALTH);
+                            person->setMentalHealth(person->getMentalHealth() -
+                                                    5 * CHANGE_MENTAL_HEALTH);
                         }
                         if ((TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 99)) <= PROBABILITY_CHANGE_PHYSICAL_HEALTH) {
-                            person->setPhysicalHealth(person->getMoralHealth() -
+                            person->setPhysicalHealth(person->getMentalHealth() -
                             3 * CHANGE_PHYSICAL_HEALTH);
                         }
-                        if (person->getPhysicalHealth() == 0 || person->getMoralHealth() <= 3) {
+                        if (person->getPhysicalHealth() == 0 || person->getMentalHealth() <= 3) {
                             person->setIsAlive(false);
                         }
                     }
@@ -234,14 +312,14 @@ void SocialService::process_accident(AccidentSeverity as) {
         for (auto& person : TheArk::get_instance()->getPopulation()->getPeople())
         {
             if (person->isAlive()) {
-                if (person->getMoralHealth() > 3 && person->getPhysicalHealth() != 0){
+                if (person->getMentalHealth() > 3 && person->getPhysicalHealth() != 0){
                     if ((TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 99)) <= PROBABILITY_CHANGE_MENTAL_HEALTH) {
-                        person->setMoralHealth(person->getMoralHealth() - 7 * CHANGE_MENTAL_HEALTH);
+                        person->setMentalHealth(person->getMentalHealth() - 7 * CHANGE_MENTAL_HEALTH);
                     }
                     if ((TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 99)) <= PROBABILITY_CHANGE_PHYSICAL_HEALTH) {
-                        person->setPhysicalHealth(person->getMoralHealth() - 5 * CHANGE_PHYSICAL_HEALTH);
+                        person->setPhysicalHealth(person->getMentalHealth() - 5 * CHANGE_PHYSICAL_HEALTH);
                     }
-                    if (person->getPhysicalHealth() == 0 || person->getMoralHealth() <= 3) {
+                    if (person->getPhysicalHealth() == 0 || person->getMentalHealth() <= 3) {
                         person->setIsAlive(false);
                     }
                 }
@@ -264,15 +342,10 @@ unsigned int SocialService::borderChildrenToAdults()
 }
 
 double SocialService::getState() {
-    return 50;
+    return state;
 }
 
-void SocialService::setState(double s) {/*nothing to do*/}
-
-void SocialService::update_n_staff_we_want() {
-    this->n_staff_we_want = (TheArk::get_instance()->getPopulation()->getPeople().size()
-            / (2 * this->efficiency_percentage));
-}
+void SocialService::setState(double s) {state = static_cast<int>(s);};
 
 unsigned int SocialService::getResourceDemand() {
     return 0; // наша служба не нуждается в ресурсах на начальном этапе придумывания
@@ -282,98 +355,21 @@ unsigned int SocialService::returnJunk() {
     return 0;
 }
 
-unsigned int SocialService::getResourcePriority() {return 6;} // последний приоритет
-
 unsigned int SocialService::getStaffDemand(){
-    return this->n_staff_we_want;
+    return TheArk::get_instance()->getPopulation()->getAllClassification()[Services::Clients_Of_Social_Service].size() / 2;
 }
 
-unsigned int SocialService::getStaffPriority(){
-    unsigned int labor_shortage_rate = 6 -
-            (TheArk::get_instance()->getPopulation()->getAllClassification()
-            [Services::Clients_Of_Social_Service].size() /
-            (TheArk::get_instance()->getPopulation()->getAllClassification()
-            [Services::Social_Service].size() * this->efficiency_percentage));
-    if (labor_shortage_rate <= 0) labor_shortage_rate = 1;
-    return labor_shortage_rate;
-}
+//-----------------------------Main Method---------------------------//
 
-bool SocialService::changeStaff (int delta) {/*сделаем, если потребуется*/
-    return true;}
-
-bool SocialService::changeResources(int delta){/*сделаем, если потребуется*/
-    return true;}
-
-void SocialService::update_people(){
-    for (auto person : TheArk::get_instance()->getPopulation()->getPeople())
-    {
-        this->update_person(*person);
-    }
-}
-
-// самый главный самый жырный метод
 void SocialService::process_year() {
+    this->set_state();
     this->update_people();
+#if 0
+    std::clog << "In ss: " << TheArk::get_instance()->getPopulation()->getAllClassification()[Services::Social_Service].size() \
+    << "Clients: " << TheArk::get_instance()->getPopulation()->getAllClassification()[Services::Clients_Of_Social_Service].size() << std::endl;
+#endif
 
     // так же тут будет обработка действий службы и тд и тп
+    TheArk::get_instance()->getPopulation()->getAllClassification()[Services::Clients_Of_Social_Service].clear();
 }
 
-void SocialService::update_person(Human &person) {
-
-    // логика "если плохих событий не меньше, чем ментальная стабильность - то минус ментальное здоровье"
-    if (person.getMentalStability() <= person.getAmountOfBlackAccidents())
-        person.setMoralHealth((unsigned int) (person.getMoralHealth() / (1.2)));
-
-    // логика "влияние ментального здоровья на жизнедеятельность"
-    if (person.getMoralHealth() < 30) {
-        if (person.getMoralHealth() < 20)
-            if (person.isAbleToWork())
-                person.setIsAbleToWork(false);
-        if (person.isAbleToStudy())
-            person.setIsAbleToStudy(false);
-        if (person.getMoralHealth() < 3)
-            person.setIsAlive(false);
-    } else {
-        if (person.getTypeAsAWorker()) {
-            if (person.getYearOfEducation()) {
-                person.setIsAbleToWork(false);
-                person.setIsAbleToStudy(true);
-            } else {
-                person.setIsAbleToWork(true);
-                person.setIsAbleToStudy(false);
-            }
-        }
-    }
-
-    // логика "сособен ли обучаться"
-    if (!person.isAbleToStudy()){
-        if (person.getAge() >= this->borderChildrenToAdults()
-                && person.getMoralHealth() >= 75
-                && person.getAmountOfBlackAccidents() < 5) {
-            person.setIsAbleToStudy(true);
-            if (person.getYearOfEducation() == NotStudying)
-                person.setYearOfEducation(FirstYear);
-        }
-    }
-
-    // логика "обработка обучения": если может, человек начинает учиться
-    if (person.isAbleToStudy()) {
-        if (person.getMoralHealth() < 40 || person.getPhysicalHealth() < 40) {
-            person.setIsAbleToStudy(false);
-        } else if (person.getYearOfEducation() != FifthYear) {
-            person.setYearOfEducation(static_cast<Education>(person.getYearOfEducation() + 1));
-            person.setMoralHealth(person.getMoralHealth() - 3);
-        } else {
-            person.setYearOfEducation(NotStudying);
-            person.setIsAbleToWork(true);
-            person.setIsAbleToStudy(false);
-        }
-    }
-
-    // логика добавления в клиенты службы
-    /*if (person.getMoralHealth() < 70)
-        TheArk::get_instance()->getPopulation()->getAllClassification()
-        [Classification_of_humans::Clients_Of_Social_Service].
-        push_back(shared_ptr<Human>(&person)); // <- добавил поинтер в очередь
-        // пока думаю, как обрабатывать повторы*/
-}

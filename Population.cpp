@@ -150,7 +150,7 @@ void Population::processYear() {
                 new_staff = max_staff_of_service - current_staff_of_service;
             staff_distribution(this->service_workers[i], new_staff);
         }
-    }  
+    }
 
     // UPDATE EVERY PERSON
     this->children = 0;
@@ -217,7 +217,6 @@ void Population::processYear() {
         {
             ++it;
         }
-
     }
 
     // POP DEAD PEOPLE IN SERVICE LISTS

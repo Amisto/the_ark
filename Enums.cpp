@@ -44,4 +44,12 @@ enum Education{
     FifthYear
 };
 
+enum RangeOfAge{
+    Baby,
+    Child,
+    Teenager,
+    Youth,
+    Adult,
+    Old
+};
 #endif //THE_ARK_ENUMS_CPP
