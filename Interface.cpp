@@ -26,7 +26,7 @@ Interface::~Interface() {
 
 void Interface::init() {
     string ifname = "test_000";
-    ifname = "/home/evgen/CLionProjects/Repos/the_ark/build/test_000.cfg";
+    ifname = "/.." + ifname + ".cfg";
     std::ifstream fi(ifname, std::ios::in);
 
     if (!fi.is_open()) {
