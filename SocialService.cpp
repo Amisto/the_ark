@@ -1,7 +1,7 @@
 //
 // Created by Amisto on 4/2/2021.
 //
-
+#define DEBUG_OUTPUT_CONTROL_AMOUNT_OF_WORKERS_AND_CLIENTS  1
 #include "SocialService.h"
 #include "RandomNumberGenerator.h"
 #include "Interface.h"
@@ -11,14 +11,34 @@
 SocialService::SocialService()
 {
     state = std::stoi(TheArk::get_instance()->getInterface()->getServices()[Services::Social_Service]["State"]);
-    efficiency_percentage = 15;
     n_years_of_education = 5; // <- все изначально учатся 5 лет
     n_staff_we_want = 50; // <- на всякий случай, вдруг что поломается
     suicide_counter = 0;
 }
 
 //--------------------------------Private Methods-----------------------------------//
-void SocialService::set_state() {
+unsigned SocialService::countWorkableStaff(){
+    unsigned n = 0;
+    for (const auto& staffik: TheArk::get_instance()->getPopulation()->getServiceStaff(Services::Social_Service))
+    {
+        if (staffik->isAbleToWork()) ++n;
+    }
+    return n;
+}
+
+void SocialService::setStaffAndResourceDemand() {
+    int demand = (clients.size() / std::stoi(TheArk::get_instance()->getInterface()->getServices()\
+                    [Services::Social_Service]["Year_thread"]))\
+                    - countWorkableStaff();
+    if (demand > 0)
+        n_staff_we_want = demand;
+    else
+        n_staff_we_want = 0;
+    n_resources_we_want = clients.size() * std::stoi(TheArk::get_instance()->getInterface()->getServices()\
+                    [Services::Social_Service]["Amount_of_drugs_for_one_person"]);
+}
+
+void SocialService::setState() {
     unsigned sum_of_mental_health = 0;
     unsigned sum_of_ph_health = 0;
     for (const auto& human: TheArk::get_instance()->getPopulation()->getPeople()) {
@@ -31,14 +51,14 @@ void SocialService::set_state() {
     else state = 0;
 }
 
-void SocialService::update_people(){
+void SocialService::updatePeople(){
     for (auto person : TheArk::get_instance()->getPopulation()->getPeople())
     {
-        update_person(person);
+        updatePerson(person);
     }
 }
 
-void SocialService::update_person(std::shared_ptr<Human> person) {
+void SocialService::updatePerson(std::shared_ptr<Human> person) {
 
     // логика "влияние ментального здоровья на жизнедеятельность"
     if (person->getMentalHealth() < std::stoi(TheArk::get_instance()->getInterface()->getServices()[Services::Social_Service]["Border_to_be_ill"])) {
@@ -84,13 +104,23 @@ void SocialService::update_person(std::shared_ptr<Human> person) {
             person->setIsAbleToStudy(false);
         }
     }
-#if 1
     if (person->getMentalHealth() < 70) {
-        TheArk::get_instance()->getPopulation()->getAllClassification()
-            [Services::Clients_Of_Social_Service].push_back(person); // <- добавил поинтер в очередь
+        clients.push(person); // <- добавил поинтер в очередь
     }
-#endif
+}
 
+void SocialService::fixPeople() {
+    n_ills = clients.size();
+    if (clients.empty()) return;
+    for (int i = 0, staff = countWorkableStaff();\
+        i < staff * std::stoi(TheArk::get_instance()->getInterface()->getServices()\
+        [Services::Social_Service]["Year_thread"]);i++)
+    {
+        clients.top()->setMentalHealth(clients.top()->getMentalHealth() + \
+        std::stoi(TheArk::get_instance()->getInterface()->getServices()[Services::Social_Service]["Efficiency_of_a_doctor"]));
+        clients.pop();
+        if (clients.empty()) break;
+    }
 }
 
 //--------------------------------Public Methods-----------------------------------//
@@ -348,7 +378,7 @@ double SocialService::getState() {
 void SocialService::setState(double s) {state = static_cast<int>(s);};
 
 unsigned int SocialService::getResourceDemand() {
-    return 0; // наша служба не нуждается в ресурсах на начальном этапе придумывания
+    return n_resources_we_want;
 }
 
 unsigned int SocialService::returnJunk() {
@@ -356,20 +386,27 @@ unsigned int SocialService::returnJunk() {
 }
 
 unsigned int SocialService::getStaffDemand(){
-    return TheArk::get_instance()->getPopulation()->getAllClassification()[Services::Clients_Of_Social_Service].size() / 2;
+    return n_staff_we_want;
 }
 
 //-----------------------------Main Method---------------------------//
 
 void SocialService::process_year() {
-    this->set_state();
-    this->update_people();
-#if 0
-    std::clog << "In ss: " << TheArk::get_instance()->getPopulation()->getAllClassification()[Services::Social_Service].size() \
-    << "Clients: " << TheArk::get_instance()->getPopulation()->getAllClassification()[Services::Clients_Of_Social_Service].size() << std::endl;
-#endif
 
-    // так же тут будет обработка действий службы и тд и тп
-    TheArk::get_instance()->getPopulation()->getAllClassification()[Services::Clients_Of_Social_Service].clear();
+#if DEBUG_OUTPUT_CONTROL_AMOUNT_OF_WORKERS_AND_CLIENTS
+    std::clog <<"LAST_YEAR:" <<std::endl<< "In SS: " << TheArk::get_instance()->getPopulation()->getAllClassification()[Services::Social_Service].size() \
+    << " Able to work: " << countWorkableStaff() \
+    << " Clients: " << n_ills << std::endl << "And SS wanna "<< getStaffDemand() \
+    << std::endl << "And population is "\
+    << TheArk::get_instance()->getPopulation()->getPeople().size() << std::endl;
+#endif
+    while(!clients.empty())
+    {
+        clients.pop();
+    }
+    setState();
+    updatePeople();
+    setStaffAndResourceDemand();
+    fixPeople();
 }
 

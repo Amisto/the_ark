@@ -166,7 +166,7 @@ void TheArk::processYear() {
     resources->processYear();
     for (auto s: services)
     {
-#if 0
+#if 1
         if (!dynamic_cast<NavigationService*>(s) /*&& !dynamic_cast<SocialService*>(s)*/)
 #endif
             s->process_year();

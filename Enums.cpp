@@ -32,7 +32,6 @@ enum Services {
     Navigation_Service,
     Emergency_Service,
     Social_Service,
-    Clients_Of_Social_Service
 };
 
 enum Education{

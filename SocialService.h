@@ -18,28 +18,30 @@ class ComparePersonsByMentalHealth{
 public:
     bool operator() (const std::shared_ptr<Human>& per1, const std::shared_ptr<Human>& per2)
     {
-        return per1->getMentalHealth() < per2->getMentalHealth();
+        return per1->getMentalHealth() > per2->getMentalHealth();
     }
 };
 
 class SocialService : public Service {
 private:
-    unsigned int efficiency_percentage; // эффективность работы одного психолога в количестве вылечивших за год
     unsigned int n_years_of_education;
     unsigned int suicide_counter;
     unsigned state;
 
-    ComparePersonsByMentalHealth comparePersonsByMentalHealth;
+    priority_queue<std::shared_ptr<Human>, std::vector<shared_ptr<Human>>, ComparePersonsByMentalHealth> clients;
 
     unsigned int count_all_accident_severity = 0; // полное число поступивих чрезвычайных событий
     unsigned int count_resolved_accident_severity = 0; // число чрезвычайных событий, которые удалось успешно решить
     unsigned int count_unresolved_accident_severity = 0; // число чрезвычайных событий, которые не удалось успешно решить
 
-    unsigned int n_staff_we_want;
+    unsigned n_staff_we_want;
+    unsigned n_resources_we_want;
+    unsigned n_ills;
 
-    void set_state();
-    void update_person(std::shared_ptr<Human> person);
-    void update_people();
+    void setState();
+    void updatePerson(std::shared_ptr<Human> person);
+    void updatePeople();
+    void fixPeople();
 public:
     SocialService();
     void process_accident(AccidentSeverity as) override;    // каждая служба должна уметь в своих терминах обработать переданную ей аварию
@@ -52,6 +54,9 @@ public:
     unsigned int getStaffDemand() override;              // сколько людей требуется
 
     unsigned int borderChildrenToAdults();
+
+    unsigned countWorkableStaff();
+    void setStaffAndResourceDemand();
 };
 
 
