@@ -24,12 +24,13 @@ void NavigationService::killStaff(unsigned int victims)
 {
     list<shared_ptr<Human>>& my_staff =
             TheArk::get_instance()->getPopulation()->getServiceStaff(Navigation_Service);
-    staff = my_staff.size();
     auto it = my_staff.begin();
-   unsigned border = std::min(staff, victims);
-    for (int i = 0; i < border; i++)
+    for (int i = 0; i < victims;)
     {
-        (*it)->setIsAlive(false);
+        if ((*it)->isAlive()) {
+            (*it)->setIsAlive(false);
+            i++;
+        }
         it++;
     }
     staff -= victims;
@@ -111,7 +112,6 @@ void NavigationService::process_accident(AccidentSeverity as)
     }
 
     killStaff(killed_staff);
-    staff -= killed_staff;
 }
 
 

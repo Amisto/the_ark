@@ -165,14 +165,9 @@ void TheArk::processYear() {
     population->processYear();
     resources->processYear();
     for (auto s: services)
-    {
-#if 1
-        if (!dynamic_cast<NavigationService*>(s) /*&& !dynamic_cast<SocialService*>(s)*/)
-#endif
-            s->process_year();
-    }
+        s->process_year();
     // перераспределение ресурсов
-    // перераспределение работниковcl
+    // перераспределение работников
 }
 
 void TheArk::flight() {
