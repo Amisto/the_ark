@@ -41,13 +41,13 @@ void SocialService::update_people(){
 void SocialService::update_person(std::shared_ptr<Human> person) {
 
     // логика "влияние ментального здоровья на жизнедеятельность"
-    if (person->getMentalHealth() < 100) {
-        if (person->getMentalHealth() < 90)
+    if (person->getMentalHealth() < std::stoi(TheArk::get_instance()->getInterface()->getServices()[Services::Social_Service]["Border_to_be_ill"])) {
+        if (person->getMentalHealth() < std::stoi(TheArk::get_instance()->getInterface()->getServices()[Services::Social_Service]["Border_to_be_ill"]) - 10)
             if (person->isAbleToWork())
                 person->setIsAbleToWork(false);
         if (person->isAbleToStudy())
             person->setIsAbleToStudy(false);
-        if (person->getMentalHealth() < 4)
+        if (person->getMentalHealth() < std::stoi(TheArk::get_instance()->getInterface()->getServices()[Services::Social_Service]["Suicide_border"]))
             person->setIsAlive(false);
     } else {
         if (person->getTypeAsAWorker()) {

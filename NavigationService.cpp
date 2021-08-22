@@ -26,7 +26,8 @@ void NavigationService::killStaff(unsigned int victims)
             TheArk::get_instance()->getPopulation()->getServiceStaff(Navigation_Service);
     staff = my_staff.size();
     auto it = my_staff.begin();
-    for (int i = 0; i < victims; i++)
+   unsigned border = std::min(staff, victims);
+    for (int i = 0; i < border; i++)
     {
         (*it)->setIsAlive(false);
         it++;
