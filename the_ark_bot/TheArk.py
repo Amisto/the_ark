@@ -1,11 +1,14 @@
+import platform
+import subprocess
 import telebot
 import os
+import time
 
 config_filename = "../test_000.cfg"
 
 TEXTS = {}
 # loading texts
-file = open('../the_ark_bot/media/texts.txt')
+file = open('../the_ark_bot/media/texts.txt', encoding="utf-8")
 texts = file.read()
 texts = texts.split("--")
 texts.remove("")
@@ -31,6 +34,7 @@ parameters = file.read()
 parameters_list = parameters.split()
 file.close()
 
+BOOL_READ_FROM_COUT = True
 
 @bot.message_handler(commands=['start'])
 def introduction(message):
@@ -67,10 +71,46 @@ def change_parameters2(message):
         bot.send_message(chat_id=message.chat.id, text="Такого параметра нет.")
 
 
-@bot.message_handler(commands = ['go'])
+@bot.message_handler(commands=['go'])
 def flight(message):
+    global BOOL_READ_FROM_COUT
     bot.send_message(chat_id=message.chat.id, text=TEXTS["STARTING FLIGHT"])
-    os.system('../build/the_ark')
+
+    current_os = platform.system()
+    executable_path = '../build/the_ark'
+
+    if current_os == "Windows":
+        executable_path = '..\\cmake-build-debug\\the_ark.exe'
+
+    process = subprocess.Popen(executable_path, stdout=subprocess.PIPE, stdin=subprocess.PIPE, text=1)
+    while process.poll() == None:
+        output = ""
+        a = ""
+        if BOOL_READ_FROM_COUT:
+            output = process.stdout.readline()
+            a = output
+        if len(output) != 0:
+            output = process.stdout.readline()
+            a += output
+            output = process.stdout.readline()
+            a += output
+        if len(a) != 0:
+            bot.send_message(chat_id=message.chat.id, text=a, reply_markup=telebot.types.ForceReply())
+            BOOL_READ_FROM_COUT = False
+
+            @bot.message_handler(content_types=['text'])
+            def message_input_step(message):
+                inp = message.text
+                process.stdin.write(inp + "\n")
+                process.stdin.flush()
+                time.sleep(1)
+                global BOOL_READ_FROM_COUT
+                if process.poll() == None:
+                    BOOL_READ_FROM_COUT = True
+
+            bot.register_next_step_handler(message, message_input_step)
+
+    BOOL_READ_FROM_COUT = True
     bot.send_message(chat_id=message.chat.id, text="Полёт завершён.")
     os.system('python plots.py')
     plot_population = open('Population.png', 'rb')
