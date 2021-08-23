@@ -98,7 +98,7 @@ void TheArk::init()
 
     random_generator = new RandomNumberGenerator;
 
-    years_total = std::stoi(interface->getGeneral()["Years"]);
+    years_total = std::stoi(interface->getGeneral()["Distance"]);
 
     population->init(std::stoi(interface->getGeneral()["Population"]));
     resources->init(std::stoi(interface->getGeneral()["Resources"]));

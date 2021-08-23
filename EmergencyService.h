@@ -64,6 +64,12 @@ private:
     // Every accident has its own properties
     array<array<map<unsigned, list<pair<char, char>>>, 6>, 6> acc_properties;
     void accPropertiesInit();
+
+    // During acceleration or maneuvering risk of accident increases
+    // depending on technical state
+    // This value shows how probability of accident increases when TS' state is 0
+    const double MAX_FLIGHT_STAGE_ADJUSTMENT = constFieldInit<double>("MAX_FLIGHT_STAGE_ADJUSTMENT", 0.0, 1.0, 0.05);
+
     // Flag for protection from infinite chain of accidents
     bool CHAIN_REACTION_FLAG = false; // 1 means there was a multi-accident this year, no more are allowed
 

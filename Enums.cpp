@@ -34,7 +34,7 @@ enum Services {
     Social_Service,
 };
 
-enum Education{
+enum Education {
     NotStudying,
     FirstYear,
     SecondYear,
@@ -43,7 +43,7 @@ enum Education{
     FifthYear
 };
 
-enum RangeOfAge{
+enum RangeOfAge {
     Baby,
     Child,
     Teenager,
@@ -51,4 +51,11 @@ enum RangeOfAge{
     Adult,
     Old
 };
+
+enum FlightStage {
+    ACCELERATION,
+    STABLE,
+    MANEUVER // Increases wear of devices
+};
+
 #endif //THE_ARK_ENUMS_CPP

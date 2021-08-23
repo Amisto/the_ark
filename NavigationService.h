@@ -18,13 +18,6 @@
 using std::unique_ptr;
 using std::clog;
 
-enum FlightStage
-{
-    ACCELERATION,
-    STABLE,
-    MANEUVER
-};
-
 class NavigationService : public Service {
 private:
     // Total amount of workers here
@@ -60,11 +53,23 @@ private:
 
     // Stages' of the flight management
     FlightStage stage;
-    unsigned short time_until_next_stage;
-    FlightStage next_stage;
 
-    // First and last years of flight are marked as ACCEL.
-    const unsigned short ACCELERATION_TIME = 3;
+    // How much time spaceship will lose on maneuvering
+    short unsigned maneuvering_time_left = 0;
+
+    // Speed and acceleration of the spaceship
+    double speed;
+    double acceleration;
+
+    // Distance to the waypoint
+    double distance_left;
+
+    // Distance in cfg file
+    const unsigned INITIAL_DISTANCE = std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Distance"]);
+
+    // Time required for the spaceship with ideal conditions to reach
+    // сruise speed (equals to 1.0)
+    const unsigned char ACCELERATION_TIME = constFieldInit<unsigned char>("ACCELERATION_TIME", 0, 255, 3);
 
     array<unique_ptr<NavigationBlock>, NavDevAMOUNT> devices;
     // Flag for process_year optimization //CURRENTLY DISABLED
@@ -80,14 +85,14 @@ private:
 
     // Shows gained or lost time due to the work
     // of devices, < 0 means faster flight
-    double years_delta;
+    double distance_delta;
 
     // If total efficiency * state > this value
     // then total distance of flight decreases
     const double MINIMAL_PRODUCTIVITY = 0.35;
 
-    // Total years amount is changing if years_delta is higher than this value
-    const unsigned short BASIC_DELTA = 2;
+    // Total years amount is changing if distance_delta is higher than this value
+    const unsigned short DISTANCE_DELTA_THRESHOLD = 2;
 
     // If years_total is higher this value times,
     // there will be a warning to prevent from endless
@@ -96,6 +101,9 @@ private:
 
     // Every year each device's state will decrease by this amount
     const double ANNUAL_DEGRADATION = constFieldInit<double>("ANNUAL_DEGRADATION", NavDevAMOUNT*(-100.0), 0, -2);
+
+    // Maneuvering damages devices this value times higher
+    const double MANEUVERING_DAMAGE_RATIO = constFieldInit<double>("MANEUVERING_DAMAGE_RATIO", 1.0, 50.0, 1.5);
 
     // This template is used for initializing const coefficients
     // Use any lower_bound == upper_bound if there are no limitations
@@ -129,6 +137,8 @@ public:
     [[nodiscard]] unsigned int getStaffDemand() override;
     [[nodiscard]] unsigned int getResourceDemand() override;
     unsigned int returnJunk() override;
+
+    [[nodiscard]] FlightStage getFlightStage() const;
 };
 
 #endif //THE_ARK_NAVIGATIONSERVICE_H

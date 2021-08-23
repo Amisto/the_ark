@@ -5,6 +5,7 @@
 #include "EmergencyService.h"
 #include "Resources.h"
 #include "RandomNumberGenerator.h"
+#include "NavigationService.h"
 
 EmergencyService::EmergencyService():
 system_state(0), staff(0), need_resources(1), junk(0),
@@ -98,6 +99,19 @@ void EmergencyService::create_accident(Service* s)
         probabilities[6] += probabilities[i];
     }
 
+    // Increasing overall probability if accelerating or maneuvering
+    if (TheArk::get_instance()->getNavigationService()->getFlightStage() != STABLE)
+    {
+        double temp_probabilities_sum = probabilities[6] +
+                MAX_FLIGHT_STAGE_ADJUSTMENT * 0.1 *
+                sqrt((-1) * TheArk::get_instance()->getServices()[Technical_Service]->getState() + 100.0);
+        if (temp_probabilities_sum > 1.0)
+            temp_probabilities_sum = 1;
+        for (auto i = 0; i < 6; i++)
+            probabilities[i] = probabilities[i] / probabilities[6] * temp_probabilities_sum;
+        probabilities[6] = temp_probabilities_sum;
+    }
+
     auto rand_number = TheArk::get_instance()->getRandomGenerator()->getRandomDouble(0, 1);
 
     if (rand_number < probabilities[6]) {
@@ -132,6 +146,9 @@ void EmergencyService::create_accident(Service* s)
 
 void EmergencyService::process_year()
 {
+//    clog << "TS: " << tools_state << endl;
+//    clog << "SS: " << staff_state << endl;
+//    clog << "RS: " << resources_state << endl;
     CHAIN_REACTION_FLAG = false;
 
     staff = TheArk::get_instance()->getPopulation()->getServiceStaff(Emergency_Service).size();

@@ -6,14 +6,15 @@
 #include "Resources.h"
 #include "RandomNumberGenerator.h"
 
-NavigationService::NavigationService(): staff(0), required_resources(0), years_delta(0), junk(0)
+NavigationService::NavigationService(): staff(0), required_resources(0), junk(0), distance_delta(0)
 {
+    speed = 0;
+    acceleration = 1.0 / ACCELERATION_TIME;
+    distance_left = INITIAL_DISTANCE;
     DEFAULT_STAFF = std::stoi(
             TheArk::get_instance()->getInterface()->getGeneral()["Population"]) / DEFAULT_STAFF_DENOMINATOR;
     required_staff = DEFAULT_STAFF;
     stage = ACCELERATION;
-    time_until_next_stage = ACCELERATION_TIME;
-    next_stage = STABLE;
 
     for (auto i = 0; i < NavDevAMOUNT; i++)
         devices[i] =
@@ -36,7 +37,7 @@ void NavigationService::killStaff(unsigned int victims)
     staff -= victims;
 }
 
-// NEGLIGIBLE — lost the way for some time
+// NEGLIGIBLE — lost some time
 // LIGHT — lost some staff members and some time
 // MEDIUM — lost some staff members and some device's health
 // SEVERE — lost staff, devices' health and time
@@ -48,66 +49,63 @@ void NavigationService::process_accident(AccidentSeverity as)
     switch (as)
     {
         case NEGLIGIBLE:
-            stage = MANEUVER;
-            time_until_next_stage = 1;
-            next_stage = STABLE;
-            years_delta += time_until_next_stage;
+            speed -= speed * TheArk::get_instance()->getRandomGenerator()->getRandomFloat(0.01, 0.04);
             devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
-                    TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-5.f, -1.f));
+                    TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-5.0, -1.0));
             break;
 
         case LIGHT:
-            killed_staff = staff / 20;
-            stage = MANEUVER;
-            time_until_next_stage = 2;
-            next_stage = STABLE;
-            years_delta += time_until_next_stage;
+            killed_staff = staff /  TheArk::get_instance()->getRandomGenerator()->getRandomInt(19, 22);
             devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
-                    TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-15.f, -5.f));
+                    TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-15.0, -5.0));
             break;
 
         case MEDIUM:
-            killed_staff = staff / 10;
+            killed_staff = staff / TheArk::get_instance()->getRandomGenerator()->getRandomInt(10, 15);
+            distance_left++;
+            speed -= speed * TheArk::get_instance()->getRandomGenerator()->getRandomFloat(0.10, 0.20);
             devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
-                    TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-35.f, -15.f));
+                    TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-35.0, -15.0));
             break;
 
         case SEVERE:
-            killed_staff = staff / 5;
-            stage = MANEUVER;
-            time_until_next_stage = 7;
-            next_stage = STABLE;
-            years_delta += time_until_next_stage;
+            killed_staff = staff / TheArk::get_instance()->getRandomGenerator()->getRandomInt(6, 9);
+            speed -= speed * TheArk::get_instance()->getRandomGenerator()->getRandomFloat(0.10, 0.20);
+            if (stage != MANEUVER)
+                stage = MANEUVER;
+            maneuvering_time_left += 4;
+            distance_left++;
             devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
-                    TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-35.f, -20.f));
+                    TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-35.0, -20.0));
             devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
-                    TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-40.f, -20.f));
+                    TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-40.0, -20.0));
             break;
 
         case DISASTROUS:
-            killed_staff = staff / 2;
+            killed_staff = staff / TheArk::get_instance()->getRandomGenerator()->getRandomInt(2, 4);
             for (auto i = 0; i < 4; i++) {
                 devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
-                        TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-60.f, -30.f));
+                        TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-60.0, -30.0));
             }
+            speed -= speed * TheArk::get_instance()->getRandomGenerator()->getRandomFloat(0.2, 0.5);
             if (TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 2) == 1) {
-                stage = MANEUVER;
-                time_until_next_stage = 12;
-                next_stage = STABLE;
-                years_delta += time_until_next_stage;
+                if (stage != MANEUVER)
+                    stage = MANEUVER;
+                maneuvering_time_left += 5;
             }
             break;
 
         case CATASTROPHIC:
-            killed_staff = staff * 9 / 10;
+            killed_staff = staff * TheArk::get_instance()->getRandomGenerator()->getRandomInt(75, 92) / 100;
             for (auto i = 0; i < 6; i++) {
                 devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
-                        TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-90.f, -60.f));
+                        TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-90.0, -60.0));
             }
-            stage = MANEUVER;
-            time_until_next_stage = 17;
-            next_stage = STABLE;
-            years_delta += time_until_next_stage;
+            if (stage != MANEUVER)
+                stage = MANEUVER;
+            distance_left += TheArk::get_instance()->getRandomGenerator()->getRandomInt(2, 7);
+            maneuvering_time_left += 9;
+            speed -= speed * TheArk::get_instance()->getRandomGenerator()->getRandomFloat(0.3, 0.7);
             break;
     }
 
@@ -118,51 +116,63 @@ void NavigationService::process_accident(AccidentSeverity as)
 void NavigationService::process_year()
 {
     // Block for flight stage management
-    time_until_next_stage--;
-    if (not time_until_next_stage) {
-        stage = next_stage;
-
-        if (stage == STABLE) {
-            time_until_next_stage = TheArk::get_instance()->getYearsTotal() -
-                    ACCELERATION_TIME;
-            next_stage = ACCELERATION;
-        }
-        else if (stage == ACCELERATION)  {
-            time_until_next_stage = ACCELERATION_TIME;
-            next_stage = STABLE;
+    auto degradation_ratio = 1.0;
+    if (stage == STABLE) {
+        if (speed < 1.0)
+            stage = ACCELERATION;
+        acceleration = 0;
+    }
+    else if (stage == ACCELERATION) {
+        acceleration = 0.1 * sqrt(TheArk::get_instance()->getServices()[Technical_Service]->getState()) *
+                (1.0 / ACCELERATION_TIME);
+        speed += acceleration;
+        if (speed >= 1.0) { // This part has to be reworked to be used with upgrades
+            speed = 1.0;
+            stage = STABLE;
         }
     }
+    else {
+        acceleration = 0;
+        maneuvering_time_left--;
+        if (!maneuvering_time_left)
+            stage = ACCELERATION;
+        degradation_ratio = MANEUVERING_DAMAGE_RATIO;
+    }
+    clog << "SP: " << speed << endl;
+    clog << "DST: " << distance_left << endl;
+    distance_left -= speed;
+    if (distance_left > 0)
+        TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getYearsTotal() + 1);
+    else
+        TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getCurrentYear() - 1);
 
-    // years_delta section
+    // distance_delta section
     double effective_sum = 0; // Sum for all devices' performance
     for (auto & it : devices)
-        effective_sum += it->getState() * it->getEfficiency() / 10000.f;
+        effective_sum += it->getState() * it->getEfficiency() / 10000.0;
 
-    years_delta -= 10 * pow((effective_sum - MINIMAL_PRODUCTIVITY), 5);
-    auto current_year_change = static_cast<int>(years_delta);
-
-    if (years_delta > BASIC_DELTA or years_delta < -BASIC_DELTA) {
-        TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getYearsTotal() + current_year_change);
-        years_delta -= current_year_change;
+    distance_delta -= 10 * pow((effective_sum - MINIMAL_PRODUCTIVITY), 5);
+    auto current_year_change = static_cast<int>(distance_delta);
+   // clog<< "CYC: " << current_year_change << endl;
+    if (distance_delta < -DISTANCE_DELTA_THRESHOLD) {
+        distance_left += current_year_change;
+        distance_delta -= current_year_change;
     }
 
-    if (TheArk::get_instance()->getCurrentYear() >
-    LOST_THE_WAY_WARNING
-    * std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Years"])) {
+    if (TheArk::get_instance()->getCurrentYear() > LOST_THE_WAY_WARNING * INITIAL_DISTANCE) {
         std::cout << "We've been travelling " << LOST_THE_WAY_WARNING << " times longer than estimated" << endl
         << "Probably we are lost forever" << endl
         << "Would you like to continue? (y/n)" << endl;
         string h;
         std::cin >> h;
-        if (h == "n")
-            TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getCurrentYear() - 1);
-        else
+        if (h == "y")
             LOST_THE_WAY_WARNING += 2;
+        else
+            TheArk::get_instance()->setYearsTotal(TheArk::get_instance()->getCurrentYear() - 1);
     }
-    if (std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Years"]) * MINIMAL_FLIGHT_TIME / 100.0 >
-        TheArk::get_instance()->getYearsTotal())
+    if (INITIAL_DISTANCE * MINIMAL_FLIGHT_TIME / 100.0 > TheArk::get_instance()->getYearsTotal())
         TheArk::get_instance()->setYearsTotal(
-                static_cast<unsigned>(std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Years"]) * MINIMAL_FLIGHT_TIME / 100));
+                static_cast<unsigned>(INITIAL_DISTANCE * MINIMAL_FLIGHT_TIME / 100));
     //
 
 
@@ -229,7 +239,7 @@ void NavigationService::process_year()
 
      // Annual degradation
      for (auto & it : devices)
-         it->changeState(ANNUAL_DEGRADATION);
+         it->changeState(ANNUAL_DEGRADATION * degradation_ratio);
 
     //
 
@@ -284,4 +294,10 @@ unsigned int NavigationService::getResourceDemand() {
 unsigned int NavigationService::returnJunk() {
     return junk;
 }
+
+FlightStage NavigationService::getFlightStage() const{
+    return stage;
+}
+
+
 

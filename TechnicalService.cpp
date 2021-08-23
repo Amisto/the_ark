@@ -154,3 +154,7 @@ unsigned int TechnicalService::getStaffDemand() {
 unsigned int TechnicalService::getStaffPriority() {
     return 1;
 }
+
+double TechnicalService::getEngineState() const {
+    return engineState;
+}

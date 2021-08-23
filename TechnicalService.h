@@ -55,7 +55,9 @@ public:
 
     virtual unsigned int getStaffPriority();                     // returns priority of people
     
-    double getState() override;                                  // returns State of theh service  
+    double getState() override;                                  // returns State of theh service
+
+    double getEngineState() const;                                     // returns state of the engine
 
 
     // SETTERS //
