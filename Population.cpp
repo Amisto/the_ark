@@ -14,7 +14,7 @@
 #include <cstdlib>
 #include <iostream>
 
-Population::Population() : children(0), adults(0), oldmen(0), unemployed_people(0)
+Population::Population() : children(0), adults(0), oldmen(0), unemployed_people(0), demand_staff{0, 0, 0, 0, 0, 0}, distributed_staff{0, 0, 0, 0, 0, 0}
 {
     for (int i = 0; i < this->service_workers.size() - 1; i++)
     {
@@ -56,6 +56,16 @@ array<list<shared_ptr<Human>>, 7>& Population::getAllClassification()
 list<shared_ptr<Human>>& Population::getServiceStaff(Services service)
 {
      return this->service_workers[service];
+}
+
+array<unsigned, 6>& Population::getDemandStaff()
+{
+    return this->demand_staff;
+}
+
+array<unsigned, 6>& Population::getDistributedStaff()
+{
+    return this->distributed_staff;
 }
 
 
@@ -112,8 +122,8 @@ double Population::deathRateOldmen()
 
 
 // PROCESS YEAR //
-void Population::processYear() {
-    
+void Population::processYear() 
+{
     // BIRTH
     for(int i = 0; i < TheArk::get_instance()->getMedicalService()->BirthRate(); i++)
     {
@@ -125,13 +135,12 @@ void Population::processYear() {
     }
 
     // ANNUAL DISTRIBUTION OF PEOPLE
-    unsigned int demand_staff[service_workers.size() - 1];
-    demand_staff[0] = TheArk::get_instance()->getTechnicalService()->getStaffDemand();
-    demand_staff[1] = TheArk::get_instance()->getBiologicalService()->getStaffDemand();
-    demand_staff[2] = TheArk::get_instance()->getMedicalService()->getStaffDemand();
-    demand_staff[3] = TheArk::get_instance()->getNavigationService()->getStaffDemand();
-    demand_staff[4] = TheArk::get_instance()->getEmergencyService()->getStaffDemand();
-    demand_staff[5] = TheArk::get_instance()->getSocialService()->getStaffDemand();
+    this->demand_staff[0] = TheArk::get_instance()->getTechnicalService()->getStaffDemand();
+    this->demand_staff[1] = TheArk::get_instance()->getBiologicalService()->getStaffDemand();
+    this->demand_staff[2] = TheArk::get_instance()->getMedicalService()->getStaffDemand();
+    this->demand_staff[3] = TheArk::get_instance()->getNavigationService()->getStaffDemand();
+    this->demand_staff[4] = TheArk::get_instance()->getEmergencyService()->getStaffDemand();
+    this->demand_staff[5] = TheArk::get_instance()->getSocialService()->getStaffDemand();
     
     int all_demand_staff = 0;
     for (int i = 0; i < this->service_workers.size() - 1; i++)
@@ -148,6 +157,7 @@ void Population::processYear() {
         {   
             if (current_staff_of_service + new_staff > max_staff_of_service) 
                 new_staff = max_staff_of_service - current_staff_of_service;
+            this->distributed_staff[i] = new_staff;
             staff_distribution(this->service_workers[i], new_staff);
         }
     }

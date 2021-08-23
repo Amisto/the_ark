@@ -27,6 +27,8 @@ private:
     unsigned int unemployed_people;                      // current number of unemployed
 
     double distribution_coef[6];                         // propotions of people in services
+    array<unsigned, 6> distributed_staff;                // number of distributed people at current year
+    array<unsigned, 6> demand_staff;                     // number of demand staff of each service at current year
     array<list<shared_ptr<Human>>, 7> service_workers;   // service staff lists
     list<shared_ptr<Human>> people;                      // all people on the ark
 
@@ -34,7 +36,7 @@ private:
     unsigned int borderChildrenToAdults();
     unsigned int borderAdultsToOldmen();
 
-    void staff_distribution(list<shared_ptr<Human>>& staff, unsigned int demand_stuff); // sends demand_staff in service list
+    void staff_distribution(list<shared_ptr<Human>>& staff, unsigned int demand_staff); // sends demand_staff in service list
     void check_dead_people_in_services();                                               // pops dead people from service lists
 
     double deathRateChildren();
@@ -54,6 +56,8 @@ public:
     list<shared_ptr<Human>>& getServiceStaff(Services service);
     list<shared_ptr<Human>>& getPeople();
     array<list<shared_ptr<Human>>, 7>& getAllClassification();
+    array<unsigned, 6>& getDemandStaff();
+    array<unsigned, 6>& getDistributedStaff();
 
     // OTHER //
     void init(unsigned int total);
