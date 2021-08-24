@@ -129,21 +129,37 @@ void NotOrgRes::ReturnJunk(unsigned int isReturned, Services id)
 
 unsigned int NotOrgRes::TakeComp(unsigned int isNeeded, Services id)
 {
-	 if ( isNeeded <= this->components / 6 or used_by_services[id] == 0)
+	 if ( components == 0)
 	 {
-	     if (isNeeded > components)
-	         isNeeded = components;
-
-		 used                 += isNeeded;
-		 components           -= isNeeded;
-		 used_by_services[id] += isNeeded;
-
-		 return isNeeded;
+		 return 0;
 	 }
-
 	 else
 	 {
-		 return (isNeeded * used) / ( 6 * used_by_services[id]);
+	 	if ( (isNeeded <= (components / 6)) or used_by_services[id] == 0)
+	 	{
+	     		if (isNeeded > components)
+	         		isNeeded = components;
+
+	     		used                 += isNeeded;
+	     		components           -= isNeeded;
+	     		used_by_services[id] += isNeeded;
+
+	     		return isNeeded;
+	 	}
+
+	 	else
+	 	{
+		 	unsigned int isGiven = (isNeeded * used) / ( 6 * used_by_services[id]);
+		 	
+			if (isGiven > components)
+				isGiven = components;
+
+		 	used                 += isGiven;
+		 	components           -= isGiven;
+		 	used_by_services[id] += isGiven;
+
+		 	return isGiven;
+	 	}
 	 }
 
 }
