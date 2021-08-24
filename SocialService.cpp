@@ -73,8 +73,13 @@ void SocialService::updateBorderChildrenToAdults(){
         koef = std::accumulate(list_want.begin(), list_want.end(), 0) / \
         std::accumulate(list_dist.begin(), list_dist.end(), 0);
     if (koef > dynamic_koeffisient_of_border_children_to_adults){
-        --border_children_to_adults;
-        dynamic_koeffisient_of_border_children_to_adults*=1.5;
+        if (border_children_to_adults <= std::stoi(TheArk::get_instance()->getInterface()->getServices()\
+                    [Services::Social_Service]["Minimum_border_Children_to_Adults"])) {
+            state -= 10;
+        } else {
+            --border_children_to_adults;
+            dynamic_koeffisient_of_border_children_to_adults *= 1.5;
+        }
     } else {
         if (border_children_to_adults >= std::stoi(TheArk::get_instance()->getInterface()->getServices()\
                     [Services::Social_Service]["Maximum_border_Children_to_Adults"])){
@@ -99,6 +104,8 @@ void SocialService::setState() {
     if (n_peop)
         state = (sum_of_mental_health / n_peop) /** 0.33 + (sum_of_ph_health / n_peop) * 0.33 + (n_peop / std::stoi(TheArk::get_instance()->getInterface()->getGeneral()["Population"])) * 0.33*/;
     else state = 0;
+    if (state > 100) state = 100;
+    if (state < 0) state = 0;
 }
 
 void SocialService::updatePeople(){
@@ -439,7 +446,6 @@ void SocialService::process_accident(AccidentSeverity as) {
         }
         count_unresolved_accident_severity++;
     }
-
     count_all_accident_severity++; // количество произошедших чрезвычайных событий увеличислось на 1
 }
 
