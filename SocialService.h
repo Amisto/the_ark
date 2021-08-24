@@ -4,6 +4,8 @@
 
 // ТЕРМИНОЛОГИЯ: ПСИХОЛОГИ - это ученые и инженеры, УЧЕНЫЕ - это ученые
 
+/*TODO Make an education system */
+
 #ifndef THE_ARK_SOCIALSERVICE_H
 #define THE_ARK_SOCIALSERVICE_H
 
@@ -34,14 +36,21 @@ private:
     unsigned int count_resolved_accident_severity = 0; // число чрезвычайных событий, которые удалось успешно решить
     unsigned int count_unresolved_accident_severity = 0; // число чрезвычайных событий, которые не удалось успешно решить
 
+    //---------Special Integers-------//
     unsigned n_staff_we_want;
     unsigned n_resources_we_want;
     unsigned n_ills;
+    unsigned border_children_to_adults;
+    unsigned eff_of_one_psyh;
+    unsigned dynamic_koeffisient_of_border_children_to_adults;
 
     void setState();
     void updatePerson(std::shared_ptr<Human> person);
     void updatePeople();
     void fixPeople();
+    void updateBorderChildrenToAdults();
+    unsigned countWorkableStaff(list<shared_ptr<Human>>& list_of_pep);
+    unsigned countFreeWorkableStaff();
 public:
     SocialService();
     void process_accident(AccidentSeverity as) override;    // каждая служба должна уметь в своих терминах обработать переданную ей аварию
@@ -55,8 +64,7 @@ public:
 
     unsigned int borderChildrenToAdults();
 
-    unsigned countWorkableStaff();
-    void setStaffAndResourceDemand();
+    void setSpecialIntegers();
 };
 
 

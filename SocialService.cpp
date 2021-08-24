@@ -2,11 +2,14 @@
 // Created by Amisto on 4/2/2021.
 //
 #define DEBUG_OUTPUT_CONTROL_AMOUNT_OF_WORKERS_AND_CLIENTS  1
+#define DEBUG_OUTPUT_CONTROL_OF_BORDER_CHILDREN_TO_ADULTS 1
+#define DEBUG_OUTPUT_CONTROL_DISRIBUTED_STAFF 0  // DON'T TOUCH THIS SSSSHHHHIIIITTTT
 #include "SocialService.h"
 #include "RandomNumberGenerator.h"
 #include "Interface.h"
 #include <iostream>
 #include <algorithm>
+
 
 SocialService::SocialService()
 {
@@ -14,28 +17,75 @@ SocialService::SocialService()
     n_years_of_education = 5; // <- все изначально учатся 5 лет
     n_staff_we_want = 50; // <- на всякий случай, вдруг что поломается
     suicide_counter = 0;
+    n_ills = 0;
+    n_resources_we_want = 0;
+    eff_of_one_psyh = std::stoi(TheArk::get_instance()->getInterface()->getServices()\
+            [Services::Social_Service]["Starting_Efficiency_of_a_doctor"]);
+    border_children_to_adults = std::stoi(TheArk::get_instance()->getInterface()->getServices()\
+            [Services::Social_Service]["Starting_border_Children_to_Adults"]);
+    dynamic_koeffisient_of_border_children_to_adults = 2;
 }
 
 //--------------------------------Private Methods-----------------------------------//
-unsigned SocialService::countWorkableStaff(){
-    unsigned n = 0;
-    for (const auto& staffik: TheArk::get_instance()->getPopulation()->getServiceStaff(Services::Social_Service))
-    {
-        if (staffik->isAbleToWork()) ++n;
-    }
-    return n;
+unsigned SocialService::countWorkableStaff(list<shared_ptr<Human>>& list_of_pep){
+    auto dash_fold = [](int sum, std::shared_ptr<Human> human) {
+        short a = 0;
+        if (human->isAbleToWork()) a = 1;
+        return sum + a;
+    };
+    return std::accumulate(list_of_pep.begin(), list_of_pep.end(), 0, dash_fold);
 }
 
-void SocialService::setStaffAndResourceDemand() {
+#if DEBUG_OUTPUT_CONTROL_DISRIBUTED_STAFF
+unsigned SocialService::countFreeWorkableStaff(){
+    unsigned all_workers = 0;
+    for (int i = 0; i < 6; ++i)
+    {
+        all_workers += countWorkableStaff(TheArk::get_instance()->getPopulation()->getAllClassification()[i]);
+    }
+    return countWorkableStaff(TheArk::get_instance()->getPopulation()->getPeople()) - all_workers;
+}
+#endif
+
+void SocialService::setSpecialIntegers() {
     int demand = (clients.size() / std::stoi(TheArk::get_instance()->getInterface()->getServices()\
                     [Services::Social_Service]["Year_thread"]))\
-                    - countWorkableStaff();
+                    - countWorkableStaff(TheArk::get_instance()->getPopulation()->getServiceStaff(Services::Social_Service));
     if (demand > 0)
-        n_staff_we_want = demand;
+        n_staff_we_want = demand;  // first
     else
         n_staff_we_want = 0;
+
     n_resources_we_want = clients.size() * std::stoi(TheArk::get_instance()->getInterface()->getServices()\
-                    [Services::Social_Service]["Amount_of_drugs_for_one_person"]);
+                    [Services::Social_Service]["Amount_of_drugs_for_one_person"]);  // second
+
+    n_ills = clients.size();  // third
+
+    updateBorderChildrenToAdults();  // fourth
+}
+
+void SocialService::updateBorderChildrenToAdults(){
+    auto list_dist = TheArk::get_instance()->getPopulation()->getDistributedStaff();
+    auto list_want = TheArk::get_instance()->getPopulation()->getDemandStaff();
+    unsigned koef = 3;
+
+    if (std::accumulate(list_dist.begin(), list_dist.end(), 0))
+        koef = std::accumulate(list_want.begin(), list_want.end(), 0) / \
+        std::accumulate(list_dist.begin(), list_dist.end(), 0);
+    if (koef > dynamic_koeffisient_of_border_children_to_adults){
+        --border_children_to_adults;
+        dynamic_koeffisient_of_border_children_to_adults*=1.5;
+    } else {
+        if (border_children_to_adults >= std::stoi(TheArk::get_instance()->getInterface()->getServices()\
+                    [Services::Social_Service]["Maximum_border_Children_to_Adults"])){
+                    dynamic_koeffisient_of_border_children_to_adults /= 1.4;
+        }  else {
+            border_children_to_adults++;
+        }
+    }
+#if DEBUG_OUTPUT_CONTROL_OF_BORDER_CHILDREN_TO_ADULTS
+    std::clog << "Border: " << border_children_to_adults << " Dynamic koef: " <<dynamic_koeffisient_of_border_children_to_adults << std::endl;
+#endif
 }
 
 void SocialService::setState() {
@@ -52,8 +102,7 @@ void SocialService::setState() {
 }
 
 void SocialService::updatePeople(){
-    for (auto person : TheArk::get_instance()->getPopulation()->getPeople())
-    {
+    for (auto person : TheArk::get_instance()->getPopulation()->getPeople()){
         updatePerson(person);
     }
 }
@@ -83,7 +132,7 @@ void SocialService::updatePerson(std::shared_ptr<Human> person) {
 
     // логика "сособен ли обучаться"
     if (!person->isAbleToStudy()){
-        if (person->getAge() >= this->borderChildrenToAdults()
+        if (person->getAge() >= border_children_to_adults
             && person->getMentalHealth() >= 75) {
             person->setIsAbleToStudy(true);
             if (person->getYearOfEducation() == NotStudying)
@@ -110,17 +159,45 @@ void SocialService::updatePerson(std::shared_ptr<Human> person) {
 }
 
 void SocialService::fixPeople() {
-    n_ills = clients.size();
     if (clients.empty()) return;
-    for (int i = 0, staff = countWorkableStaff();\
+    for (int i = 0, staff = countWorkableStaff(TheArk::get_instance()->getPopulation()->getServiceStaff(Services::Social_Service));\
         i < staff * std::stoi(TheArk::get_instance()->getInterface()->getServices()\
         [Services::Social_Service]["Year_thread"]);i++)
     {
-        clients.top()->setMentalHealth(clients.top()->getMentalHealth() + \
-        std::stoi(TheArk::get_instance()->getInterface()->getServices()[Services::Social_Service]["Efficiency_of_a_doctor"]));
+        clients.top()->setMentalHealth(clients.top()->getMentalHealth() + eff_of_one_psyh);
         clients.pop();
         if (clients.empty()) break;
     }
+}
+
+//-----------------------------Main Method---------------------------//
+
+void SocialService::process_year() {
+
+#if DEBUG_OUTPUT_CONTROL_AMOUNT_OF_WORKERS_AND_CLIENTS
+    std::clog << "In SS: " << TheArk::get_instance()->getPopulation()->getAllClassification()[Services::Social_Service].size() \
+    << " Able to work: " << countWorkableStaff(TheArk::get_instance()->getPopulation()->getAllClassification()[Services::Social_Service]) \
+    << " Clients: " << n_ills << std::endl <<\
+    "And SS wanna "<< getStaffDemand() << std::endl << "And population is "\
+    << TheArk::get_instance()->getPopulation()->getPeople().size() << std::endl << "\n";
+#endif
+#if DEBUG_OUTPUT_CONTROL_DISRIBUTED_STAFF
+    auto list_dist = TheArk::get_instance()->getPopulation()->getDistributedStaff();
+    auto list_want = TheArk::get_instance()->getPopulation()->getDemandStaff();
+    std::clog << "Distributed: " << std::accumulate(list_dist.begin(), list_dist.end(), 0) <<"\n" <<  "Wanted: " <<  \
+    std::accumulate(list_want.begin(), list_want.end(), 0)<<"\n" << "All free workable people: " << countFreeWorkableStaff() << std::endl <<
+              "All workable people: " << countWorkableStaff(TheArk::get_instance()->getPopulation()->getPeople())<<"\n";
+#endif
+    while(!clients.empty()){
+        clients.pop();
+    }
+    setState();
+    updatePeople();
+    setSpecialIntegers();
+
+
+
+    fixPeople();
 }
 
 //--------------------------------Public Methods-----------------------------------//
@@ -157,8 +234,8 @@ void SocialService::process_accident(AccidentSeverity as) {
         {
             if (person->isAlive()) {
                 if (person->getMentalHealth() != 100
-                && person->getMentalHealth() > 3
-                && person->getPhysicalHealth() != 0) {
+                    && person->getMentalHealth() > 3
+                    && person->getPhysicalHealth() != 0) {
                     if ((TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 99)) <= PROBABILITY_CHANGE_MENTAL_HEALTH_LIGHT) {
                         person->setMentalHealth(person->getMentalHealth() + CHANGE_MENTAL_HEALTH);
                     }
@@ -180,8 +257,8 @@ void SocialService::process_accident(AccidentSeverity as) {
             if (person->isAlive()) {
                 if (TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 1)) {
                     if (person->getMentalHealth() != 100
-                    && person->getMentalHealth() > 3
-                    && person->getPhysicalHealth() != 0) {
+                        && person->getMentalHealth() > 3
+                        && person->getPhysicalHealth() != 0) {
                         if ((TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 99)) <= PROBABILITY_CHANGE_MENTAL_HEALTH_NEGLIGIBLE) {
                             person->setMentalHealth(person->getMentalHealth() +
                                                     2 * CHANGE_MENTAL_HEALTH);
@@ -243,7 +320,7 @@ void SocialService::process_accident(AccidentSeverity as) {
                         }
                         if ((TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 99)) <= PROBABILITY_CHANGE_PHYSICAL_HEALTH) {
                             person->setPhysicalHealth(person->getMentalHealth() -
-                            2 * CHANGE_PHYSICAL_HEALTH);
+                                                      2 * CHANGE_PHYSICAL_HEALTH);
                         }
                         if (person->getPhysicalHealth() == 0 || person->getMentalHealth() <= 3) {
                             person->setIsAlive(false);
@@ -264,7 +341,7 @@ void SocialService::process_accident(AccidentSeverity as) {
                         }
                         if ((TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 99)) <= PROBABILITY_CHANGE_PHYSICAL_HEALTH) {
                             person->setPhysicalHealth(person->getMentalHealth() -
-                            3 * CHANGE_PHYSICAL_HEALTH);
+                                                      3 * CHANGE_PHYSICAL_HEALTH);
                         }
                         if (person->getPhysicalHealth() == 0 || person->getMentalHealth() <= 3) {
                             person->setIsAlive(false);
@@ -297,7 +374,7 @@ void SocialService::process_accident(AccidentSeverity as) {
                         }
                         if ((TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 99)) <= PROBABILITY_CHANGE_PHYSICAL_HEALTH) {
                             person->setPhysicalHealth(person->getMentalHealth() -
-                            3 * CHANGE_PHYSICAL_HEALTH);
+                                                      3 * CHANGE_PHYSICAL_HEALTH);
                         }
                         if (person->getPhysicalHealth() == 0 || person->getMentalHealth() <= 3) {
                             person->setIsAlive(false);
@@ -318,7 +395,7 @@ void SocialService::process_accident(AccidentSeverity as) {
                         }
                         if ((TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 99)) <= PROBABILITY_CHANGE_PHYSICAL_HEALTH) {
                             person->setPhysicalHealth(person->getMentalHealth() -
-                            3 * CHANGE_PHYSICAL_HEALTH);
+                                                      3 * CHANGE_PHYSICAL_HEALTH);
                         }
                         if (person->getPhysicalHealth() == 0 || person->getMentalHealth() <= 3) {
                             person->setIsAlive(false);
@@ -366,9 +443,8 @@ void SocialService::process_accident(AccidentSeverity as) {
     count_all_accident_severity++; // количество произошедших чрезвычайных событий увеличислось на 1
 }
 
-unsigned int SocialService::borderChildrenToAdults()
-{
-    return 18;
+unsigned int SocialService::borderChildrenToAdults(){
+    return border_children_to_adults;
 }
 
 double SocialService::getState() {
@@ -388,25 +464,3 @@ unsigned int SocialService::returnJunk() {
 unsigned int SocialService::getStaffDemand(){
     return n_staff_we_want;
 }
-
-//-----------------------------Main Method---------------------------//
-
-void SocialService::process_year() {
-
-#if DEBUG_OUTPUT_CONTROL_AMOUNT_OF_WORKERS_AND_CLIENTS
-    std::clog <<"LAST_YEAR:" <<std::endl<< "In SS: " << TheArk::get_instance()->getPopulation()->getAllClassification()[Services::Social_Service].size() \
-    << " Able to work: " << countWorkableStaff() \
-    << " Clients: " << n_ills << std::endl << "And SS wanna "<< getStaffDemand() \
-    << std::endl << "And population is "\
-    << TheArk::get_instance()->getPopulation()->getPeople().size() << std::endl;
-#endif
-    while(!clients.empty())
-    {
-        clients.pop();
-    }
-    setState();
-    updatePeople();
-    setStaffAndResourceDemand();
-    fixPeople();
-}
-
