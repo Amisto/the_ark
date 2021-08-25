@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <ctime>
+#include "RandomNumberGenerator.h"
 
 TechnicalService::TechnicalService() 
 {
@@ -33,7 +34,7 @@ void TechnicalService::process_accident(AccidentSeverity as)
         this->emergencyRepair();
 
     // kill 1%-as% of all staff
-    kill((unsigned int)(random.getRandomDouble(1, as) / 100 * this->staff));
+    kill((unsigned int)(TheArk::get_instance()->getRandomGenerator()->getRandomDouble(1, as) / 100 * this->staff));
 }
 
 void TechnicalService::kill(unsigned int victims)
@@ -69,7 +70,7 @@ void TechnicalService::emergencyRepair()
     }
 
     // убить много людей, так как экстренная и масштабная починка
-    kill(random.getRandomDouble(0.1, 0.3) * this->staff);
+    kill(TheArk::get_instance()->getRandomGenerator()->getRandomDouble(0.1, 0.3) * this->staff);
 }
 
 void TechnicalService::process_year()
@@ -106,8 +107,8 @@ void TechnicalService::process_year()
     }
 
     // износ корабля
-    this->protectionState -= random.getRandomDouble(1.0, 1.5);
-    this->engineState     -= (100 - this->protectionState) * random.getRandomDouble(0.01, 0.1); 
+    this->protectionState -= TheArk::get_instance()->getRandomGenerator()->getRandomDouble(1.0, 1.5);
+    this->engineState     -= (100 - this->protectionState) * TheArk::get_instance()->getRandomGenerator()->getRandomDouble(0.01, 0.1);
 }
 
 double TechnicalService::efficiencyConsumablesToComponents() {

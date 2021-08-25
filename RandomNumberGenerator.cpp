@@ -4,23 +4,25 @@
 
 #include "RandomNumberGenerator.h"
 
+std::default_random_engine RandomNumberGenerator::r_engine = std::default_random_engine(std::chrono::steady_clock::now().time_since_epoch().count());
+
 int RandomNumberGenerator::getRandomInt(int min, int max) {
-    unsigned seed = std::chrono::steady_clock::now().time_since_epoch().count();
-    static default_random_engine e(seed);
+    if (min > max)
+        throw std::invalid_argument("MIN/MAX MISMATCH IN getRandomInt");
     std::uniform_int_distribution<int> d(min, max);
-    return d(e);
+    return d(r_engine);
 }
 
 float RandomNumberGenerator::getRandomFloat(float min, float max) {
-    unsigned seed = std::chrono::steady_clock::now().time_since_epoch().count();
-    static std::default_random_engine e(seed);
-    uniform_real_distribution<float> d(min, max);
-    return d(e);
+    if (min > max)
+        throw std::invalid_argument("MIN/MAX MISMATCH IN getRandomFloat");
+    std::uniform_real_distribution<float> d(min, max);
+    return d(r_engine);
 }
 
 double RandomNumberGenerator::getRandomDouble(double min, double max) {
-    unsigned seed = std::chrono::steady_clock::now().time_since_epoch().count();
-    static std::default_random_engine e(seed);
-    uniform_real_distribution<double> d(min, max);
-    return d(e);
+    if (min > max)
+        throw std::invalid_argument("MIN/MAX MISMATCH IN getRandomDouble");
+    std::uniform_real_distribution<double> d(min, max);
+    return d(r_engine);
 }

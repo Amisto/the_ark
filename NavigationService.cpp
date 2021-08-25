@@ -45,50 +45,49 @@ void NavigationService::killStaff(unsigned int victims)
 // CATASTROPHIC — lost almost everything
 void NavigationService::process_accident(AccidentSeverity as)
 {
+    static auto ranFloat = &RandomNumberGenerator::getRandomFloat;
+    static auto ranDouble = &RandomNumberGenerator::getRandomDouble;
+    static auto ranInt = &RandomNumberGenerator::getRandomInt;
+    static auto RNG = TheArk::get_instance()->getRandomGenerator();
+
     unsigned killed_staff = 0;
     switch (as)
     {
         case NEGLIGIBLE:
-            speed -= speed * TheArk::get_instance()->getRandomGenerator()->getRandomFloat(0.01, 0.04);
-            devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
-                    TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-5.0, -1.0));
+            speed -= speed * (RNG->*ranDouble)(0.01, 0.04);
+            devices[(RNG->*ranInt)(0, 4)]->changeState((RNG->*ranFloat)(-5.0, -1.0));
             break;
 
         case LIGHT:
-            killed_staff = staff /  TheArk::get_instance()->getRandomGenerator()->getRandomInt(19, 22);
-            devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
-                    TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-15.0, -5.0));
+            killed_staff = staff / (RNG->*ranInt)(19, 22);
+            devices[(RNG->*ranInt)(0, 4)]->changeState((RNG->*ranFloat)(-15.0, -5.0));
             break;
 
         case MEDIUM:
-            killed_staff = staff / TheArk::get_instance()->getRandomGenerator()->getRandomInt(10, 15);
+            killed_staff = staff / (RNG->*ranInt)(10, 15);
             distance_left++;
-            speed -= speed * TheArk::get_instance()->getRandomGenerator()->getRandomFloat(0.10, 0.20);
-            devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
-                    TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-35.0, -15.0));
+            speed -= speed * (RNG->*ranDouble)(0.10, 0.20);
+            devices[(RNG->*ranInt)(0, 4)]->changeState((RNG->*ranFloat)(-35.0, -15.0));
             break;
 
         case SEVERE:
-            killed_staff = staff / TheArk::get_instance()->getRandomGenerator()->getRandomInt(6, 9);
-            speed -= speed * TheArk::get_instance()->getRandomGenerator()->getRandomFloat(0.10, 0.20);
+            killed_staff = staff / (RNG->*ranInt)(6, 9);
+            speed -= speed * (RNG->*ranDouble)(0.10, 0.20);
             if (stage != MANEUVER)
                 stage = MANEUVER;
             maneuvering_time_left += 4;
             distance_left++;
-            devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
-                    TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-35.0, -20.0));
-            devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
-                    TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-40.0, -20.0));
+            devices[(RNG->*ranInt)(0, 4)]->changeState((RNG->*ranFloat)(-35.0, -20.0));
+            devices[(RNG->*ranInt)(0, 4)]->changeState((RNG->*ranFloat)(-40.0, -20.0));
             break;
 
         case DISASTROUS:
-            killed_staff = staff / TheArk::get_instance()->getRandomGenerator()->getRandomInt(2, 4);
-            for (auto i = 0; i < 4; i++) {
-                devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
-                        TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-60.0, -30.0));
-            }
-            speed -= speed * TheArk::get_instance()->getRandomGenerator()->getRandomFloat(0.2, 0.5);
-            if (TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 2) == 1) {
+            killed_staff = staff / (RNG->*ranInt)(2, 4);
+            for (auto i = 0; i < 4; i++)
+                devices[(RNG->*ranInt)(0, 4)]->changeState((RNG->*ranFloat)(-60.0, -30.0));
+
+            speed -= speed * (RNG->*ranDouble)(0.2, 0.5);
+            if ((RNG->*ranInt)(0, 2) == 1) {
                 if (stage != MANEUVER)
                     stage = MANEUVER;
                 maneuvering_time_left += 5;
@@ -96,16 +95,15 @@ void NavigationService::process_accident(AccidentSeverity as)
             break;
 
         case CATASTROPHIC:
-            killed_staff = staff * TheArk::get_instance()->getRandomGenerator()->getRandomInt(75, 92) / 100;
-            for (auto i = 0; i < 6; i++) {
-                devices[TheArk::get_instance()->getRandomGenerator()->getRandomInt(0, 4)]->changeState(
-                        TheArk::get_instance()->getRandomGenerator()->getRandomDouble(-90.0, -60.0));
-            }
+            killed_staff = staff * (RNG->*ranInt)(75, 92) / 100;
+            for (auto i = 0; i < 6; i++)
+                devices[(RNG->*ranInt)(0, 4)]->changeState((RNG->*ranFloat)(-90.0, -60.0));
+
             if (stage != MANEUVER)
                 stage = MANEUVER;
-            distance_left += TheArk::get_instance()->getRandomGenerator()->getRandomInt(2, 7);
+            distance_left += (RNG->*ranInt)(2, 7);
             maneuvering_time_left += 9;
-            speed -= speed * TheArk::get_instance()->getRandomGenerator()->getRandomFloat(0.3, 0.7);
+            speed -= speed * (RNG->*ranDouble)(0.3, 0.7);
             break;
     }
 

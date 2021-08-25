@@ -10,6 +10,7 @@
 #include "BiologicalService.h"
 #include "EmergencyService.h"
 #include "NavigationService.h"
+#include "RandomNumberGenerator.h"
 #include "Enums.cpp"
 #include <cstdlib>
 #include <iostream>

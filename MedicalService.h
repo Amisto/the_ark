@@ -8,7 +8,6 @@
 #include "Service.h"
 #include "Interface.h"
 #include "TheArk.h"
-#include "RandomNumberGenerator.h"
 #include <list>
 
 using std::list;
@@ -39,7 +38,6 @@ private:
     double Birth;                                         // number of new people
     unsigned int HealthYearAgo;                           // total health year ago
     unsigned int CriticalHealth;                          // critical health to die
-    RandomNumberGenerator RNG = *TheArk::get_instance()->getRandomGenerator();
 
     // METHODS //
     void process_child(std::shared_ptr<Human> human);     // updates child state

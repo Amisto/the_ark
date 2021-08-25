@@ -9,7 +9,6 @@
 #include "Service.h"
 #include "Human.h"
 #include "TheArk.h"
-#include "RandomNumberGenerator.h"
 #include "Interface.h"
 
 class TechnicalService : public Service {
@@ -33,7 +32,6 @@ private:
     unsigned int maxResources;        // current demand resources
     unsigned int junk;                // junk resources to be returned after the year
     unsigned int demand_resources;    //
-    RandomNumberGenerator random;     // 
 
 
     // METHODS //

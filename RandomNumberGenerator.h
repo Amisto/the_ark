@@ -7,12 +7,12 @@
 
 #include <chrono>
 #include <random>
-
-using std::default_random_engine;
-using std::uniform_real_distribution;
+#include <exception>
 
 class RandomNumberGenerator
 {
+private:
+    static std::default_random_engine r_engine;
 public:
     int getRandomInt(int min, int max);
     float getRandomFloat(float min, float max);
