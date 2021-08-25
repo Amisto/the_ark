@@ -165,7 +165,7 @@ public:
 const int x = 5;
 const int y = 5;
 
-void process_year()
+void BiologicalService::process_year()
 {
     double w, f, l;
     int n;
