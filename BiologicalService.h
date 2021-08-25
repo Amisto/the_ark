@@ -11,7 +11,7 @@ public:
 
     void process_accident(AccidentSeverity as) override;   
     void
-    process_year() override {};                       
+    process_year() override;
     double
     getState() override;                             
     void setState(double s) override;                    
