@@ -46,10 +46,44 @@ def send_instructions(message):
     bot.send_message(chat_id=message.chat.id, text="Waiting for help...")
 
 
+############################
+# Information about services
+#
+#
+@bot.message_handler(commands=['technical'])
+def technical_info(message):
+    bot.send_message(chat_id=message.chat.id, text=TEXTS["TECHNICAL_INFO"], parse_mode="Markdown")
+
+@bot.message_handler(commands=['biological'])
+def biological_info(message):
+    bot.send_message(chat_id=message.chat.id, text=TEXTS["BIOLOGICAL_INFO"], parse_mode="Markdown")
+
+@bot.message_handler(commands=['medical'])
+def medical_info(message):
+    bot.send_message(chat_id=message.chat.id, text=TEXTS["MEDICAL_INFO"], parse_mode="Markdown")
+
+@bot.message_handler(commands=['navigation'])
+def navigation_info(message):
+    bot.send_message(chat_id=message.chat.id, text=TEXTS["NAVIGATION_INFO"], parse_mode="Markdown")
+
+@bot.message_handler(commands=['emergency'])
+def emergency_info(message):
+    bot.send_message(chat_id=message.chat.id, text=TEXTS["EMERGENCY_INFO"], parse_mode="Markdown")
+
+@bot.message_handler(commands=['social'])
+def social_info(message):
+    bot.send_message(chat_id=message.chat.id, text=TEXTS["SOCIAL_INFO"], parse_mode="Markdown")
+
+@bot.message_handler(commands=['general'])
+def general_info(message):
+    bot.send_message(chat_id=message.chat.id, text=TEXTS["GENERAL_INFO"], parse_mode="Markdown")
+#
+#
+############################
+
 @bot.message_handler(commands=['parameters', 'new_flight'])
 def show_parameters(message):
     bot.send_message(chat_id=message.chat.id, text="Текущие параметры:\n\n" + parameters + "\nЧтобы внести изменения отправьте /change_parameters")
-
 
 @bot.message_handler(commands=['change_parameters'])
 def change_parameters1(message):
