@@ -8,6 +8,7 @@
 #include <chrono>
 #include <random>
 #include <exception>
+#include <stdexcept>
 
 class RandomNumberGenerator
 {
