@@ -176,6 +176,8 @@ void TheArk::flight() {
     {
         processYear();
         interface->snap(current_year + 1);
+        if (population->getTotal() == 0)
+            break;
     }
     interface->finalSnap();
 }
