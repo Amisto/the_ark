@@ -4,7 +4,10 @@ import telebot
 import os
 import time
 
-config_filename = "../test_000.cfg"
+config_filename = "../test_{}.cfg"
+dir_plots = "users_plots"
+if not os.path.exists(dir_plots):
+    os.mkdir(dir_plots)
 
 TEXTS = {}
 # loading texts
@@ -17,9 +20,9 @@ for i in range(len(texts) // 2):
 file.close()
 
 
-def update_config_file(data):
-# Updates information in config file by data
-    file = open(config_filename, "w")
+def update_config_file(data, chat_id):
+    # Updates information in config file by data
+    file = open(config_filename.format(chat_id), "w")
     file.write(data)
     file.close()
 
@@ -27,14 +30,21 @@ def update_config_file(data):
 TOKEN = '1975742331:AAGLCpQXH1KXVgtYx8v3JApsky1_4D53z_U'    
 
 bot = telebot.TeleBot(TOKEN, parse_mode=None)
-BOOL_CHANGE_PARAMETERS = False
 
-file = open('../test_000.cfg')
-parameters = file.read()
-parameters_list = parameters.split()
-file.close()
+params = {}
 
-BOOL_READ_FROM_COUT = True
+def make_new_param(chat_id):
+    if chat_id in params:
+        return
+    params[chat_id] = {}
+    params[chat_id]['BOOL_CHANGE_PARAMETERS'] = False
+    params[chat_id]['BOOL_READ_FROM_COUT'] = True
+    file = open('../test_000.cfg')
+    params[chat_id]['parameters'] = file.read()
+    params[chat_id]['parameters_list'] = parameters.split()
+    os.popen('cp ../test_000.cfg ../test_{}.cfg'.format(chat_id))# os.popen('copy ... for Windows  
+    file.close()
+
 
 @bot.message_handler(commands=['start'])
 def introduction(message):
@@ -87,28 +97,35 @@ def show_parameters(message):
 
 @bot.message_handler(commands=['change_parameters'])
 def change_parameters1(message):
-    global BOOL_CHANGE_PARAMETERS
-    BOOL_CHANGE_PARAMETERS = True
-    bot.send_message(chat_id=message.chat.id, text="Введите *имя параметра* *новое значение*")
+    chat_id = message.chat.id
+    make_new_param(chat_id)
+    params[chat_id]['BOOL_CHANGE_PARAMETERS'] = True
+    bot.send_message(chat_id=chat_id, text="Введите *имя параметра* *новое значение*")
 
-@bot.message_handler(func=lambda message: BOOL_CHANGE_PARAMETERS)
+@bot.message_handler(func=lambda message: params[message.chat.id]['BOOL_CHANGE_PARAMETERS'])
 def change_parameters2(message):
-    global BOOL_CHANGE_PARAMETERS, parameters, parameters_list
-    BOOL_CHANGE_PARAMETERS = False
+    chat_id = message.chat.id
+    params[chat_id]['BOOL_CHANGE_PARAMETERS'] = False
     message_text = message.text.split(" ")
     if message_text[0] in parameters_list:
-        parameters = parameters.replace(message_text[0] + " " + str(parameters_list[parameters_list.index(message_text[0]) + 1]), message_text[0] + " " + message_text[1])
-        parameters_list[parameters_list.index(message_text[0]) + 1] = message_text[1]
-        bot.send_message(chat_id=message.chat.id, text="Новые параметры:\n\n" + parameters)
-        update_config_file(parameters)
+        params[chat_id]['parameters'] = parameters.replace(message_text[0] + " " + str(parameters_list[parameters_list.index(message_text[0]) + 1]), message_text[0] + " " + message_text[1])
+        params[chat_id]['parameters_list'][parameters_list.index(message_text[0]) + 1] = message_text[1]
+        bot.send_message(chat_id=chat_id, text="Новые параметры:\n\n" + parameters)
+        update_config_file(parameters, chat_id)
     else:
-        bot.send_message(chat_id=message.chat.id, text="Такого параметра нет.")
+        bot.send_message(chat_id=chat_id, text="Такого параметра нет.")
 
 
 @bot.message_handler(commands=['go'])
 def flight(message):
-    global BOOL_READ_FROM_COUT
+    chat_id = message.chat.id
+    make_new_param(chat_id)
+
+    global params
     bot.send_message(chat_id=message.chat.id, text=TEXTS["STARTING FLIGHT"])
+
+    chat_id = message.chat.id
+    os.popen('cp ../test_{}.cfg ../test_000.cfg'.format(chat_id))
 
     current_os = platform.system()
     executable_path = '../build/the_ark'
@@ -120,7 +137,7 @@ def flight(message):
     while process.poll() == None:
         output = ""
         a = ""
-        if BOOL_READ_FROM_COUT:
+        if params[chat_id]['BOOL_READ_FROM_COUT']:
             output = process.stdout.readline()
             a = output
         if len(output) != 0:
@@ -130,7 +147,7 @@ def flight(message):
             a += output
         if len(a) != 0:
             bot.send_message(chat_id=message.chat.id, text=a, reply_markup=telebot.types.ForceReply())
-            BOOL_READ_FROM_COUT = False
+            params[chat_id]['BOOL_READ_FROM_COUT'] = False
 
             @bot.message_handler(content_types=['text'])
             def message_input_step(message):
@@ -138,15 +155,18 @@ def flight(message):
                 process.stdin.write(inp + "\n")
                 process.stdin.flush()
                 time.sleep(1)
-                global BOOL_READ_FROM_COUT
+                global params
                 if process.poll() == None:
-                    BOOL_READ_FROM_COUT = True
+                    params[message.chat.id]['BOOL_READ_FROM_COUT'] = True
 
             bot.register_next_step_handler(message, message_input_step)
 
-    BOOL_READ_FROM_COUT = True
+    params[chat_id]['BOOL_READ_FROM_COUT'] = True
     bot.send_message(chat_id=message.chat.id, text="Полёт завершён.")
     os.system('python plots.py')
+    os.popen('cp Population.png ../{}/Population_{}.png'.format(dir_plots, chat_id))
+    os.popen('cp Services.png ../{}/Services_{}.png'.format(dir_plots, chat_id))
+    os.popen('cp Resources.png ../{}/Resources_{}.png'.format(dir_plots, chat_id))
     plot_population = open('Population.png', 'rb')
     plot_services = open('Services.png', 'rb')
     plot_resources = open('Resources.png', 'rb')
