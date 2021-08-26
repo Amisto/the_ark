@@ -34,7 +34,7 @@ void TechnicalService::process_accident(AccidentSeverity as)
         this->emergencyRepair();
 
     // kill 1%-as% of all staff
-    kill((unsigned int)(TheArk::get_instance()->getRandomGenerator()->getRandomDouble(1, as) / 100 * this->staff));
+    kill((unsigned int)(TheArk::get_instance()->getRandomGenerator()->getRandomDouble(1, as + 1) / 100 * this->staff));
 }
 
 void TechnicalService::kill(unsigned int victims)
