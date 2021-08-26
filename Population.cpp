@@ -15,12 +15,20 @@
 #include <cstdlib>
 #include <iostream>
 
-Population::Population() : children(0), adults(0), oldmen(0), unemployed_people(0), demand_staff{0, 0, 0, 0, 0, 0}, distributed_staff{0, 0, 0, 0, 0, 0}
+Population::Population() : children(0), adults(0), oldmen(0), unemployed_people(0), workers(0), disabled(0), demand_staff{0, 0, 0, 0, 0, 0}, distributed_staff{0, 0, 0, 0, 0, 0}
 {
     for (int i = 0; i < this->service_workers.size() - 1; i++)
     {
         distribution_coef[i] = std::stod(TheArk::get_instance()->getInterface()->getServices()[i]["Propotion_of_people"]);
     }
+
+    population_stat.open("../Population.csv");
+    population_stat << "Year, People, Children, Adults, Old, Workers, Unemployed, Disabled\n";
+}
+
+Population::~Population()
+{
+    population_stat.close();
 }
 
 // GETTERS //
@@ -89,9 +97,9 @@ void Population::staff_distribution(list<shared_ptr<Human>>& staff, unsigned int
     unsigned int counter = 0;
     while (it != this->people.end() && counter < demand_staff)
     {
-        if((*it)->getAge() >= this->borderChildrenToAdults() && (*it)->getAge() < this->borderAdultsToOldmen())
+        if ((*it)->getAge() >= this->borderChildrenToAdults() && (*it)->getAge() < this->borderAdultsToOldmen())
         {
-            if((*it)->getTypeAsAWorker() == UNDEFINED || (*it)->getTypeAsAWorker() == UNEMPLOYED)
+            if ((*it)->isAbleToWork() && (*it)->getTypeAsAWorker() == UNEMPLOYED)
             {
                 staff.push_back(*it);
                 (*it)->setTypeAsAWorker(WORKER);
@@ -125,7 +133,17 @@ double Population::deathRateOldmen()
 // PROCESS YEAR //
 void Population::processYear() 
 {
-    // BIRTH
+    // SAVE STATISTICS
+    population_stat << TheArk::get_instance()->getCurrentYear() << ", "
+                    << people.size()                            << ", "
+                    << this->children                           << ", "
+                    << this->adults                             << ", "
+                    << this->oldmen                             << ", "
+                    << this->workers                            << ", "
+                    << this->unemployed_people                  << ", "
+                    << this->disabled                           << "\n";
+
+    // BIRTH 
     for(int i = 0; i < TheArk::get_instance()->getMedicalService()->BirthRate(); i++)
     {
         auto* micro_chelik = new Human();
@@ -168,6 +186,9 @@ void Population::processYear()
     this->adults = 0;
     this->oldmen = 0;
     this->unemployed_people = 0;
+    this->workers = 0;
+    this->disabled = 0;
+
     unsigned int HisAge;
     unsigned int CriticalHealth = TheArk::get_instance()->getMedicalService()->getCriticalHealth();
 
@@ -178,7 +199,8 @@ void Population::processYear()
         (*it)->setAge(HisAge + 1);
         HisAge++;
 
-        if (HisAge == this->borderChildrenToAdults()) (*it)->setTypeAsAWorker(UNEMPLOYED);
+        if (HisAge == this->borderChildrenToAdults())
+            (*it)->setTypeAsAWorker(UNEMPLOYED);
 
         // RANDOM DEATHS AND UPDATE OF FIELDS
         if (HisAge < this->borderChildrenToAdults())  // CHILDREN
@@ -194,6 +216,8 @@ void Population::processYear()
         }
         if ((HisAge >= this->borderChildrenToAdults()) && (HisAge < borderAdultsToOldmen()))  // ADULTS
         {
+            if ((*it)->getTypeAsAWorker() == CHILD)
+                (*it)->setTypeAsAWorker(UNEMPLOYED);
             adults++;
             if (TheArk::get_instance()->getRandomGenerator()->getRandomFloat(0, 1) <= this->deathRateAdults()
                 || (*it)->getPhysicalHealth() < CriticalHealth
@@ -202,22 +226,35 @@ void Population::processYear()
                 (*it)->setIsAlive(false);
                 adults--;
             }
-            if ((*it)->getTypeAsAWorker() != WORKER)
-                unemployed_people ++;
+            else
+            {
+                if (!(*it)->isAbleToWork()) (*it)->setTypeAsAWorker(DISABLED);
+                if ((*it)->getTypeAsAWorker() == UNEMPLOYED)
+                    unemployed_people++;
+                else
+                {
+                    if ((*it)->getTypeAsAWorker() == DISABLED)  
+                        disabled++;
+                    else
+                    {
+                        if ((*it)->getTypeAsAWorker() == WORKER)
+                            workers++;
+                    }
+                }
+            }
         }
         if (HisAge >= this->borderAdultsToOldmen())  // OLD
         {
             oldmen++;
             if (TheArk::get_instance()->getRandomGenerator()->getRandomFloat(0, 1) <= this->deathRateOldmen()
-                || HisAge > 100  || (*it)->getPhysicalHealth() < CriticalHealth
-                or !(*it)->isAlive())
+                || HisAge > 100 || (*it)->getPhysicalHealth() < CriticalHealth || !(*it)->isAlive())
             {
                 (*it)->setIsAlive(false);
                 oldmen--;
             }
         }
        
-        // POP DEAD PERSON
+        // POP DEAD PEOPLE
         if (!(*it)->isAlive())
         {
             auto tmpit = it;
@@ -231,10 +268,10 @@ void Population::processYear()
     }
 
     // POP DEAD PEOPLE IN SERVICE LISTS
-    this->check_dead_people_in_services();
+    this->check_people_in_services();
 }
 
-void Population::check_dead_people_in_services()
+void Population::check_people_in_services()
 {
     for (list<shared_ptr<Human>>& classification: this->service_workers)
     {
@@ -247,8 +284,17 @@ void Population::check_dead_people_in_services()
                 ++it;
                 classification.erase(nit);
             }
-            else{
-                ++it;
+            else
+            {
+                if (!(*it)->isAbleToWork())
+                {
+                    (*it)->setTypeAsAWorker(DISABLED);
+                    auto nit = it;
+                    ++it;
+                    classification.erase(nit);
+                }   
+                else
+                    ++it;
             }
         }
     }
@@ -286,6 +332,7 @@ void Population::init(unsigned int total)
         auto* person = new Human;
         person->setAge(TheArk::get_instance()->getRandomGenerator()->getRandomInt(borderChildrenToAdults(), borderAdultsToOldmen() - 1));
         person->setTypeAsAWorker(UNEMPLOYED);
+        person->setIsAbleToWork(true);
         auto ptr = shared_ptr<Human>(person);
         this->people.push_back(ptr);
     }
@@ -304,7 +351,8 @@ void Population::init(unsigned int total)
         {
             this->service_workers[number_of_service].push_back(*human_it);
             (*human_it)->setTypeAsAWorker(WORKER);
-            counter ++;
+            workers++;
+            counter++;
             this->unemployed_people--;
         }
         if (counter >= number_of_people_to_service[number_of_service])

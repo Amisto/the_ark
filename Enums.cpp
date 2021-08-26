@@ -19,6 +19,7 @@ enum AccidentSeverity {
 enum Profession {
     UNEMPLOYED,
     WORKER,
+    DISABLED,
     UNDEFINED,
     STUDYING,
     CHILD,
