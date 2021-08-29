@@ -40,7 +40,8 @@ def make_new_param(chat_id):
     params[chat_id]['BOOL_CHANGE_PARAMETERS'] = False
     params[chat_id]['BOOL_READ_FROM_COUT'] = True
     file = open('../test_000.cfg')
-    params[chat_id]['parameters'] = file.read()
+    parameters = file.read()
+    params[chat_id]['parameters'] = parameters
     params[chat_id]['parameters_list'] = parameters.split()
     os.popen('cp ../test_000.cfg ../test_{}.cfg'.format(chat_id))# os.popen('copy ... for Windows  
     file.close()
@@ -48,6 +49,7 @@ def make_new_param(chat_id):
 
 @bot.message_handler(commands=['start'])
 def introduction(message):
+    make_new_param(message.chat.id)
     bot.send_message(chat_id=message.chat.id, text=TEXTS["INTRODUCTION"], parse_mode="Markdown")
 
 
@@ -101,19 +103,6 @@ def change_parameters1(message):
     make_new_param(chat_id)
     params[chat_id]['BOOL_CHANGE_PARAMETERS'] = True
     bot.send_message(chat_id=chat_id, text="Введите *имя параметра* *новое значение*")
-
-@bot.message_handler(func=lambda message: params[message.chat.id]['BOOL_CHANGE_PARAMETERS'])
-def change_parameters2(message):
-    chat_id = message.chat.id
-    params[chat_id]['BOOL_CHANGE_PARAMETERS'] = False
-    message_text = message.text.split(" ")
-    if message_text[0] in parameters_list:
-        params[chat_id]['parameters'] = parameters.replace(message_text[0] + " " + str(parameters_list[parameters_list.index(message_text[0]) + 1]), message_text[0] + " " + message_text[1])
-        params[chat_id]['parameters_list'][parameters_list.index(message_text[0]) + 1] = message_text[1]
-        bot.send_message(chat_id=chat_id, text="Новые параметры:\n\n" + parameters)
-        update_config_file(parameters, chat_id)
-    else:
-        bot.send_message(chat_id=chat_id, text="Такого параметра нет.")
 
 
 @bot.message_handler(commands=['go'])
@@ -175,7 +164,27 @@ def flight(message):
     bot.send_photo(chat_id=message.chat.id, photo=plot_services)
     bot.send_photo(chat_id=message.chat.id, photo=plot_resources)
 
-@bot.message_handler(func=lambda message: True)
+def check_bool_change_parameters(message):
+    if 'BOOL_CHANGE_PARAMETERS' in params[message.chat.id].keys():
+        return params[message.chat.id]['BOOL_CHANGE_PARAMETERS']
+    else: 
+        return False
+
+@bot.message_handler(func=check_bool_change_parameters)
+def change_parameters2(message):
+    chat_id = message.chat.id
+    params[chat_id]['BOOL_CHANGE_PARAMETERS'] = False
+    message_text = message.text.split(" ")
+    if message_text[0] in parameters_list:
+        parameters = params[chat_id]['parameters']
+        params[chat_id]['parameters'] = parameters.replace(message_text[0] + " " + str(parameters_list[parameters_list.index(message_text[0]) + 1]), message_text[0] + " " + message_text[1])
+        params[chat_id]['parameters_list'][parameters_list.index(message_text[0]) + 1] = message_text[1]
+        bot.send_message(chat_id=chat_id, text="Новые параметры:\n\n" + parameters)
+        update_config_file(parameters, chat_id)
+    else:
+        bot.send_message(chat_id=chat_id, text="Такого параметра нет.")
+
+@bot.message_handler(func=lambda: True)
 def other_messages(message):
     bot.send_message(chat_id=message.chat.id, text="?")
 
