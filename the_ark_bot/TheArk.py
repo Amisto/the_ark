@@ -95,7 +95,8 @@ def general_info(message):
 
 @bot.message_handler(commands=['parameters', 'new_flight'])
 def show_parameters(message):
-    bot.send_message(chat_id=message.chat.id, text="Текущие параметры:\n\n" + parameters + "\nЧтобы внести изменения отправьте /change_parameters")
+    make_new_param(message.chat.id)
+    bot.send_message(chat_id=message.chat.id, text="Текущие параметры:\n\n" + params[message.chat.id]['parameters'] + "\nЧтобы внести изменения отправьте /change_parameters")
 
 @bot.message_handler(commands=['change_parameters'])
 def change_parameters1(message):
@@ -174,12 +175,13 @@ def check_bool_change_parameters(message):
 def change_parameters2(message):
     chat_id = message.chat.id
     params[chat_id]['BOOL_CHANGE_PARAMETERS'] = False
+    parameters_list = params[chat_id]['parameters_list']
     message_text = message.text.split(" ")
     if message_text[0] in parameters_list:
         parameters = params[chat_id]['parameters']
         params[chat_id]['parameters'] = parameters.replace(message_text[0] + " " + str(parameters_list[parameters_list.index(message_text[0]) + 1]), message_text[0] + " " + message_text[1])
         params[chat_id]['parameters_list'][parameters_list.index(message_text[0]) + 1] = message_text[1]
-        bot.send_message(chat_id=chat_id, text="Новые параметры:\n\n" + parameters)
+        bot.send_message(chat_id=chat_id, text="Новые параметры:\n\n" + params[chat_id]['parameters'])
         update_config_file(parameters, chat_id)
     else:
         bot.send_message(chat_id=chat_id, text="Такого параметра нет.")
