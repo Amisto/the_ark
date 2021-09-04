@@ -250,20 +250,20 @@ void BiologicalService::process_year()
     for (int i = 0; i < Animals.size(); ++i) {
         if ((Animals[i].heal <= 0) && (Animals[i].predator)) {
             for (int j = 0; j < Animals.size(); ++j) {
-                if (((abs(Animals[i].id_biom - Animals[j].id_biom) == 1) ||
-                     (abs(Animals[i].id_biom - Animals[j].id_biom) == 10) || (Animals[i].id_biom == Animals[j].id_biom))&&
-                    (Animals[j].predator==false)) {
+                auto tmp = abs(Animals[i].id_biom - Animals[j].id_biom);
+                if ((tmp == 1 || tmp == 10 || tmp == 0) && !Animals[j].predator) {
                     Animals[i].heal=Animals[i].heal+1;
                     xi=((Animals[j].id_biom)/10-1);
                     yi=((Animals[j].id_biom)%10-1);
                     ++territory[xi][yi].free;
                     Animals.erase(Animals.begin() + j);
-                    --i;
+                    if (i > 0)
+                        --i;
                     --j;
-                };
-            };
-        };
-    };
+                }
+            }
+        }
+    }
 // Erase of dead predators
     for(int i = 0; i < Animals.size(); ++i)
     {
